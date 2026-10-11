@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/*
+ * Système de design.
+ * Tout ce qui est couleur, typographie, rayon ou durée se définit ici ; les
+ * composants n'utilisent que ces jetons, jamais de valeur en dur.
+ */
+@theme {
+  /* Surfaces, de la plus profonde à la plus proche */
+  --color-canvas: #0d0f12;
+  --color-surface: #16191e;
+  --color-raised: #1d2127;
+  --color-line: #272c34;
+  --color-line-strong: #3a414c;
+
+  /* Texte */
+  --color-ink: #e8eaed;
+  --color-ink-muted: #9aa3af;
+  --color-ink-faint: #7c8594;
+
+  /* Accent : une seule couleur d'action dans toute l'interface */
+  --color-accent: #ff5a36;
+  --color-accent-hover: #ff7252;
+  --color-accent-soft: #ff5a361f;
+  --color-on-accent: #170a06;
+
+  /* Sémantique */
+  --color-win: #3ddc97;
+  --color-loss: #f0506e;
+  --color-loss-soft: #f0506e1f;
+  --color-warn: #f5b544;
+
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  /* Échelle typographique (rapport 1,2) */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.2rem;
+  --text-lg--line-height: 1.6rem;
+  --text-xl: 1.44rem;
+  --text-xl--line-height: 1.8rem;
+  --text-2xl: 1.728rem;
+  --text-2xl--line-height: 2.1rem;
+  --text-3xl: 2.488rem;
+  --text-3xl--line-height: 2.7rem;
+  --text-4xl: 3.583rem;
+  --text-4xl--line-height: 3.6rem;
+
+  /* Rayons : contrôles, panneaux, pastilles */
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-pill: 999px;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+
+  --animate-fade-in: fade-in 160ms var(--ease-out);
+  --animate-pop-in: pop-in 160ms var(--ease-out);
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.98);
+    }
+  }
+  @keyframes pulse-soft {
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-canvas);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss03";
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Un seul style de focus, visible partout, uniquement au clavier */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
