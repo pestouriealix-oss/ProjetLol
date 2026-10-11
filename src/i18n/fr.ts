@@ -106,25 +106,72 @@ export const fr = {
   },
   dashboard: {
     title: "Tableau de bord",
-    noAccountTitle: "Lie ton compte Riot pour commencer",
-    noAccountBody:
-      "Tes statistiques et tes bilans se construisent à partir de tes parties classées. Il faut d'abord savoir quel compte suivre.",
-    noAccountAction: "Lier un compte Riot",
-    noMatchesTitle: "Aucune partie pour l'instant",
-    noMatchesBody:
-      "La synchronisation des parties n'est pas encore disponible. Ton compte est prêt : tes parties classées apparaîtront ici dès qu'elle le sera.",
+    accounts: "Compte affiché",
+    manage: "Gérer les comptes",
+    noRoles: "Aucun rôle choisi",
+    syncSoon: "Synchronisation bientôt disponible",
+    start: {
+      title: "Trois étapes pour commencer",
+      steps: [
+        {
+          title: "Lie ton compte Riot",
+          body: "Ton Riot ID suffit. C'est lui qui dit quelles parties suivre.",
+        },
+        {
+          title: "Tes parties arrivent",
+          body: "Classement, champions joués et historique se remplissent tout seuls.",
+        },
+        {
+          title: "Envoie ta draft",
+          body: "Pendant la sélection des champions, reçois ta fiche avant le lancement.",
+        },
+      ],
+      action: "Lier un compte Riot",
+    },
+    rank: {
+      title: "Classement",
+      solo: "Solo/Duo",
+      flex: "Flex",
+      pending: "Pas encore synchronisé",
+    },
+    champions: {
+      title: "Champions les plus joués",
+      empty: "Tes champions apparaîtront ici, avec ton taux de victoire sur chacun.",
+    },
+    recent: {
+      title: "Dernières parties",
+      all: "Tout l'historique",
+    },
   },
   draft: {
     title: "Nouvelle game",
-    emptyTitle: "Le coach de draft n'est pas encore disponible",
-    emptyBody:
-      "Tu pourras bientôt coller une capture de ta sélection des champions et recevoir ta fiche avant le lancement de la partie.",
+    soon: "Bientôt",
+    capture: {
+      title: "Colle une capture de ta sélection des champions",
+      body: "Ctrl + V, ou dépose l'image ici. Les dix champions seront reconnus et placés dans le tableau.",
+    },
+    allies: "Ton équipe",
+    enemies: "Adversaires",
+    you: "Toi",
+    slot: "En attente",
+    sheet: {
+      title: "Ta fiche",
+      body: "Elle s'écrira ici pendant le chargement de la partie.",
+      items: [
+        "Comment ton équipe gagne, et comment la leur gagne",
+        "Plusieurs plans de début de partie, tracés sur la carte",
+        "Qui est le plus fort, et à quel moment",
+        "Le danger principal à surveiller",
+      ],
+    },
   },
   matches: {
     title: "Parties",
     emptyTitle: "Aucune partie pour l'instant",
     emptyBody:
-      "L'historique de tes parties classées et leurs bilans apparaîtront ici une fois la synchronisation disponible.",
+      "La synchronisation n'est pas encore disponible. Tes parties classées s'afficheront ici, de la plus récente à la plus ancienne, chacune avec son bilan.",
+    noAccountBody: "Lie d'abord ton compte Riot pour que tes parties puissent être suivies.",
+    noAccountAction: "Lier un compte Riot",
   },
   settings: {
     title: "Paramètres",

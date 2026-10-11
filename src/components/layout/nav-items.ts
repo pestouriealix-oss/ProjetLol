@@ -10,8 +10,12 @@ const DASHBOARD: NavItem = { href: "/dashboard", label: t.nav.dashboard, icon: L
 const MATCHES: NavItem = { href: "/matches", label: t.nav.matches, icon: History };
 const SETTINGS: NavItem = { href: "/settings", label: t.nav.settings, icon: Settings };
 
-/** Liens de la barre du haut (ordinateur). « Nouvelle game » y est un bouton à part. */
-export const HEADER_ITEMS: NavItem[] = [DASHBOARD, MATCHES, SETTINGS];
+/**
+ * Liens de la barre du haut (ordinateur) : ce qu'on consulte. « Nouvelle game »
+ * y est un bouton à part, et les paramètres se rangent dans le menu du compte,
+ * comme sur les sites de statistiques dont les joueurs ont l'habitude.
+ */
+export const HEADER_ITEMS: NavItem[] = [DASHBOARD, MATCHES];
 
 /** Onglets de la barre du bas (téléphone). */
 export const TAB_ITEMS: NavItem[] = [DASHBOARD, NEW_GAME, MATCHES, SETTINGS];
