@@ -1,5 +1,6 @@
 "use client";
 
+import { RoleGlyph } from "@/components/map/role-glyph";
 import { t } from "@/i18n/fr";
 import { MAX_ROLES_PER_ACCOUNT, ROLES, type Role } from "@/lib/config";
 import { cn } from "@/lib/cn";
@@ -21,7 +22,8 @@ type RolePickerProps = {
 
 /**
  * Choix des rôles principaux : des cases à cocher présentées comme des
- * pastilles. Une fois le maximum atteint, les rôles restants se grisent.
+ * pastilles. Cocher un rôle trace sa voie sur le pictogramme ; une fois le
+ * maximum atteint, les rôles restants s'estompent.
  */
 export function RolePicker({
   idPrefix,
@@ -43,8 +45,8 @@ export function RolePicker({
   };
 
   return (
-    <fieldset aria-describedby={messageId} className="flex min-w-0 flex-col gap-1.5">
-      <legend className={cn("mb-1.5 text-sm font-medium text-ink", hideLegend && "sr-only")}>
+    <fieldset aria-describedby={messageId} className="flex min-w-0 flex-col">
+      <legend className={cn("pb-2 text-sm font-semibold text-ink", hideLegend && "sr-only")}>
         {legend}
       </legend>
       <div className="flex flex-wrap gap-1.5">
@@ -66,13 +68,19 @@ export function RolePicker({
               <label
                 htmlFor={inputId}
                 className={cn(
-                  "inline-flex h-8 cursor-pointer items-center rounded-pill border px-3 text-sm font-medium select-none",
-                  "border-line-strong text-ink-muted transition-colors duration-(--duration-fast) hover:border-ink-faint hover:text-ink",
-                  "peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:text-accent",
+                  "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-pill border pr-3.5 pl-2.5 text-sm font-semibold select-none",
+                  "[transition:scale_var(--duration-slow)_var(--ease-spring),color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),background-color_var(--duration-fast)_var(--ease-out),opacity_var(--duration-base)_var(--ease-out)]",
+                  "active:scale-[0.94] active:[transition-duration:var(--duration-press)]",
+                  // L'état coché est posé ici plutôt qu'avec `peer-checked` : au
+                  // survol, les styles de survol l'emporteraient sur le corail.
+                  checked
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-line-strong text-ink-muted hover:border-ink-faint hover:text-ink",
                   "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent",
-                  "peer-disabled:cursor-not-allowed peer-disabled:opacity-40 peer-disabled:hover:border-line-strong peer-disabled:hover:text-ink-muted",
+                  "peer-disabled:cursor-not-allowed peer-disabled:opacity-40 peer-disabled:hover:border-line-strong peer-disabled:hover:text-ink-muted peer-disabled:active:scale-100",
                 )}
               >
+                <RoleGlyph role={role} active={checked} />
                 {t.roles[role]}
               </label>
             </div>
@@ -80,11 +88,11 @@ export function RolePicker({
         })}
       </div>
       {error ? (
-        <p id={messageId} className="text-sm text-loss">
+        <p id={messageId} className="pt-1.5 text-sm text-loss">
           {error}
         </p>
       ) : hint ? (
-        <p id={messageId} className="text-sm text-ink-faint">
+        <p id={messageId} className="pt-1.5 text-sm text-ink-faint">
           {hint}
         </p>
       ) : null}

@@ -1,29 +1,30 @@
 import type { ReactNode } from "react";
 
-import { SampleSheet } from "@/components/draft/sample-sheet";
+import { Wordmark } from "@/components/brand/wordmark";
+import { SheetDemo } from "@/components/draft/sheet-demo";
+import { Entrance } from "@/components/layout/entrance";
 import { LegalFooter } from "@/components/layout/legal-footer";
-import { Wordmark } from "@/components/layout/wordmark";
 import { t } from "@/i18n/fr";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="mx-auto grid w-full max-w-5xl flex-1 gap-x-16 gap-y-12 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,26rem)_1fr] lg:py-14">
+    <Entrance className="flex min-h-dvh flex-col">
+      {/* Entre 1024 et 1280 px, la colonne de gauche se resserre pour laisser à
+          la fiche sa pleine largeur. */}
+      <div className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-x-12 gap-y-14 px-4 pt-8 pb-16 group-data-entering/shell:shell-rise sm:px-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:pt-12 xl:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] xl:gap-x-24">
         <main id="contenu" className="flex flex-col">
           <Wordmark />
-          <div className="mt-10 lg:mt-16">
-            <p className="font-display text-3xl leading-tight font-semibold text-ink">
-              {t.auth.headline}
-            </p>
-            <p className="mt-3 max-w-[46ch] text-ink-muted">{t.auth.pitch}</p>
-          </div>
+          <p className="mt-12 display text-5xl text-balance text-ink lg:mt-16 lg:text-4xl xl:text-5xl">
+            {t.auth.headline}
+          </p>
+          <p className="mt-5 max-w-[42ch] text-lg text-ink-muted">{t.auth.pitch}</p>
           <div className="mt-10">{children}</div>
         </main>
-        <aside className="flex items-start justify-center lg:items-center lg:justify-end">
-          <SampleSheet />
+        <aside className="flex justify-center lg:sticky lg:top-10 lg:justify-end">
+          <SheetDemo />
         </aside>
       </div>
       <LegalFooter />
-    </div>
+    </Entrance>
   );
 }

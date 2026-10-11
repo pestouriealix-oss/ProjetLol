@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthPanel, authLinkClasses } from "@/components/auth/auth-panel";
 import { DiscordButton } from "@/components/auth/discord-button";
 import { LoginForm } from "@/components/auth/login-form";
+import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isDiscordEnabled } from "@/lib/env";
@@ -19,19 +20,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { error } = await searchParams;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">{t.auth.loginTitle}</h1>
+    <AuthPanel title={t.auth.loginTitle}>
       <LoginForm initialError={error ? t.auth.errors.oauth : undefined} />
       {isDiscordEnabled ? <DiscordButton /> : null}
-      <p className="text-sm text-ink-muted">
+      <p className="text-ink-muted">
         {t.auth.noAccount}{" "}
-        <Link
-          href="/register"
-          className="font-medium text-ink underline underline-offset-4 hover:text-accent"
-        >
+        <Link href="/register" className={authLinkClasses}>
           {t.auth.goToRegister}
         </Link>
       </p>
-    </div>
+    </AuthPanel>
   );
 }

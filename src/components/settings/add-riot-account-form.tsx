@@ -1,18 +1,18 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useLayoutEffect, useState } from "react";
 
 import { addRiotAccountAction, type AddRiotAccountState } from "@/app/(app)/settings/actions";
-import { SubmitButton } from "@/components/auth/submit-button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { ErrorNotice } from "@/components/ui/notice";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n/fr";
 import { DEFAULT_PLATFORM, PLATFORM_IDS, PLATFORMS, ROLES, type Role } from "@/lib/config";
 
 import { RolePicker } from "./role-picker";
 
 const copy = t.settings.riot;
-const initialState: AddRiotAccountState = { successCount: 0 };
+const initialState: AddRiotAccountState = { successCount: 0, attempt: 0 };
 
 const isRole = (value: string): value is Role => (ROLES as readonly string[]).includes(value);
 
@@ -32,46 +32,50 @@ function Fields({
 }) {
   const [roles, setRoles] = useState<Role[]>(() => (state.values?.roles ?? []).filter(isRole));
 
+  // Après un refus, le curseur revient sur le Riot ID, presque toujours en cause.
+  useLayoutEffect(() => {
+    if (state.attempt > 0) document.getElementById("riotId")?.focus();
+  }, [state.attempt]);
+
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
-      {state.error ? <ErrorNotice>{state.error}</ErrorNotice> : null}
-      <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
-        <Field
-          id="riotId"
-          label={copy.riotId}
-          hint={copy.riotIdHint}
-          error={state.fieldErrors?.riotId}
-        >
-          {(control) => (
-            <Input
-              {...control}
-              name="riotId"
-              placeholder={copy.riotIdPlaceholder}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              maxLength={24}
-              defaultValue={state.values?.riotId}
-              required
-            />
-          )}
-        </Field>
-        <Field id="platform" label={copy.platform} error={state.fieldErrors?.platform}>
-          {(control) => (
-            <Select
-              {...control}
-              name="platform"
-              defaultValue={state.values?.platform || DEFAULT_PLATFORM}
-            >
-              {PLATFORM_IDS.map((platform) => (
-                <option key={platform} value={platform}>
-                  {PLATFORMS[platform].label} ({PLATFORMS[platform].short})
-                </option>
-              ))}
-            </Select>
-          )}
-        </Field>
-      </div>
+      {state.error ? <ErrorNotice attempt={state.attempt}>{state.error}</ErrorNotice> : null}
+      <Field
+        id="riotId"
+        label={copy.riotId}
+        hint={copy.riotIdHint}
+        error={state.fieldErrors?.riotId}
+        attempt={state.attempt}
+      >
+        {(control) => (
+          <Input
+            {...control}
+            name="riotId"
+            placeholder={copy.riotIdPlaceholder}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={24}
+            defaultValue={state.values?.riotId}
+            required
+          />
+        )}
+      </Field>
+      <Field id="platform" label={copy.platform} error={state.fieldErrors?.platform}>
+        {(control) => (
+          <Select
+            {...control}
+            name="platform"
+            defaultValue={state.values?.platform || DEFAULT_PLATFORM}
+          >
+            {PLATFORM_IDS.map((platform) => (
+              <option key={platform} value={platform}>
+                {PLATFORMS[platform].label} ({PLATFORMS[platform].short})
+              </option>
+            ))}
+          </Select>
+        )}
+      </Field>
       <RolePicker
         idPrefix="new-account-role"
         name="roles"
@@ -81,9 +85,7 @@ function Fields({
         value={roles}
         onChange={setRoles}
       />
-      <div>
-        <SubmitButton label={copy.add} pendingLabel={copy.adding} />
-      </div>
+      <SubmitButton className="mt-1 self-start">{copy.add}</SubmitButton>
     </form>
   );
 }

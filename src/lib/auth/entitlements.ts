@@ -25,3 +25,8 @@ export function limitsFor(plan: Plan): Limits {
 export function canLinkRiotAccount(plan: Plan, linkedCount: number): boolean {
   return linkedCount < LIMITS[plan].riotAccounts;
 }
+
+/** Vrai pour une offre payante (sert par exemple à mettre son nom en avant). */
+export function isPaidPlan(plan: Plan): boolean {
+  return plan !== "FREE";
+}

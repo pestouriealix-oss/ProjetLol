@@ -4,13 +4,13 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
 const badgeVariants = cva(
-  "inline-flex h-6 items-center gap-1 rounded-pill px-2.5 text-xs font-medium whitespace-nowrap",
+  "inline-flex h-6 items-center gap-1 rounded-pill px-2.5 text-xs font-semibold whitespace-nowrap",
   {
     variants: {
       tone: {
         neutral: "bg-raised text-ink-muted",
         accent: "bg-accent-soft text-accent",
-        warn: "bg-warn/12 text-warn",
+        warn: "bg-warn-soft text-warn",
       },
     },
     defaultVariants: { tone: "neutral" },

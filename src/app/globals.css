@@ -2,82 +2,259 @@
 
 /*
  * Système de design.
- * Tout ce qui est couleur, typographie, rayon ou durée se définit ici ; les
- * composants n'utilisent que ces jetons, jamais de valeur en dur.
+ *
+ * Idée directrice : le tableau du coach, de nuit. Un terrain vert sombre, des
+ * tracés à la craie, et un seul marqueur de couleur, le corail, réservé à ce
+ * que le coach dit de faire (actions, trajets, choix).
+ *
+ * Tout ce qui est couleur, typographie, rayon, durée ou courbe se définit ici.
+ * Les composants n'utilisent que ces jetons, jamais de valeur en dur.
  */
+
+/* ── Polices : sous-ensembles chargés à la demande ─────────────────────────
+   Le sous-ensemble latin est déclaré (et préchargé) par src/app/fonts/index.ts.
+   Ceux-ci s'y rattachent par le nom de famille. */
+@font-face {
+  font-family: "sofiaSansXC";
+  src: url("./fonts/sofia-sans-extra-condensed-latin-ext.woff2") format("woff2");
+  font-weight: 1 1000;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "sofiaSansXC";
+  src: url("./fonts/sofia-sans-extra-condensed-cyrillic.woff2") format("woff2");
+  font-weight: 1 1000;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "atkinsonNext";
+  src: url("./fonts/atkinson-hyperlegible-next-latin-ext.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
 @theme {
-  /* Surfaces, de la plus profonde à la plus proche */
-  --color-canvas: #0d0f12;
-  --color-surface: #16191e;
-  --color-raised: #1d2127;
-  --color-line: #272c34;
-  --color-line-strong: #3a414c;
+  /* ── Couleurs ────────────────────────────────────────────────────────────
+     Une seule teinte de vert (172°) déclinée en clarté, pour que les surfaces
+     s'empilent sans jurer. Contrastes vérifiés (WCAG AA) pour chaque couple
+     texte / surface utilisé. */
 
-  /* Texte */
-  --color-ink: #e8eaed;
-  --color-ink-muted: #9aa3af;
-  --color-ink-faint: #7c8594;
+  /* Terrain : du plus profond au plus proche */
+  --color-field: oklch(0.165 0.026 172);
+  --color-canvas: oklch(0.195 0.03 172);
+  --color-surface: oklch(0.235 0.034 172);
+  --color-raised: oklch(0.28 0.038 172);
+  --color-line: oklch(0.34 0.038 172);
+  --color-line-strong: oklch(0.53 0.04 172);
 
-  /* Accent : une seule couleur d'action dans toute l'interface */
+  /* Craie : le texte */
+  --color-ink: oklch(0.955 0.022 92);
+  --color-ink-muted: oklch(0.79 0.03 165);
+  --color-ink-faint: oklch(0.68 0.032 168);
+
+  /* Corail : la voix du coach. Une seule couleur d'action dans l'interface. */
   --color-accent: #ff5a36;
-  --color-accent-hover: #ff7252;
-  --color-accent-soft: #ff5a361f;
-  --color-on-accent: #170a06;
+  --color-accent-hover: #ff7a52;
+  --color-accent-soft: oklch(0.685 0.205 34 / 0.14);
+  --color-on-accent: oklch(0.2 0.045 40);
 
   /* Sémantique */
-  --color-win: #3ddc97;
-  --color-loss: #f0506e;
-  --color-loss-soft: #f0506e1f;
-  --color-warn: #f5b544;
+  --color-win: oklch(0.85 0.13 165);
+  --color-loss: oklch(0.72 0.17 12);
+  --color-loss-soft: oklch(0.72 0.17 12 / 0.14);
+  --color-warn: oklch(0.85 0.13 85);
+  --color-warn-soft: oklch(0.85 0.13 85 / 0.14);
 
-  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  /* Carte tactique */
+  --color-river: oklch(0.42 0.06 200);
 
-  /* Échelle typographique (rapport 1,2) */
+  /* ── Typographie ─────────────────────────────────────────────────────── */
+  --font-display: var(--font-display-face), "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-text-face), ui-sans-serif, system-ui, sans-serif;
+
   --text-xs: 0.75rem;
   --text-xs--line-height: 1rem;
   --text-sm: 0.875rem;
   --text-sm--line-height: 1.25rem;
   --text-base: 1rem;
   --text-base--line-height: 1.5rem;
-  --text-lg: 1.2rem;
-  --text-lg--line-height: 1.6rem;
-  --text-xl: 1.44rem;
-  --text-xl--line-height: 1.8rem;
-  --text-2xl: 1.728rem;
-  --text-2xl--line-height: 2.1rem;
-  --text-3xl: 2.488rem;
-  --text-3xl--line-height: 2.7rem;
-  --text-4xl: 3.583rem;
-  --text-4xl--line-height: 3.6rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  /* À partir d'ici, tailles pensées pour la police de titrage (condensée) */
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.5rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.125rem;
+  --text-4xl: 3rem;
+  --text-4xl--line-height: 2.75rem;
+  --text-5xl: 4rem;
+  --text-5xl--line-height: 3.625rem;
+  --text-6xl: 5.25rem;
+  --text-6xl--line-height: 4.625rem;
 
-  /* Rayons : contrôles, panneaux, pastilles */
-  --radius-control: 8px;
-  --radius-panel: 10px;
+  /* ── Formes ──────────────────────────────────────────────────────────── */
+  --radius-control: 7px;
+  --radius-panel: 14px;
+  --radius-sheet: 18px;
   --radius-pill: 999px;
 
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --duration-fast: 120ms;
+  --shadow-lift: 0 28px 60px -28px oklch(0 0 0 / 0.65);
+  --shadow-key: inset 0 1px 0 oklch(1 0 0 / 0.22);
 
-  --animate-fade-in: fade-in 160ms var(--ease-out);
-  --animate-pop-in: pop-in 160ms var(--ease-out);
-  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  /* ── Mouvement ───────────────────────────────────────────────────────────
+     Les courbes « ressort » sont la réponse d'un ressort amorti, échantillonnée
+     en linear(). Elles donnent un léger dépassement puis se posent.
+     Règle d'usage : le ressort pour ce qui arrive ou répond à un geste,
+     ease-in court pour ce qui s'en va. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.5, 0, 0.75, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: linear(
+    0,
+    0.058,
+    0.196,
+    0.371,
+    0.549,
+    0.71,
+    0.844,
+    0.945,
+    1.015,
+    1.058,
+    1.079,
+    1.083,
+    1.077,
+    1.065,
+    1.05,
+    1.036,
+    1.022,
+    1.012,
+    1.004,
+    0.998,
+    0.995,
+    0.993,
+    0.993,
+    0.994,
+    0.995,
+    0.996,
+    0.997,
+    0.998,
+    1
+  );
+  --ease-spring-bouncy: linear(
+    0,
+    0.096,
+    0.318,
+    0.581,
+    0.822,
+    1.006,
+    1.122,
+    1.173,
+    1.175,
+    1.145,
+    1.1,
+    1.053,
+    1.015,
+    0.987,
+    0.972,
+    0.968,
+    0.971,
+    0.978,
+    0.986,
+    0.994,
+    1,
+    1.004,
+    1.006,
+    1.006,
+    1.005,
+    1.003,
+    1.002,
+    1.001,
+    1
+  );
 
-  @keyframes fade-in {
+  --duration-press: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 240ms;
+  --duration-move: 360ms;
+  --duration-slow: 460ms;
+  --duration-draw: 760ms;
+
+  --animate-overlay-in: overlay-in 200ms var(--ease-out) both;
+  --animate-overlay-out: overlay-out 140ms var(--ease-in) both;
+  --animate-dialog-in: dialog-in 420ms var(--ease-spring) both;
+  --animate-dialog-out: dialog-out 130ms var(--ease-in) both;
+  --animate-menu-in: menu-in 300ms var(--ease-spring) both;
+  --animate-menu-out: menu-out 110ms var(--ease-in) both;
+  --animate-ripple: ripple 1.5s var(--ease-out) infinite;
+  --animate-row-flash: row-flash 1.6s var(--ease-out) 240ms both;
+
+  @keyframes overlay-in {
     from {
       opacity: 0;
     }
   }
-  @keyframes pop-in {
-    from {
+  @keyframes overlay-out {
+    to {
       opacity: 0;
-      transform: translate(-50%, -48%) scale(0.98);
     }
   }
-  @keyframes pulse-soft {
-    50% {
-      opacity: 0.55;
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.94;
+      translate: 0 12px;
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      scale: 0.97;
+    }
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      scale: 0.92;
+    }
+  }
+  @keyframes menu-out {
+    to {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+  @keyframes ripple {
+    from {
+      scale: 0.25;
+      opacity: 0.9;
+    }
+    to {
+      scale: 1;
+      opacity: 0;
+    }
+  }
+  @keyframes row-flash {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
     }
   }
 }
@@ -86,6 +263,7 @@
   html {
     color-scheme: dark;
     background: var(--color-canvas);
+    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -93,16 +271,28 @@
     background: var(--color-canvas);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-feature-settings: "cv11", "ss03";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     min-height: 100dvh;
+  }
+
+  /* Lumière de projecteur : le haut du terrain est un peu plus éclairé. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      80rem 34rem at 50% -14rem,
+      oklch(0.34 0.05 172 / 0.5),
+      transparent 72%
+    );
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    letter-spacing: -0.015em;
     text-wrap: balance;
   }
 
@@ -121,20 +311,319 @@
     background: var(--color-accent);
     color: var(--color-on-accent);
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+/* ── Styles de texte ───────────────────────────────────────────────────── */
+
+/* Titrage : capitales condensées, comme un tableau d'affichage. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.012em;
+}
+
+/* Même police, casse d'origine : pour les pseudos et les noms de champions. */
+@utility display-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.012em;
+}
+
+/* Chiffres à chasse fixe, pour qu'ils s'alignent et ne sautillent pas. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Chargement ────────────────────────────────────────────────────────── */
+
+/* Reflet qui balaie en biais, dans l'angle de la barre du logo. */
+@utility shimmer {
+  background: linear-gradient(
+      102deg,
+      var(--color-raised) 42%,
+      var(--color-line) 50%,
+      var(--color-raised) 58%
+    )
+    0 0 / 300% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
   }
 }
 
-@utility tabular {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+/* ── Entrées en scène ──────────────────────────────────────────────────────
+   Utilisées par la fiche de draft. Chaque animation ne décrit que son état de
+   départ et se remplit « en arrière » : pendant le délai l'élément est caché,
+   à la fin il retombe sur son style normal, qui reste pilotable par des
+   transitions. Le délai se règle avec --intro-delay (voir <Streamed> etc.).
+   Sans JavaScript, tout se joue quand même au chargement. */
+
+@utility intro-fade {
+  animation: intro-fade var(--duration-slow) var(--ease-out) var(--intro-delay, 0ms) backwards;
+}
+
+@utility intro-rise {
+  animation: intro-rise var(--duration-slow) var(--ease-out) var(--intro-delay, 0ms) backwards;
+}
+
+/* Un mot qui arrive, comme un texte en cours d'écriture. */
+@utility intro-word {
+  display: inline-block;
+  animation: intro-word 320ms var(--ease-out) var(--intro-delay, 0ms) backwards;
+}
+
+/* Un pion qui se pose sur la carte. */
+@utility intro-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: intro-pop 520ms var(--ease-spring-bouncy) var(--intro-delay, 0ms) backwards;
+}
+
+/* Un trait qui se dessine (le tracé doit porter pathLength="1"). */
+@utility intro-draw {
+  animation: intro-draw var(--duration-draw) var(--ease-in-out) var(--intro-delay, 0ms) backwards;
+}
+
+/* Le pion qui suit la pointe du trait. */
+@utility intro-travel {
+  animation: intro-travel var(--duration-draw) var(--ease-in-out) var(--intro-delay, 0ms) backwards;
+}
+
+/* Un dévoilement de gauche à droite, pour un axe de temps. */
+@utility intro-wipe {
+  animation: intro-wipe 1000ms var(--ease-in-out) var(--intro-delay, 0ms) backwards;
+}
+
+/* Arrivée sur un autre gabarit (après une connexion, une déconnexion…) : il
+   apparaît en fondu et son contenu principal monte un peu. Le conteneur
+   n'anime que son opacité : un déplacement décrocherait du bas de l'écran,
+   le temps de l'animation, la barre d'onglets qui y est fixée.
+   Posées par le composant <Entrance>, jamais au premier affichage. */
+@utility shell-enter {
+  animation: intro-fade var(--duration-base) var(--ease-out) backwards;
+}
+
+@utility shell-rise {
+  animation: intro-rise var(--duration-move) var(--ease-out) backwards;
+}
+
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+@keyframes intro-word {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    translate: 0 0.3em;
+  }
+}
+@keyframes intro-pop {
+  from {
+    opacity: 0;
+    scale: 0;
+  }
+}
+@keyframes intro-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes intro-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes intro-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Onde d'un signal sur la carte : deux battements puis le calme. */
+@utility ping-wave {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: ping-wave 1100ms var(--ease-out) var(--intro-delay, 0ms) 2 backwards;
+}
+
+@keyframes ping-wave {
+  from {
+    opacity: 0.9;
+    scale: 0.2;
+  }
+  to {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+/* ── Transitions de vue ────────────────────────────────────────────────────
+   Pilotées par <ViewTransition> de React (voir le guide « view transitions »
+   de Next.js). Sans prise en charge du navigateur, tout fonctionne, sans
+   animation.
+
+   Elles restent courtes exprès : tant qu'une transition joue, les éléments
+   qui y participent ne reçoivent pas les clics. La plus longue animation fixe
+   la durée de l'ensemble. */
+
+::view-transition {
+  /* La page reste cliquable pendant une transition. */
+  pointer-events: none;
+}
+
+/* Tout ce qui n'a pas de frontière propre change d'un coup, sans le fondu par
+   défaut du navigateur : seules les frontières nommées ci-dessous s'animent. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Changement de page (lien suivi) : l'ancienne s'efface vite, la nouvelle
+   arrive plus posément. L'ensemble tient en 300 ms, repère de navigation
+   compris : c'est aussi le temps minimal pendant lequel React garde un
+   squelette à l'écran, donc la transition ne retarde jamais le contenu. */
+::view-transition-old(.page-exit) {
+  animation: 100ms var(--ease-in) both vt-fade-out;
+}
+::view-transition-new(.page-enter) {
+  animation: 220ms var(--ease-out) 80ms both vt-rise-in;
+}
+
+/* Le contenu remplace son squelette : fondu sur place, sans seconde arrivée.
+   Les deux images suivent la même courbe pendant la même durée, pour que leurs
+   opacités s'additionnent toujours à 1 : ce qui est identique des deux côtés
+   (le titre de la page) ne bronche pas. */
+::view-transition-group(.page-reveal) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(.page-reveal),
+::view-transition-new(.page-reveal) {
+  /* Le navigateur pose ce mélange par une animation que les nôtres remplacent. */
+  mix-blend-mode: plus-lighter;
+}
+::view-transition-old(.page-reveal) {
+  animation: 200ms var(--ease-in-out) both vt-fade-out;
+}
+::view-transition-new(.page-reveal) {
+  animation: 200ms var(--ease-in-out) both vt-fade-in;
+}
+
+/* Repère de navigation : une seule barre qui glisse d'une entrée à l'autre. */
+::view-transition-group(.nav-indicator) {
+  animation-duration: 300ms;
+  animation-timing-function: var(--ease-spring);
+}
+::view-transition-old(.nav-indicator) {
+  display: none;
+}
+::view-transition-new(.nav-indicator) {
+  height: 100%;
+  animation: none;
+}
+::view-transition-old(.indicator-exit) {
+  animation: 120ms var(--ease-in) both vt-fade-out;
+}
+::view-transition-new(.indicator-enter) {
+  animation: 250ms var(--ease-spring) 50ms both vt-stretch-in;
+}
+
+/* Liste : ce qui reste glisse à sa nouvelle place, sans fondu parasite. */
+::view-transition-group(.shift) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: var(--ease-in-out);
+}
+::view-transition-old(.shift) {
+  display: none;
+}
+::view-transition-new(.shift) {
+  animation: none;
+}
+/* Ce qui part s'efface d'abord ; ce qui arrive ne commence qu'ensuite, pour
+   que les deux ne se superposent pas quand ils occupent la même place. */
+::view-transition-old(.row-exit) {
+  animation: 150ms var(--ease-in) both vt-row-out;
+}
+::view-transition-new(.row-enter) {
+  animation: 360ms var(--ease-spring) 150ms both vt-row-in;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-rise-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+@keyframes vt-stretch-in {
+  from {
+    opacity: 0;
+    scale: 0 1;
+  }
+}
+@keyframes vt-row-out {
+  to {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+@keyframes vt-row-in {
+  from {
+    opacity: 0;
+    scale: 0.97;
+    translate: 0 -12px;
+  }
+}
+
+/* ── Mouvement réduit ──────────────────────────────────────────────────────
+   Les états restent identiques, seul le trajet pour y arriver disparaît. Les
+   délais sont annulés aussi : sinon un élément « en attente d'entrer » resterait
+   invisible pendant son délai. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

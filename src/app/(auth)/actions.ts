@@ -14,9 +14,13 @@ const AFTER_LOGIN = "/dashboard";
 /** Un nouveau compte arrive directement là où lier son compte Riot. */
 const AFTER_REGISTER = "/settings";
 
+export type AuthField = "name" | "email" | "password";
+
 export type AuthFormState = {
+  /** Nombre d'envois refusés : sert à rejouer le signe de refus et à replacer le focus. */
+  attempt: number;
   error?: string;
-  fieldErrors?: Partial<Record<"name" | "email" | "password", string>>;
+  fieldErrors?: Partial<Record<AuthField, string>>;
   /** Valeurs à remettre dans le formulaire après une erreur (jamais le mot de passe). */
   values?: { name?: string; email?: string };
 };
@@ -27,49 +31,56 @@ function text(formData: FormData, key: string): string {
 }
 
 export async function loginAction(
-  _previous: AuthFormState,
+  previous: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
   const values = { email: text(formData, "email") };
+  const refuse = (error: string): AuthFormState => ({
+    attempt: previous.attempt + 1,
+    error,
+    values,
+  });
+
   const parsed = loginSchema.safeParse({ ...values, password: text(formData, "password") });
-  if (!parsed.success) return { error: t.auth.errors.invalidCredentials, values };
+  if (!parsed.success) return refuse(t.auth.errors.invalidCredentials);
 
   try {
     await signIn("credentials", { ...parsed.data, redirectTo: AFTER_LOGIN });
   } catch (error) {
     if (error instanceof AuthError) {
-      return {
-        error:
-          error.type === "CredentialsSignin"
-            ? t.auth.errors.invalidCredentials
-            : t.auth.errors.unknown,
-        values,
-      };
+      return refuse(
+        error.type === "CredentialsSignin"
+          ? t.auth.errors.invalidCredentials
+          : t.auth.errors.unknown,
+      );
     }
     // `signIn` signale sa redirection par une exception : on la laisse passer.
     throw error;
   }
-  return {};
+  return previous;
 }
 
 export async function registerAction(
-  _previous: AuthFormState,
+  previous: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
   const values = { name: text(formData, "name"), email: text(formData, "email") };
-  const password = text(formData, "password");
-  const parsed = registerSchema.safeParse({ ...values, password });
+  const refuse = (rest: Pick<AuthFormState, "error" | "fieldErrors">): AuthFormState => ({
+    attempt: previous.attempt + 1,
+    values,
+    ...rest,
+  });
 
+  const parsed = registerSchema.safeParse({ ...values, password: text(formData, "password") });
   if (!parsed.success) {
     const { fieldErrors } = z.flattenError(parsed.error);
-    return {
+    return refuse({
       fieldErrors: {
         name: fieldErrors.name?.[0],
         email: fieldErrors.email?.[0],
         password: fieldErrors.password?.[0],
       },
-      values,
-    };
+    });
   }
 
   try {
@@ -80,7 +91,7 @@ export async function registerAction(
     });
   } catch (error) {
     if (error instanceof EmailTakenError) {
-      return { fieldErrors: { email: t.auth.errors.emailTaken }, values };
+      return refuse({ fieldErrors: { email: t.auth.errors.emailTaken } });
     }
     throw error;
   }
@@ -92,10 +103,10 @@ export async function registerAction(
       redirectTo: AFTER_REGISTER,
     });
   } catch (error) {
-    if (error instanceof AuthError) return { error: t.auth.errors.unknown, values };
+    if (error instanceof AuthError) return refuse({ error: t.auth.errors.unknown });
     throw error;
   }
-  return {};
+  return previous;
 }
 
 export async function discordSignInAction(): Promise<void> {

@@ -8,11 +8,11 @@ export const metadata: Metadata = { title: t.legal.terms };
 export default function Page() {
   return (
     <>
-      <h1 className="text-3xl font-semibold">{t.legal.terms}</h1>
+      <h1 className="display text-4xl text-ink sm:text-5xl">{t.legal.terms}</h1>
       <div>
         <Badge tone="warn">{t.legal.draftNotice}</Badge>
       </div>
-      <p className="text-ink-muted">{t.legal.termsBody}</p>
+      <p className="text-lg text-ink-muted">{t.legal.termsBody}</p>
     </>
   );
 }

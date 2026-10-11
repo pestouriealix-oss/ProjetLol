@@ -1,13 +1,11 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
+import { Wordmark } from "@/components/brand/wordmark";
+import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import type { CurrentUser } from "@/lib/db/users";
 
 import { AccountMenu } from "./account-menu";
 import { HeaderNav } from "./header-nav";
-import { NEW_GAME } from "./nav-items";
-import { Wordmark } from "./wordmark";
+import { NewGameLink } from "./new-game-link";
 
 type AppHeaderProps = {
   user: CurrentUser;
@@ -15,23 +13,18 @@ type AppHeaderProps = {
 };
 
 export function AppHeader({ user, signOutAction }: AppHeaderProps) {
-  const NewGameIcon = NEW_GAME.icon;
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-canvas/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-5xl items-center gap-6 px-4 sm:px-6">
-        <Link href="/dashboard" className="rounded-control">
+    // Flou large : ce qui défile dessous devient une lueur, jamais des lettres fantômes.
+    <header className="sticky top-0 z-30 border-b border-line/70 bg-canvas/88 backdrop-blur-xl">
+      <div className="mx-auto flex h-15 max-w-6xl items-stretch gap-4 px-4 sm:px-6">
+        <Link href="/dashboard" className="flex items-center rounded-control pr-2">
           <Wordmark />
         </Link>
-        <nav aria-label={t.nav.main} className="hidden flex-1 md:block">
+        <nav aria-label={t.nav.main} className="hidden md:block">
           <HeaderNav />
         </nav>
         <div className="ml-auto flex items-center gap-3">
-          <Button asChild size="sm" className="hidden md:inline-flex">
-            <Link href={NEW_GAME.href}>
-              <NewGameIcon aria-hidden />
-              {NEW_GAME.label}
-            </Link>
-          </Button>
+          <NewGameLink />
           <AccountMenu email={user.email} name={user.name} signOutAction={signOutAction} />
         </div>
       </div>

@@ -26,6 +26,8 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 export type AddRiotAccountState = {
   /** Change à chaque succès : le formulaire s'en sert pour se vider. */
   successCount: number;
+  /** Nombre d'envois refusés : sert à rejouer le signe de refus et à replacer le focus. */
+  attempt: number;
   error?: string;
   fieldErrors?: Partial<Record<"riotId" | "platform" | "roles", string>>;
   values?: { riotId: string; platform: string; roles: string[] };
@@ -44,8 +46,11 @@ export async function addRiotAccountAction(
     platform: typeof platform === "string" ? platform : "",
     roles: formData.getAll("roles").filter((role): role is string => typeof role === "string"),
   };
-  const failure = (rest: Pick<AddRiotAccountState, "error" | "fieldErrors">) => ({
+  const failure = (
+    rest: Pick<AddRiotAccountState, "error" | "fieldErrors">,
+  ): AddRiotAccountState => ({
     successCount: previous.successCount,
+    attempt: previous.attempt + 1,
     values,
     ...rest,
   });
@@ -80,11 +85,16 @@ export async function addRiotAccountAction(
   }
 
   revalidatePath(SETTINGS_PATH);
-  return { successCount: previous.successCount + 1 };
+  return { successCount: previous.successCount + 1, attempt: previous.attempt };
 }
 
 const accountIdSchema = z.string().min(1).max(64);
 
+/**
+ * Enregistre les rôles d'un compte. L'écran les affiche déjà (état local du
+ * composant) ; la page est quand même revalidée, sans quoi le bouton Retour du
+ * navigateur ramènerait plus tard une version d'avant l'enregistrement.
+ */
 export async function updateRiotAccountRolesAction(
   accountId: string,
   roles: string[],

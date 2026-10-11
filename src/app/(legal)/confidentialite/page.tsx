@@ -8,11 +8,11 @@ export const metadata: Metadata = { title: t.legal.privacy };
 export default function Page() {
   return (
     <>
-      <h1 className="text-3xl font-semibold">{t.legal.privacy}</h1>
+      <h1 className="display text-4xl text-ink sm:text-5xl">{t.legal.privacy}</h1>
       <div>
         <Badge tone="warn">{t.legal.draftNotice}</Badge>
       </div>
-      <p className="text-ink-muted">{t.legal.privacyBody}</p>
+      <p className="text-lg text-ink-muted">{t.legal.privacyBody}</p>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canLinkRiotAccount, limitsFor } from "./entitlements";
+import { canLinkRiotAccount, isPaidPlan, limitsFor } from "./entitlements";
 
 describe("entitlements", () => {
   it("l'offre Premium n'est jamais plus restrictive que l'offre gratuite", () => {
@@ -15,5 +15,10 @@ describe("entitlements", () => {
     const max = limitsFor("FREE").riotAccounts;
     expect(canLinkRiotAccount("FREE", max - 1)).toBe(true);
     expect(canLinkRiotAccount("FREE", max)).toBe(false);
+  });
+
+  it("distingue l'offre gratuite des offres payantes", () => {
+    expect(isPaidPlan("FREE")).toBe(false);
+    expect(isPaidPlan("PREMIUM")).toBe(true);
   });
 });

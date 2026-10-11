@@ -1,30 +1,50 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ViewTransition } from "react";
 
+import { Link } from "@/components/ui/link";
 import { cn } from "@/lib/cn";
 
 import { HEADER_ITEMS, isActive } from "./nav-items";
 
+/**
+ * Liens de l'en-tête. Le repère corail n'existe qu'une fois : en changeant de
+ * page il glisse d'un lien à l'autre (élément partagé d'une transition de vue)
+ * au lieu de disparaître ici pour réapparaître là.
+ */
 export function HeaderNav() {
   const pathname = usePathname();
   return (
-    <ul className="hidden items-center gap-1 md:flex">
+    <ul className="flex h-full items-stretch">
       {HEADER_ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
         return (
-          <li key={item.href}>
+          <li key={item.href} className="relative flex">
             <Link
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "rounded-control px-3 py-2 text-sm font-medium transition-colors duration-(--duration-fast)",
-                active ? "bg-raised text-ink" : "text-ink-muted hover:text-ink",
+                "flex items-center px-3.5 display text-lg tracking-[0.045em] transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                active ? "text-ink" : "text-ink-muted hover:text-ink",
               )}
             >
               {item.label}
             </Link>
+            {active ? (
+              <ViewTransition
+                name="header-indicator"
+                share="nav-indicator"
+                enter="indicator-enter"
+                exit="indicator-exit"
+                default="none"
+              >
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-3.5 bottom-0 h-[3px] -skew-x-[30deg] bg-accent"
+                />
+              </ViewTransition>
+            ) : null}
           </li>
         );
       })}

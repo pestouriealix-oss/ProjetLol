@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthPanel, authLinkClasses } from "@/components/auth/auth-panel";
 import { DiscordButton } from "@/components/auth/discord-button";
 import { RegisterForm } from "@/components/auth/register-form";
+import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isDiscordEnabled } from "@/lib/env";
@@ -14,19 +15,15 @@ export default async function RegisterPage() {
   if (await getCurrentUser()) redirect("/dashboard");
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">{t.auth.registerTitle}</h1>
+    <AuthPanel title={t.auth.registerTitle}>
       <RegisterForm />
       {isDiscordEnabled ? <DiscordButton /> : null}
-      <p className="text-sm text-ink-muted">
+      <p className="text-ink-muted">
         {t.auth.hasAccount}{" "}
-        <Link
-          href="/login"
-          className="font-medium text-ink underline underline-offset-4 hover:text-accent"
-        >
+        <Link href="/login" className={authLinkClasses}>
           {t.auth.goToLogin}
         </Link>
       </p>
-    </div>
+    </AuthPanel>
   );
 }
