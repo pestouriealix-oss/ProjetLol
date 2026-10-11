@@ -62,16 +62,24 @@ src/
     (auth)/             Connexion, inscription
     (app)/              Pages protégées : tableau de bord, draft, parties, paramètres
     (legal)/            CGU, confidentialité
+    fonts/              Polices embarquées et leurs licences
+    globals.css         Système de design : jetons, mouvement, transitions de vue
   components/
-    ui/                 Composants de base (bouton, champ, panneau, dialogue…)
-    layout/             En-tête, barre d'onglets, pied de page
-    auth/ settings/ draft/
+    ui/                 Composants de base (bouton, champ, panneau, dialogue, lien…)
+    brand/              Logo
+    layout/             En-tête, barre d'onglets, pied de page, gabarit de page
+    map/                Mini-carte tactique et pictogrammes des rôles
+    draft/              Fiche de draft : plans, courbe de puissance, texte qui s'écrit
+    auth/ settings/
   lib/
     config.ts           Nom de l'app, rôles, serveurs Riot
     env.ts              Variables d'environnement validées au démarrage
     db/                 Schéma, client, accès aux données filtré par utilisateur
     auth/               Session, mots de passe, droits par offre
     validation/         Schémas Zod partagés
+    draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
+    motion.ts           Petites animations pilotées en JavaScript
+    view-transitions.ts Vocabulaire des transitions entre pages
   i18n/fr.ts            Tous les textes de l'interface
 drizzle/                Migrations SQL générées
 ```
@@ -95,10 +103,44 @@ définies. Le paiement n'est pas implémenté.
 
 ### Système de design
 
-Les jetons (couleurs, typographie, rayons, durées) sont définis dans
-`src/app/globals.css`. Les composants n'utilisent que ces jetons. Les polices
-(Space Grotesk, Inter, JetBrains Mono) sont embarquées, sans appel à un service
-tiers.
+L'idée directrice : **le tableau du coach, de nuit**. Un terrain vert sombre,
+des tracés clairs comme à la craie, et une seule couleur vive, le corail,
+réservée à ce que le coach dit de faire (actions, trajets, choix).
+
+- **Jetons.** Couleurs, typographie, rayons, durées et courbes sont définis dans
+  `src/app/globals.css`. Les composants n'utilisent que ces jetons : changer la
+  couleur d'accent ou une police se fait en un seul endroit.
+- **Polices.** Sofia Sans Extra Condensed pour les titres et les pseudos,
+  Atkinson Hyperlegible Next pour le texte. Elles sont embarquées
+  (`src/app/fonts`, licence OFL), sans appel à un service tiers.
+- **Carte.** La mini-carte (`src/components/map`) est un schéma dessiné pour le
+  projet, pas une image du jeu : alliés en ronds pleins, adversaires en losanges
+  creux, trajets conseillés en corail. Les pictogrammes des rôles en sont tirés.
+
+### Mouvement
+
+Une animation doit dire quelque chose : d'où vient un élément, ce qui a changé,
+ce que l'application attend. Le reste ne bouge pas.
+
+| Besoin                                     | Outil                                                |
+| ------------------------------------------ | ---------------------------------------------------- |
+| Réponse à un geste (appui, survol, focus)  | Transitions CSS, jetons `--duration-*` et `--ease-*` |
+| Ce qui arrive ou se pose                   | Courbes « ressort » `--ease-spring*`                 |
+| Entrée en scène orchestrée (la fiche)      | Utilitaires `intro-*` et `--intro-delay`, en CSS pur |
+| Changement de page, liste qui se réordonne | Transitions de vue (`<ViewTransition>` de React)     |
+| Signe de refus, valeur qui glisse          | `src/lib/motion.ts`                                  |
+
+Les transitions de vue suivent quelques règles, détaillées dans `CLAUDE.md` :
+
+- une page ne s'anime que si la navigation vient d'un lien de l'application
+  (`src/components/ui/link.tsx`), pas du bouton Retour ;
+- un squelette et le contenu qui le remplace portent le même nom : l'un se fond
+  dans l'autre sur place ;
+- elles restent courtes (300 ms pour une page), car React attend la fin d'une
+  transition avant d'afficher la suite.
+
+Tout respecte `prefers-reduced-motion` : les états restent les mêmes, seul le
+trajet disparaît.
 
 ## Choix techniques notables
 
