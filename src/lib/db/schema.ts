@@ -109,6 +109,8 @@ export const riotAccounts = pgTable(
       .default(sql`'{}'::role[]`),
     isPrimary: boolean("is_primary").notNull().default(false),
     verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    /** Dernière synchronisation menée à bien avec l'API Riot. */
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -287,3 +289,6 @@ export const llmUsages = pgTable(
 
 export type User = typeof users.$inferSelect;
 export type RiotAccount = typeof riotAccounts.$inferSelect;
+export type Match = typeof matches.$inferSelect;
+export type Participation = typeof participations.$inferSelect;
+export type RankSnapshot = typeof rankSnapshots.$inferSelect;

@@ -110,7 +110,33 @@ export const fr = {
     accounts: "Compte affiché",
     manage: "Gérer les comptes",
     noRoles: "Aucun rôle choisi",
-    syncSoon: "Synchronisation bientôt disponible",
+    unverified: "Non vérifié",
+    sync: {
+      action: "Mettre à jour",
+      never: "Jamais mis à jour",
+      last: (when: string) => `Mis à jour ${when}`,
+      newMatches: (count: number) =>
+        count === 0
+          ? "Tout est à jour."
+          : count === 1
+            ? "1 nouvelle partie."
+            : `${count} nouvelles parties.`,
+      partial: "Riot limite le nombre d'appels : relance dans une minute pour la suite.",
+      errors: {
+        missing_key:
+          "La synchronisation n'est pas configurée sur ce serveur (clé de l'API Riot absente).",
+        invalid_key: "La clé de l'API Riot est refusée ou expirée.",
+        not_found: "Riot ne trouve pas ces données. Réessaie dans quelques minutes.",
+        unavailable: "Riot ne répond pas pour l'instant. Réessaie dans quelques minutes.",
+        rate_limited: "Trop de demandes envoyées à Riot. Réessaie dans une minute.",
+        account_missing: "Ce compte n'existe plus. Recharge la page.",
+        player_unknown:
+          "Riot ne connaît pas ce Riot ID sur ce serveur. Vérifie son écriture dans les paramètres.",
+        player_already_linked: "Ce joueur est déjà lié sous un autre Riot ID.",
+        cooldown: (seconds: number) =>
+          `Mis à jour à l'instant. Nouvelle mise à jour possible dans ${seconds} s.`,
+      },
+    },
     start: {
       title: "Trois étapes pour commencer",
       steps: [
@@ -131,17 +157,33 @@ export const fr = {
     },
     rank: {
       title: "Classement",
-      solo: "Solo/Duo",
-      flex: "Flex",
-      pending: "Pas encore synchronisé",
+      pending: "Pas encore mis à jour",
+      unranked: "Non classé",
+      lp: (lp: number) => `${lp} LP`,
+      record: (wins: number, losses: number) => `${wins} V ${losses} D`,
+      tiers: {
+        IRON: "Fer",
+        BRONZE: "Bronze",
+        SILVER: "Argent",
+        GOLD: "Or",
+        PLATINUM: "Platine",
+        EMERALD: "Émeraude",
+        DIAMOND: "Diamant",
+        MASTER: "Maître",
+        GRANDMASTER: "Grand Maître",
+        CHALLENGER: "Challenger",
+      } as Record<string, string>,
     },
     champions: {
       title: "Champions les plus joués",
       empty: "Tes champions apparaîtront ici, avec ton taux de victoire sur chacun.",
+      games: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
+      kda: (ratio: string) => `${ratio} KDA`,
     },
     recent: {
       title: "Dernières parties",
       all: "Tout l'historique",
+      empty: "Clique sur « Mettre à jour » : tes parties classées récentes s'afficheront ici.",
     },
   },
   draft: {
@@ -170,7 +212,15 @@ export const fr = {
     title: "Parties",
     emptyTitle: "Aucune partie pour l'instant",
     emptyBody:
-      "La synchronisation n'est pas encore disponible. Tes parties classées s'afficheront ici, de la plus récente à la plus ancienne, chacune avec son bilan.",
+      "Mets ton compte à jour depuis le tableau de bord : tes parties classées s'afficheront ici, de la plus récente à la plus ancienne.",
+    toDashboard: "Aller au tableau de bord",
+    win: "Victoire",
+    loss: "Défaite",
+    queues: { SOLO: "Solo/Duo", FLEX: "Flex", OTHER: "Autre file" },
+    kda: (ratio: string) => `${ratio} KDA`,
+    cs: (cs: number, perMinute: string) => `${cs} CS (${perMinute}/min)`,
+    killParticipation: (percent: string) => `${percent} des éliminations`,
+    count: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
     noAccountBody: "Lie d'abord ton compte Riot pour que tes parties puissent être suivies.",
     noAccountAction: "Lier un compte Riot",
   },

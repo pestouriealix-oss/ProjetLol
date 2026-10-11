@@ -130,3 +130,56 @@ export async function removeRiotAccount(userId: string, accountId: string): Prom
     return true;
   });
 }
+
+export async function findRiotAccount(
+  userId: string,
+  accountId: string,
+): Promise<RiotAccount | null> {
+  const [account] = await db.select().from(riotAccounts).where(owned(userId, accountId)).limit(1);
+  return account ?? null;
+}
+
+/** Un même joueur Riot est déjà lié à cet utilisateur sous un autre Riot ID. */
+export class RiotPlayerAlreadyLinkedError extends Error {
+  constructor() {
+    super("riot_player_already_linked");
+    this.name = "RiotPlayerAlreadyLinkedError";
+  }
+}
+
+/**
+ * Enregistre l'identité confirmée par Riot : l'identifiant stable du joueur et
+ * l'écriture exacte de son Riot ID.
+ */
+export async function markRiotAccountVerified(
+  userId: string,
+  accountId: string,
+  identity: { puuid: string; gameName: string; tagLine: string },
+): Promise<boolean> {
+  try {
+    const updated = await db
+      .update(riotAccounts)
+      .set({ ...identity, verifiedAt: new Date() })
+      .where(owned(userId, accountId))
+      .returning({ id: riotAccounts.id });
+    return updated.length > 0;
+  } catch (error) {
+    if (isUniqueViolation(error)) throw new RiotPlayerAlreadyLinkedError();
+    throw error;
+  }
+}
+
+export async function markRiotAccountSynced(
+  userId: string,
+  accountId: string,
+  at: Date,
+): Promise<void> {
+  await db.update(riotAccounts).set({ lastSyncedAt: at }).where(owned(userId, accountId));
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  for (let current: unknown = error; current; current = (current as { cause?: unknown }).cause) {
+    if ((current as { code?: unknown }).code === "23505") return true;
+  }
+  return false;
+}

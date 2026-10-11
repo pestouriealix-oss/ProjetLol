@@ -1,40 +1,48 @@
 import type { Metadata } from "next";
-import { z } from "zod";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { MatchList } from "@/components/matches/match-list";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
+import { ChampionRecords } from "@/components/profile/champion-records";
 import { ProfileHeader, type ProfileAccount } from "@/components/profile/profile-header";
+import { RankCard } from "@/components/profile/rank-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
 import { requireUser } from "@/lib/auth/session";
-import { listRiotAccounts } from "@/lib/db/riot-accounts";
+import { getChampionAssets } from "@/lib/ddragon/champions";
+import { listChampionRecords, listPlayedMatches } from "@/lib/db/matches";
+import { listLatestRanks } from "@/lib/db/ranks";
+import { formatRelative } from "@/lib/format";
+
+import { getSelectedAccount, type AccountSearchParams } from "../selected-account";
 
 export const metadata: Metadata = { title: t.dashboard.title };
 
 const copy = t.dashboard;
 
-/** Compte demandé dans l'adresse ; toute valeur inattendue est ignorée. */
-const accountParam = z.string().min(1).max(64).optional().catch(undefined);
+/** Parties affichées sur le tableau de bord ; l'historique complet est sur « Parties ». */
+const RECENT_MATCHES = 8;
 
-type DashboardPageProps = { searchParams: Promise<{ compte?: string | string[] }> };
-
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: AccountSearchParams;
+}) {
   const user = await requireUser();
-  const [rows, params] = await Promise.all([listRiotAccounts(user.id), searchParams]);
+  const { accounts: rows, account: selected } = await getSelectedAccount(user.id, searchParams);
 
-  const accounts: ProfileAccount[] = rows.map((row) => ({
+  const toProfile = (row: (typeof rows)[number]): ProfileAccount => ({
     id: row.id,
     gameName: row.gameName,
     tagLine: row.tagLine,
     platform: row.platform,
     roles: row.roles,
-  }));
-
-  // La liste est triée compte principal en tête : c'est lui par défaut.
-  const requested = accountParam.parse(params.compte);
-  const account = accounts.find((candidate) => candidate.id === requested) ?? accounts[0];
+    verified: row.verifiedAt !== null,
+  });
+  const accounts = rows.map(toProfile);
+  const account = selected ? toProfile(selected) : undefined;
 
   if (!account) {
     return (
@@ -73,34 +81,32 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
+  const [ranks, records, matches, champions] = await Promise.all([
+    listLatestRanks(user.id, account.id),
+    listChampionRecords(user.id, account.id, { limit: 5 }),
+    listPlayedMatches(user.id, account.id, { limit: RECENT_MATCHES }),
+    getChampionAssets(),
+  ]);
+  const lastSyncedAt = selected?.lastSyncedAt ?? null;
+
   return (
     <PageShell
       route="dashboard"
       title={copy.title}
-      header={<ProfileHeader account={account} accounts={accounts} />}
+      header={
+        <ProfileHeader
+          account={account}
+          accounts={accounts}
+          lastSynced={lastSyncedAt ? copy.sync.last(formatRelative(lastSyncedAt)) : copy.sync.never}
+        />
+      }
     >
       {/* Colonne étroite : l'état du compte. Colonne large : les parties.
           Sur téléphone, les parties passent en premier. */}
       <div className="grid items-start gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="flex flex-col gap-4 max-lg:order-2">
-          <Panel className="p-5">
-            <h2 className="display text-xl text-ink">{copy.rank.title}</h2>
-            <dl className="flex flex-col pt-3">
-              {[copy.rank.solo, copy.rank.flex].map((queue) => (
-                <div
-                  key={queue}
-                  className="flex items-baseline justify-between gap-4 border-t border-line py-3 first:border-t-0 last:pb-0"
-                >
-                  <dt className="font-semibold text-ink">{queue}</dt>
-                  <dd className="text-sm text-ink-faint">{copy.rank.pending}</dd>
-                </div>
-              ))}
-            </dl>
-          </Panel>
-          <Panel className="p-5">
-            <h2 className="display text-xl text-ink">{copy.champions.title}</h2>
-            <p className="pt-3 text-ink-muted">{copy.champions.empty}</p>
-          </Panel>
+          <RankCard ranks={ranks} synced={lastSyncedAt !== null} />
+          <ChampionRecords records={records} champions={champions} />
         </div>
 
         <section aria-labelledby="recent-title" className="flex min-w-0 flex-col gap-4">
@@ -109,13 +115,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               {copy.recent.title}
             </h2>
             <Link
-              href="/matches"
+              href={`/matches?compte=${account.id}`}
               className="text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
             >
               {copy.recent.all}
             </Link>
           </div>
-          <MatchListEmpty title={t.matches.emptyTitle} body={t.matches.emptyBody} />
+          {matches.length === 0 ? (
+            <MatchListEmpty title={t.matches.emptyTitle} body={copy.recent.empty} />
+          ) : (
+            <MatchList matches={matches} champions={champions} />
+          )}
         </section>
       </div>
     </PageShell>

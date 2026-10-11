@@ -11,7 +11,7 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 | Étape | Contenu                                                          | État    |
 | ----- | ---------------------------------------------------------------- | ------- |
 | 1     | Socle, base de données, connexion, système de design, Paramètres | Fait    |
-| 2     | API Riot, Data Dragon, synchronisation des parties               | À faire |
+| 2     | API Riot, Data Dragon, synchronisation des parties               | Fait    |
 | 3     | Coach de draft (capture, extraction, fiche en streaming)         | À faire |
 | 4     | Détail d'une partie et bilan                                     | À faire |
 | 5     | Tableau de bord global                                           | À faire |
@@ -28,6 +28,18 @@ docker compose up -d        # démarre PostgreSQL
 npm run db:migrate          # crée les tables
 npm run dev                 # http://localhost:3000
 ```
+
+### Clé de l'API Riot
+
+La synchronisation des parties a besoin d'une clé :
+
+1. Connecte-toi sur <https://developer.riotgames.com> avec ton compte Riot.
+2. Copie la « Development API Key » dans `RIOT_API_KEY` (fichier `.env`), puis
+   relance `npm run dev`.
+
+Une clé de développement expire au bout de 24 heures : il faut la régénérer sur
+la même page. Sans clé, l'application fonctionne, mais le bouton « Mettre à
+jour » du tableau de bord explique qu'elle manque.
 
 ### Connexion Discord (facultatif)
 
@@ -78,7 +90,11 @@ src/
     auth/               Session, mots de passe, droits par offre
     validation/         Schémas Zod partagés
     draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
-    ddragon/            Data Dragon : liste des patchs (page Actus)
+    ddragon/            Data Dragon : patchs, noms et portraits des champions
+    riot/               Client de l'API Riot (comptes, classement, parties)
+    stats/              Ce qu'on retient d'une partie brute
+    sync/               Synchronisation d'un compte Riot
+    format.ts           Nombres, durées et dates en français
     motion.ts           Petites animations pilotées en JavaScript
     view-transitions.ts Vocabulaire des transitions entre pages
   i18n/fr.ts            Tous les textes de l'interface
@@ -144,6 +160,11 @@ Tout respecte `prefers-reduced-motion` : les états restent les mêmes, seul le
 trajet disparaît.
 
 ## Choix techniques notables
+
+- **Synchronisation à la demande.** Le joueur clique sur « Mettre à jour » : le
+  compte est vérifié auprès de Riot, son classement relevé, et ses 20 dernières
+  parties classées téléchargées si elles manquent. Relancer ne duplique rien, et
+  une interruption (limite d'appels de Riot) se reprend au clic suivant.
 
 - **Drizzle plutôt que Prisma.** Les migrations se génèrent en JavaScript pur,
   sans binaire à télécharger, et les types viennent directement du schéma.
