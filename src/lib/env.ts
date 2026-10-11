@@ -14,6 +14,8 @@ const schema = z.object({
   AUTH_DISCORD_SECRET: optional,
   RIOT_API_KEY: optional,
   ANTHROPIC_API_KEY: optional,
+  /** Autre adresse pour Data Dragon (miroir, tests). Par défaut, celle de Riot. */
+  DDRAGON_BASE_URL: optional,
 });
 
 const parsed = schema.safeParse(process.env);

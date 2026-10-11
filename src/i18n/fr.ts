@@ -9,6 +9,7 @@ export const fr = {
     dashboard: "Tableau de bord",
     newGame: "Nouvelle game",
     matches: "Parties",
+    news: "Actus",
     settings: "Paramètres",
     main: "Navigation principale",
     accountMenu: "Menu du compte",
@@ -228,6 +229,32 @@ export const fr = {
       deleteBody:
         "Toutes tes données seront effacées immédiatement et ne pourront pas être récupérées.",
       deleteConfirm: "Supprimer mon compte",
+    },
+  },
+  news: {
+    title: "Actus",
+    intro: "Les patchs du jeu, dans l'ordre, avec un lien vers les notes officielles de Riot.",
+    current: "Patch actuel",
+    patch: (id: string) => `Patch ${id}`,
+    readNotes: "Lire les notes de patch",
+    notesFor: (id: string) => `Notes du patch ${id}`,
+    previous: "Patchs précédents",
+    opensRiot: "S'ouvre sur le site de League of Legends",
+    errorTitle: "La liste des patchs n'a pas pu être chargée",
+    errorBody:
+      "Les serveurs de Riot ne répondent pas pour l'instant. Les liens officiels restent disponibles.",
+    emptyTitle: "Aucun patch à afficher",
+    official: {
+      title: "Sources officielles",
+      links: [
+        {
+          label: "Toutes les notes de patch",
+          href: "https://www.leagueoflegends.com/fr-fr/news/tags/patch-notes/",
+        },
+        { label: "Actualités du jeu", href: "https://www.leagueoflegends.com/fr-fr/news/" },
+        { label: "État des serveurs", href: "https://status.riotgames.com/lol?locale=fr_FR" },
+        { label: "Compétition (LoL Esports)", href: "https://lolesports.com/fr-FR/" },
+      ],
     },
   },
   common: {

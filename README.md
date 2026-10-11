@@ -60,7 +60,7 @@ Le bouton « Continuer avec Discord » apparaît dès que les deux valeurs sont 
 src/
   app/                  Pages et actions serveur (aucune logique métier)
     (auth)/             Connexion, inscription
-    (app)/              Pages protégées : tableau de bord, draft, parties, paramètres
+    (app)/              Pages protégées : tableau de bord, draft, parties, actus, paramètres
     (legal)/            CGU, confidentialité
     fonts/              Polices embarquées et leurs licences
     globals.css         Système de design : jetons, mouvement, transitions de vue
@@ -78,6 +78,7 @@ src/
     auth/               Session, mots de passe, droits par offre
     validation/         Schémas Zod partagés
     draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
+    ddragon/            Data Dragon : liste des patchs (page Actus)
     motion.ts           Petites animations pilotées en JavaScript
     view-transitions.ts Vocabulaire des transitions entre pages
   i18n/fr.ts            Tous les textes de l'interface
