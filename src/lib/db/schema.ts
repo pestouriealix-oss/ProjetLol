@@ -295,3 +295,16 @@ export type RiotAccount = typeof riotAccounts.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Participation = typeof participations.$inferSelect;
 export type RankSnapshot = typeof rankSnapshots.$inferSelect;
+
+// ── Protection de la connexion ──────────────────────────────────────────────
+
+/**
+ * Compteurs d'essais (connexions ratées, inscriptions) par clé, sur une
+ * fenêtre de temps. La clé est une empreinte (SHA-256) : ni l'e-mail ni
+ * l'adresse IP ne sont stockés en clair.
+ */
+export const authAttempts = pgTable("auth_attempts", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+});

@@ -17,6 +17,10 @@ const pool =
     connectionString: env.DATABASE_URL,
     // Une base injoignable doit échouer vite, pas laisser la page tourner sans fin.
     connectionTimeoutMillis: 5_000,
+    // En ligne, chaque instance du serveur garde peu de connexions : l'hébergeur
+    // en lance plusieurs, et la base en accepte un nombre limité.
+    max: process.env.NODE_ENV === "production" ? 5 : 10,
+    idleTimeoutMillis: 10_000,
   });
 
 if (process.env.NODE_ENV !== "production") {

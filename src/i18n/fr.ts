@@ -59,6 +59,7 @@ export const fr = {
       oauth: "La connexion avec Discord a échoué. Réessaie.",
       unknown: "La connexion a échoué. Réessaie dans un instant.",
       unavailable: "Le service ne répond pas pour l'instant. Réessaie dans un instant.",
+      tooManyAttempts: "Trop de tentatives. Réessaie dans quelques minutes.",
     },
     howItWorks: {
       title: "Comment ça marche",

@@ -200,8 +200,17 @@ avant toute ouverture au public. Règles déjà prises en compte :
 - le coach propose plusieurs options plutôt qu'une réponse unique ;
 - aucun calcul de MMR ou d'ELO.
 
-## Reste à faire avant une mise en ligne
+## Mise en ligne
 
-- Limitation du nombre de tentatives de connexion.
-- Vérification de l'adresse e-mail et réinitialisation du mot de passe.
-- Rédaction des CGU et de la politique de confidentialité.
+Le guide pas à pas (Vercel + Neon, variables, clé Riot) est dans
+[`docs/MISE-EN-LIGNE.md`](docs/MISE-EN-LIGNE.md).
+
+Déjà en place : limitation des essais de connexion (5 par e-mail et 30 par
+adresse IP toutes les 15 minutes) et d'inscription (10 par adresse IP et par
+heure), en-têtes de sécurité, migrations lancées au déploiement.
+
+Reste à faire avant une ouverture au public :
+
+- vérification de l'adresse e-mail et réinitialisation du mot de passe ;
+- rédaction des CGU et de la politique de confidentialité ;
+- clé Riot personnelle ou de production (une clé de développement expire en 24 h).
