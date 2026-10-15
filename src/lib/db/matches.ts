@@ -145,3 +145,28 @@ export async function listChampionRecords(
     .orderBy(desc(games), participations.championName)
     .limit(options.limit);
 }
+
+/**
+ * Une partie jouée par l'un des comptes de l'utilisateur, avec le compte qui
+ * l'a jouée. Renvoie `null` si aucun de ses comptes n'y a participé : on ne
+ * montre jamais une partie à quelqu'un qui n'y était pas.
+ */
+export async function findPlayedMatch(
+  userId: string,
+  matchId: string,
+): Promise<{ details: unknown; puuid: string; accountId: string } | null> {
+  const [row] = await db
+    .select({
+      details: matches.details,
+      puuid: riotAccounts.puuid,
+      accountId: riotAccounts.id,
+    })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(and(eq(riotAccounts.userId, userId), eq(matches.id, matchId)))
+    .orderBy(desc(riotAccounts.isPrimary))
+    .limit(1);
+  if (!row?.puuid) return null;
+  return { details: row.details, puuid: row.puuid, accountId: row.accountId };
+}

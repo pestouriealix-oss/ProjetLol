@@ -21,6 +21,11 @@ const POSITIONS: Record<string, Role> = {
   UTILITY: "SUPPORT",
 };
 
+/** Poste attribué par Riot (« MIDDLE », « UTILITY »…), traduit en rôle de l'application. */
+export function roleFromPosition(position: string): Role | null {
+  return POSITIONS[position] ?? null;
+}
+
 export type MatchSummary = {
   id: string;
   /** Version technique du jeu, réduite à « majeur.mineur » (par exemple « 16.20 »). */
@@ -95,7 +100,7 @@ export function extractParticipation(match: MatchDto, puuid: string): Participat
   return {
     championId: player.championId,
     championName: player.championName,
-    role: POSITIONS[player.teamPosition] ?? null,
+    role: roleFromPosition(player.teamPosition),
     side: player.teamId === 100 ? "BLUE" : "RED",
     win: player.win,
     kills: player.kills,

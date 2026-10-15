@@ -221,6 +221,10 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
     expect(await matchesApi.listPlayedMatches(bob, account.id, { limit: 10 })).toEqual([]);
     expect(await matchesApi.listChampionRecords(bob, account.id, { limit: 10 })).toEqual([]);
     expect(await matchesApi.listKnownMatchIds(bob, account.id, ids(41))).toEqual([]);
+    expect(await matchesApi.findPlayedMatch(bob, ids(41)[0]!)).toBeNull();
+    expect(await matchesApi.findPlayedMatch(alice, ids(41)[0]!)).toMatchObject({
+      accountId: account.id,
+    });
     expect(await ranksApi.listLatestRanks(bob, account.id)).toEqual([]);
     expect(await ranksApi.recordRanks(bob, account.id, [])).toBe(false);
     expect(await accountsApi.findRiotAccount(bob, account.id)).toBeNull();

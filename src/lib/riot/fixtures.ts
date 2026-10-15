@@ -59,6 +59,23 @@ export function matchFixture({
       item4: 0,
       item5: 0,
       item6: 3364,
+      riotIdGameName: tracked ? "Joueur" : `Joueur${teamId}${index}`,
+      riotIdTagline: "EUW",
+      totalDamageTaken: 21000,
+      wardsPlaced: 9,
+      controlWardsPlaced: 2,
+      summoner1Id: 4,
+      summoner2Id: index === 1 ? 11 : 14,
+      perks: {
+        styles: [
+          {
+            description: "primaryStyle",
+            style: 8100,
+            selections: [{ perk: 8112 }, { perk: 8139 }],
+          },
+          { description: "subStyle", style: 8300, selections: [{ perk: 8304 }] },
+        ],
+      },
     };
   };
   return {
@@ -72,6 +89,27 @@ export function matchFixture({
       participants: [
         ...POSITIONS.map((_, index) => participant(100, index)),
         ...POSITIONS.map((_, index) => participant(200, index)),
+      ],
+      teams: [
+        {
+          teamId: 100,
+          win,
+          objectives: {
+            champion: { kills: 19 },
+            tower: { kills: win ? 9 : 3 },
+            dragon: { kills: 3 },
+            baron: { kills: win ? 1 : 0 },
+          },
+        },
+        {
+          teamId: 200,
+          win: !win,
+          objectives: {
+            champion: { kills: 20 },
+            tower: { kills: win ? 3 : 9 },
+            dragon: { kills: 1 },
+          },
+        },
       ],
     },
   };
