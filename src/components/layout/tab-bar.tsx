@@ -20,7 +20,7 @@ export function TabBar() {
       aria-label={t.nav.main}
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {TAB_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -52,7 +52,14 @@ export function TabBar() {
                   aria-hidden
                   className="size-5 transition-[scale,translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-active:scale-90 group-aria-[current=page]:-translate-y-0.5"
                 />
-                <span>{item.label}</span>
+                {item.shortLabel ? (
+                  <>
+                    <span aria-hidden>{item.shortLabel}</span>
+                    <span className="sr-only">{item.label}</span>
+                  </>
+                ) : (
+                  <span>{item.label}</span>
+                )}
               </Link>
             </li>
           );

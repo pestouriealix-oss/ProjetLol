@@ -13,7 +13,8 @@ Travailler une étape à la fois et attendre la validation entre chacune.
 - **Couches.** `src/app` et `src/components` n'importent jamais `@/lib/db/client`
   ni `drizzle-orm`. Tout accès aux données passe par un module de `src/lib/db`.
   De même, l'API Riot vivra dans `src/lib/riot`, le modèle dans `src/lib/llm`,
-  Data Dragon dans `src/lib/ddragon`, les calculs dans `src/lib/stats`.
+  Data Dragon dans `src/lib/ddragon`, PandaScore (esport) dans `src/lib/esport`,
+  les calculs dans `src/lib/stats`.
 - **Isolation.** Toute fonction de `src/lib/db` qui touche une donnée personnelle
   prend `userId` en premier argument et l'utilise dans sa clause WHERE. Ajouter
   un cas dans `src/lib/db/isolation.test.ts` pour chaque nouvelle table.

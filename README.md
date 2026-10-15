@@ -8,16 +8,16 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 
 ## État d'avancement
 
-| Étape  | Contenu                                                          | État     |
-| ------ | ---------------------------------------------------------------- | -------- |
-| 1      | Socle, base de données, connexion, système de design, Paramètres | Fait     |
-| 2      | API Riot, Data Dragon, synchronisation des parties               | Fait     |
-| 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)      | Fait     |
-| Esport | Calendrier, résultats, arbres et classements (PandaScore)        | En cours |
-| 3      | Coach de draft (capture, extraction, fiche en streaming)         | À faire  |
-| 4b     | Bilan d'une partie                                               | À faire  |
-| 5      | Tableau de bord global                                           | À faire  |
-| 6      | Finitions, pages légales définitives                             | À faire  |
+| Étape  | Contenu                                                          | État    |
+| ------ | ---------------------------------------------------------------- | ------- |
+| 1      | Socle, base de données, connexion, système de design, Paramètres | Fait    |
+| 2      | API Riot, Data Dragon, synchronisation des parties               | Fait    |
+| 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)      | Fait    |
+| Esport | Calendrier, résultats, arbres et classements (PandaScore)        | Fait    |
+| 3      | Coach de draft (capture, extraction, fiche en streaming)         | À faire |
+| 4b     | Bilan d'une partie                                               | À faire |
+| 5      | Tableau de bord global                                           | À faire |
+| 6      | Finitions, pages légales définitives                             | À faire |
 
 L'ordre suit les priorités du moment : le détail des parties et l'onglet
 Esport (pendant les Worlds) passent avant le coach de draft.
@@ -45,6 +45,18 @@ La synchronisation des parties a besoin d'une clé :
 Une clé de développement expire au bout de 24 heures : il faut la régénérer sur
 la même page. Sans clé, l'application fonctionne, mais le bouton « Mettre à
 jour » du tableau de bord explique qu'elle manque.
+
+### Clé PandaScore (onglet Esport)
+
+L'onglet Esport lit le calendrier, les résultats, les arbres et les classements
+sur PandaScore (offre gratuite, 1 000 appels par heure ; les réponses sont
+gardées une minute en cache) :
+
+1. Crée un compte sur <https://pandascore.co>.
+2. Copie la clé (« token ») de ton tableau de bord dans `PANDASCORE_TOKEN`
+   (fichier `.env`), puis relance `npm run dev`.
+
+Sans clé, l'onglet explique qu'elle manque.
 
 ### Connexion Discord (facultatif)
 
