@@ -6,9 +6,11 @@ import {
   matchIdsSchema,
   matchSchema,
   riotAccountSchema,
+  summonerSchema,
   type LeagueEntryDto,
   type MatchDto,
   type RiotAccountDto,
+  type SummonerDto,
 } from "./schemas";
 
 /** Les appels à l'API Riot dont l'application a besoin, et rien d'autre. */
@@ -26,6 +28,15 @@ export function createRiotApi(client: RiotClient) {
         { kind: "account", platform },
         `/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`,
         riotAccountSchema,
+      );
+    },
+
+    /** Summoner-V4 : icône d'invocateur et niveau du joueur. */
+    getSummoner(platform: Platform, puuid: string): Promise<SummonerDto> {
+      return client.get(
+        { kind: "platform", platform },
+        `/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(puuid)}`,
+        summonerSchema,
       );
     },
 

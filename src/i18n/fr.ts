@@ -132,6 +132,7 @@ export const fr = {
     },
   },
   dashboard: {
+    level: (level: number) => `Niveau ${level}`,
     title: "Tableau de bord",
     accounts: "Compte affiché",
     manage: "Gérer les comptes",

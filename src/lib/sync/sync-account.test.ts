@@ -64,6 +64,9 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
         if (failOn?.account) throw failOn.account;
         return { puuid, gameName: gameName.toUpperCase(), tagLine: "TEST" };
       },
+      async getSummoner(_platform, summonerPuuid) {
+        return { puuid: summonerPuuid, profileIconId: 4568, summonerLevel: 312 };
+      },
       async getLeagueEntries() {
         return leagueEntriesSchema.parse(leagueEntriesFixture);
       },
@@ -116,7 +119,12 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
 
     const saved = await accountsApi.findRiotAccount(alice, account.id);
     // L'écriture exacte du Riot ID vient de Riot.
-    expect(saved).toMatchObject({ puuid, gameName: "ALICE" });
+    expect(saved).toMatchObject({
+      puuid,
+      gameName: "ALICE",
+      profileIconId: 4568,
+      summonerLevel: 312,
+    });
     expect(saved?.verifiedAt).toBeInstanceOf(Date);
     expect(saved?.lastSyncedAt).toEqual(at(0)());
 
@@ -228,6 +236,12 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
     expect(await ranksApi.listLatestRanks(bob, account.id)).toEqual([]);
     expect(await ranksApi.recordRanks(bob, account.id, [])).toBe(false);
     expect(await accountsApi.findRiotAccount(bob, account.id)).toBeNull();
+    expect(
+      await accountsApi.updateRiotAccountProfile(bob, account.id, {
+        profileIconId: 1,
+        summonerLevel: 1,
+      }),
+    ).toBe(false);
     expect(
       await accountsApi.markRiotAccountVerified(bob, account.id, {
         puuid: "x",

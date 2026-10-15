@@ -33,6 +33,8 @@ export default async function DashboardPage({
   const user = await requireUser();
   const { accounts: rows, account: selected } = await getSelectedAccount(user.id, searchParams);
 
+  // Les portraits viennent de Data Dragon : chargés seulement s'il y a un compte à montrer.
+  const champions = selected ? await getChampionAssets() : null;
   const toProfile = (row: (typeof rows)[number]): ProfileAccount => ({
     id: row.id,
     gameName: row.gameName,
@@ -40,6 +42,9 @@ export default async function DashboardPage({
     platform: row.platform,
     roles: row.roles,
     verified: row.verifiedAt !== null,
+    iconUrl:
+      row.profileIconId !== null ? (champions?.profileIconUrl(row.profileIconId) ?? null) : null,
+    level: row.summonerLevel,
   });
   const accounts = rows.map(toProfile);
   const account = selected ? toProfile(selected) : undefined;
@@ -81,11 +86,10 @@ export default async function DashboardPage({
     );
   }
 
-  const [ranks, records, matches, champions] = await Promise.all([
+  const [ranks, records, matches] = await Promise.all([
     listLatestRanks(user.id, account.id),
     listChampionRecords(user.id, account.id, { limit: 5 }),
     listPlayedMatches(user.id, account.id, { limit: RECENT_MATCHES }),
-    getChampionAssets(),
   ]);
   const lastSyncedAt = selected?.lastSyncedAt ?? null;
 

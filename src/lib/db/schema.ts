@@ -111,6 +111,9 @@ export const riotAccounts = pgTable(
     verifiedAt: timestamp("verified_at", { withTimezone: true }),
     /** Dernière synchronisation menée à bien avec l'API Riot. */
     lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    /** Icône d'invocateur (identifiant Data Dragon) et niveau, relevés à la synchronisation. */
+    profileIconId: integer("profile_icon_id"),
+    summonerLevel: integer("summoner_level"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

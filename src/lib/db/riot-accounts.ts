@@ -169,6 +169,20 @@ export async function markRiotAccountVerified(
   }
 }
 
+/** Icône d'invocateur et niveau du compte, tels que Riot les donne. */
+export async function updateRiotAccountProfile(
+  userId: string,
+  accountId: string,
+  profile: { profileIconId: number; summonerLevel: number },
+): Promise<boolean> {
+  const updated = await db
+    .update(riotAccounts)
+    .set(profile)
+    .where(owned(userId, accountId))
+    .returning({ id: riotAccounts.id });
+  return updated.length > 0;
+}
+
 export async function markRiotAccountSynced(
   userId: string,
   accountId: string,

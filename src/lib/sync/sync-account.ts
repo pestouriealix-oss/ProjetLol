@@ -7,6 +7,7 @@ import {
   markRiotAccountSynced,
   markRiotAccountVerified,
   RiotPlayerAlreadyLinkedError,
+  updateRiotAccountProfile,
 } from "@/lib/db/riot-accounts";
 import type { RiotApi } from "@/lib/riot/api";
 import { RiotApiError, type RiotErrorKind } from "@/lib/riot/errors";
@@ -38,7 +39,7 @@ export type SyncResult =
   | { ok: false; reason: SyncFailure; retryAfterSeconds?: number };
 
 /**
- * Met un compte à jour depuis l'API Riot : identité, classement, puis les
+ * Met un compte à jour depuis l'API Riot : identité, icône et niveau, classement, puis les
  * parties classées récentes qui manquent.
  *
  * Tout est repris sans dégât si on relance : une partie déjà enregistrée est
@@ -82,6 +83,12 @@ export async function syncRiotAccount(
       await markRiotAccountVerified(userId, accountId, identity);
       puuid = identity.puuid;
     }
+
+    const summoner = await api.getSummoner(account.platform, puuid);
+    await updateRiotAccountProfile(userId, accountId, {
+      profileIconId: summoner.profileIconId,
+      summonerLevel: summoner.summonerLevel,
+    });
 
     const entries = await api.getLeagueEntries(account.platform, puuid);
     await recordRanks(

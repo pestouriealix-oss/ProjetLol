@@ -19,6 +19,8 @@ export type ChampionAssets = {
   name: (championId: string) => string;
   /** Portrait carré du champion, servi par Data Dragon. */
   iconUrl: (championId: string) => string;
+  /** Icône d'invocateur, servie par Data Dragon. */
+  profileIconUrl: (profileIconId: number) => string;
 };
 
 /**
@@ -40,6 +42,7 @@ export async function getChampionAssets(): Promise<ChampionAssets | null> {
     return {
       name: (id) => data[fix(id)]?.name ?? id,
       iconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/champion/${fix(id)}.png`,
+      profileIconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/profileicon/${id}.png`,
     };
   } catch (error) {
     console.error("Données des champions indisponibles", error);

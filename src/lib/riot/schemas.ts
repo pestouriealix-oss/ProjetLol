@@ -12,6 +12,12 @@ export const riotAccountSchema = z.object({
   tagLine: z.string(),
 });
 
+export const summonerSchema = z.looseObject({
+  puuid: z.string(),
+  profileIconId: z.number().int(),
+  summonerLevel: z.number().int(),
+});
+
 export const leagueEntrySchema = z.looseObject({
   queueType: z.string(),
   tier: z.string(),
@@ -55,6 +61,7 @@ export const matchSchema = z.looseObject({
 });
 
 export type RiotAccountDto = z.infer<typeof riotAccountSchema>;
+export type SummonerDto = z.infer<typeof summonerSchema>;
 export type LeagueEntryDto = z.infer<typeof leagueEntrySchema>;
 export type MatchDto = z.infer<typeof matchSchema>;
 export type MatchParticipantDto = z.infer<typeof matchParticipantSchema>;
