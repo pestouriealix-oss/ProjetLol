@@ -9,11 +9,13 @@ import {
   matchSchema,
   riotAccountSchema,
   summonerSchema,
+  timelineSchema,
   type ActiveGameDto,
   type LeagueEntryDto,
   type MatchDto,
   type RiotAccountDto,
   type SummonerDto,
+  type TimelineDto,
 } from "./schemas";
 
 /** Les appels à l'API Riot dont l'application a besoin, et rien d'autre. */
@@ -74,6 +76,15 @@ export function createRiotApi(client: RiotClient) {
         `/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids`,
         matchIdsSchema,
         { type: "ranked", start: 0, count },
+      );
+    },
+
+    /** Match-V5 : la chronologie d'une partie (or minute par minute, événements). */
+    getMatchTimeline(platform: Platform, matchId: string): Promise<TimelineDto> {
+      return client.get(
+        { kind: "regional", platform },
+        `/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`,
+        timelineSchema,
       );
     },
 

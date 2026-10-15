@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, exists, inArray, sql } from "drizzle-orm";
 
 import type { Platform } from "@/lib/config";
 import type { MatchSummary, ParticipationData } from "@/lib/stats/participation";
@@ -154,10 +154,18 @@ export async function listChampionRecords(
 export async function findPlayedMatch(
   userId: string,
   matchId: string,
-): Promise<{ details: unknown; puuid: string; accountId: string } | null> {
+): Promise<{
+  details: unknown;
+  timeline: unknown;
+  platform: Platform;
+  puuid: string;
+  accountId: string;
+} | null> {
   const [row] = await db
     .select({
       details: matches.details,
+      timeline: matches.timeline,
+      platform: matches.platform,
       puuid: riotAccounts.puuid,
       accountId: riotAccounts.id,
     })
@@ -168,7 +176,13 @@ export async function findPlayedMatch(
     .orderBy(desc(riotAccounts.isPrimary))
     .limit(1);
   if (!row?.puuid) return null;
-  return { details: row.details, puuid: row.puuid, accountId: row.accountId };
+  return {
+    details: row.details,
+    timeline: row.timeline,
+    platform: row.platform,
+    puuid: row.puuid,
+    accountId: row.accountId,
+  };
 }
 
 /** File de parties à prendre en compte : toutes les classées, ou une seule. */
@@ -261,4 +275,27 @@ export async function listMatchups(
     )
     .groupBy(opponent)
     .orderBy(desc(count()));
+}
+
+/**
+ * Enregistre la chronologie (réduite) d'une partie. La partie est partagée,
+ * mais seul un utilisateur dont un compte l'a jouée peut l'écrire : renvoie
+ * `false` sinon.
+ */
+export async function saveMatchTimeline(
+  userId: string,
+  matchId: string,
+  timeline: unknown,
+): Promise<boolean> {
+  const played = db
+    .select({ id: participations.id })
+    .from(participations)
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(and(eq(riotAccounts.userId, userId), eq(participations.matchId, matchId)));
+  const updated = await db
+    .update(matches)
+    .set({ timeline })
+    .where(and(eq(matches.id, matchId), exists(played)))
+    .returning({ id: matches.id });
+  return updated.length > 0;
 }

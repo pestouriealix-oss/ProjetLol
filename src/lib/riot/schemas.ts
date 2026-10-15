@@ -93,6 +93,42 @@ export const activeGameSchema = z.looseObject({
 });
 
 export type ActiveGameDto = z.infer<typeof activeGameSchema>;
+
+/**
+ * Match-V5, chronologie d'une partie : une image par minute (or de chaque
+ * joueur) et les événements (achats, compétences, objectifs…). Seuls les
+ * champs utilisés sont décrits ; le reste est ignoré.
+ */
+const timelineEventSchema = z.looseObject({
+  type: z.string(),
+  timestamp: z.number(),
+  participantId: z.number().int().optional(),
+  itemId: z.number().int().optional(),
+  beforeId: z.number().int().optional(),
+  skillSlot: z.number().int().optional(),
+  levelUpType: z.string().optional(),
+  killerTeamId: z.number().int().optional(),
+  teamId: z.number().int().optional(),
+  monsterType: z.string().optional(),
+  monsterSubType: z.string().optional(),
+  buildingType: z.string().optional(),
+});
+
+export const timelineSchema = z.looseObject({
+  info: z.looseObject({
+    frameInterval: z.number().optional().default(60_000),
+    participants: z.array(z.looseObject({ participantId: z.number().int(), puuid: z.string() })),
+    frames: z.array(
+      z.looseObject({
+        timestamp: z.number(),
+        participantFrames: z.record(z.string(), z.looseObject({ totalGold: z.number() })),
+        events: z.array(timelineEventSchema).optional().default([]),
+      }),
+    ),
+  }),
+});
+
+export type TimelineDto = z.infer<typeof timelineSchema>;
 export type RiotAccountDto = z.infer<typeof riotAccountSchema>;
 export type SummonerDto = z.infer<typeof summonerSchema>;
 export type LeagueEntryDto = z.infer<typeof leagueEntrySchema>;

@@ -64,6 +64,9 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
         if (failOn?.account) throw failOn.account;
         return { puuid, gameName: gameName.toUpperCase(), tagLine: "TEST" };
       },
+      async getMatchTimeline() {
+        throw new Error("pas de chronologie dans ces tests");
+      },
       async getActiveGame() {
         return null;
       },
@@ -255,6 +258,8 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
     ).toEqual([]);
     expect(await matchesApi.listKnownMatchIds(bob, account.id, ids(41))).toEqual([]);
     expect(await matchesApi.findPlayedMatch(bob, ids(41)[0]!)).toBeNull();
+    expect(await matchesApi.saveMatchTimeline(bob, ids(41)[0]!, { version: 1 })).toBe(false);
+    expect(await matchesApi.saveMatchTimeline(alice, ids(41)[0]!, { version: 1 })).toBe(true);
     expect(await matchesApi.findPlayedMatch(alice, ids(41)[0]!)).toMatchObject({
       accountId: account.id,
     });

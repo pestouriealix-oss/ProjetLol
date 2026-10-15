@@ -1,11 +1,13 @@
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { PageShell } from "@/components/layout/page-shell";
 import { Duel } from "@/components/match-detail/duel";
 import { TeamTable, type AssetResolver } from "@/components/match-detail/team-table";
+import { TimelineSection, TimelineSkeleton } from "@/components/match-detail/timeline-section";
 import { ErrorNotice } from "@/components/ui/notice";
 import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
@@ -128,6 +130,14 @@ export default async function MatchDetailPage({
       <div className="max-w-2xl">
         <Duel me={me} opponent={opponent} assets={assets} />
       </div>
+      <Suspense fallback={<TimelineSkeleton />}>
+        <TimelineSection
+          userId={user.id}
+          match={{ id: matchId, platform: played.platform, stored: played.timeline }}
+          detail={detail}
+          assets={assets}
+        />
+      </Suspense>
     </PageShell>
   );
 }
