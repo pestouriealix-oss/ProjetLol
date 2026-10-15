@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { Radio, Settings } from "lucide-react";
 
 import { RoleGlyph } from "@/components/map/role-glyph";
 import { AccountSwitcher } from "@/components/profile/account-switcher";
@@ -73,6 +73,12 @@ export function ProfileHeader({
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <AccountSwitcher basePath="/dashboard" accounts={accounts} currentId={account.id} />
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/live?compte=${account.id}`}>
+              <Radio aria-hidden />
+              {t.live.open}
+            </Link>
+          </Button>
           <Button asChild variant="ghost" size="icon" aria-label={copy.manage} title={copy.manage}>
             <Link href="/settings">
               <Settings aria-hidden />

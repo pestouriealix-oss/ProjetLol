@@ -64,6 +64,9 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
         if (failOn?.account) throw failOn.account;
         return { puuid, gameName: gameName.toUpperCase(), tagLine: "TEST" };
       },
+      async getActiveGame() {
+        return null;
+      },
       async getSummoner(_platform, summonerPuuid) {
         return { puuid: summonerPuuid, profileIconId: 4568, summonerLevel: 312 };
       },

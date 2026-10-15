@@ -60,6 +60,39 @@ export const matchSchema = z.looseObject({
   }),
 });
 
+/** Spectator-V5 : la partie en cours d'un joueur. */
+export const activeGameSchema = z.looseObject({
+  gameId: z.number(),
+  gameQueueConfigId: z.number().int().optional().default(0),
+  gameMode: z.string().optional().default(""),
+  /** Début de la partie (millisecondes) ; 0 tant que le chargement n'est pas fini. */
+  gameStartTime: z.number().optional().default(0),
+  gameLength: z.number().optional().default(0),
+  participants: z.array(
+    z.looseObject({
+      puuid: z.string().nullable().optional().default(null),
+      teamId: z.number().int(),
+      championId: z.number().int(),
+      spell1Id: z.number().int().optional().default(0),
+      spell2Id: z.number().int().optional().default(0),
+      riotId: z.string().optional(),
+      bot: z.boolean().optional().default(false),
+      perks: z
+        .looseObject({
+          perkIds: z.array(z.number().int()).optional().default([]),
+          perkStyle: z.number().int().optional(),
+          perkSubStyle: z.number().int().optional(),
+        })
+        .optional(),
+    }),
+  ),
+  bannedChampions: z
+    .array(z.looseObject({ championId: z.number().int(), teamId: z.number().int() }))
+    .optional()
+    .default([]),
+});
+
+export type ActiveGameDto = z.infer<typeof activeGameSchema>;
 export type RiotAccountDto = z.infer<typeof riotAccountSchema>;
 export type SummonerDto = z.infer<typeof summonerSchema>;
 export type LeagueEntryDto = z.infer<typeof leagueEntrySchema>;

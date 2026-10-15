@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { PageShell } from "@/components/layout/page-shell";
+import { LiveBanner } from "@/components/live/live-banner";
 import { MatchList } from "@/components/matches/match-list";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
 import { ChampionRecords } from "@/components/profile/champion-records";
@@ -105,6 +107,12 @@ export default async function DashboardPage({
         />
       }
     >
+      {/* Si le joueur est en partie, un bandeau y mène ; le reste n'attend pas Riot. */}
+      {selected ? (
+        <Suspense fallback={null}>
+          <LiveBanner accountId={selected.id} platform={selected.platform} puuid={selected.puuid} />
+        </Suspense>
+      ) : null}
       {/* Colonne étroite : l'état du compte. Colonne large : les parties.
           Sur téléphone, les parties passent en premier. */}
       <div className="grid items-start gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
