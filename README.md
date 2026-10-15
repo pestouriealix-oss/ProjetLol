@@ -19,12 +19,12 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 
 ## Installation
 
-Prérequis : Node.js 22 ou plus, Docker (pour PostgreSQL).
+Prérequis : Node.js 22 ou plus, Docker Desktop ouvert (pour PostgreSQL).
 
 ```bash
 npm install
-cp .env.example .env        # puis remplis AUTH_SECRET : npx auth secret
-docker compose up -d        # démarre PostgreSQL
+cp .env.example .env        # puis remplis AUTH_SECRET : openssl rand -base64 33
+docker compose up -d        # démarre PostgreSQL (port 5433)
 npm run db:migrate          # crée les tables
 npm run dev                 # http://localhost:3000
 ```

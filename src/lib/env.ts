@@ -9,7 +9,7 @@ const optional = z
 
 const schema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requise"),
-  AUTH_SECRET: z.string().min(1, "AUTH_SECRET est requise (npx auth secret)"),
+  AUTH_SECRET: z.string().min(1, "AUTH_SECRET est requise (openssl rand -base64 33)"),
   AUTH_DISCORD_ID: optional,
   AUTH_DISCORD_SECRET: optional,
   RIOT_API_KEY: optional,
