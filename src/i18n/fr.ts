@@ -54,6 +54,29 @@ export const fr = {
       nameTooLong: "Le pseudo ne peut pas dépasser 32 caractères.",
       oauth: "La connexion avec Discord a échoué. Réessaie.",
       unknown: "La connexion a échoué. Réessaie dans un instant.",
+      unavailable: "Le service ne répond pas pour l'instant. Réessaie dans un instant.",
+    },
+    howItWorks: {
+      title: "Comment ça marche",
+      steps: [
+        {
+          when: "Avant la partie",
+          title: "Envoie ta draft",
+          body: "Une capture de la sélection des champions suffit, rien à recopier.",
+        },
+        {
+          when: "Pendant le chargement",
+          title: "Lis ta fiche",
+          body: "Comment ton équipe gagne, où aller et quand forcer. Plusieurs options : c'est toi qui choisis.",
+        },
+        {
+          when: "Après la partie",
+          title: "Vois ce qui revient",
+          body: "Tes parties classées se synchronisent : ce qui marche, et ce qui te coûte des parties.",
+        },
+      ],
+      you: "Toi",
+      options: ["Envahir", "Protéger", "Pousser"],
     },
   },
   sheet: {
