@@ -1,7 +1,8 @@
-import { Settings } from "lucide-react";
+import { Radio, Settings } from "lucide-react";
 
 import { RoleGlyph } from "@/components/map/role-glyph";
 import { AccountSwitcher } from "@/components/profile/account-switcher";
+import { ProfileAvatar } from "@/components/profile/profile-avatar";
 import { SyncButton } from "@/components/profile/sync-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,9 @@ export type ProfileAccount = {
   platform: Platform;
   roles: Role[];
   verified: boolean;
+  /** Icône d'invocateur (déjà résolue en adresse Data Dragon) et niveau, après une synchronisation. */
+  iconUrl: string | null;
+  level: number | null;
 };
 
 /**
@@ -39,12 +43,11 @@ export function ProfileHeader({
     <header className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-          <div
-            aria-hidden
-            className="flex size-14 shrink-0 items-center justify-center rounded-panel border border-line-strong bg-raised display text-3xl text-ink sm:size-18 sm:text-4xl"
-          >
-            {account.gameName.trim().charAt(0).toUpperCase()}
-          </div>
+          <ProfileAvatar
+            gameName={account.gameName}
+            iconUrl={account.iconUrl}
+            level={account.level}
+          />
           <div className="min-w-0">
             <p className="display text-base tracking-[0.06em] text-ink-muted">{copy.title}</p>
             <h1 className="display-name text-3xl break-words text-ink sm:text-4xl">
@@ -70,6 +73,12 @@ export function ProfileHeader({
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <AccountSwitcher basePath="/dashboard" accounts={accounts} currentId={account.id} />
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/live?compte=${account.id}`}>
+              <Radio aria-hidden />
+              {t.live.open}
+            </Link>
+          </Button>
           <Button asChild variant="ghost" size="icon" aria-label={copy.manage} title={copy.manage}>
             <Link href="/settings">
               <Settings aria-hidden />

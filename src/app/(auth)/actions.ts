@@ -93,7 +93,10 @@ export async function registerAction(
     if (error instanceof EmailTakenError) {
       return refuse({ fieldErrors: { email: t.auth.errors.emailTaken } });
     }
-    throw error;
+    // Base de données injoignable ou autre panne : un message clair plutôt
+    // qu'un écran d'erreur, et la cause complète dans les journaux du serveur.
+    console.error("Inscription impossible :", error);
+    return refuse({ error: t.auth.errors.unavailable });
   }
 
   try {

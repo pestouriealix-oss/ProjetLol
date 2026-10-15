@@ -1,4 +1,5 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
+import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
 import type { ChampionAssets } from "@/lib/ddragon/champions";
@@ -12,13 +13,26 @@ const copy = t.dashboard.champions;
 export function ChampionRecords({
   records,
   champions,
+  statsHref,
 }: {
   records: ChampionRecord[];
   champions: ChampionAssets | null;
+  /** Lien vers la page de statistiques complètes du compte. */
+  statsHref?: string;
 }) {
   return (
     <Panel className="p-5">
-      <h2 className="display text-xl text-ink">{copy.title}</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="display text-xl text-ink">{copy.title}</h2>
+        {statsHref && records.length > 0 ? (
+          <Link
+            href={statsHref}
+            className="shrink-0 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
+          >
+            {t.stats.seeAll}
+          </Link>
+        ) : null}
+      </div>
       {records.length === 0 ? (
         <p className="pt-3 text-ink-muted">{copy.empty}</p>
       ) : (

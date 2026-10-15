@@ -18,9 +18,9 @@ export default function NewsLoading() {
           <Skeleton className="h-[9.875rem] rounded-panel" />
           <div className="flex flex-col gap-3">
             <p className="display text-2xl text-ink">{copy.previous}</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-[3.75rem] rounded-panel" />
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-5">
+              {Array.from({ length: 15 }, (_, index) => (
+                <Skeleton key={index} className="h-12 rounded-control" />
               ))}
             </div>
           </div>

@@ -11,7 +11,13 @@ import * as schema from "./schema";
 // chaque modification.
 const globalForDb = globalThis as typeof globalThis & { __dbPool?: Pool };
 
-const pool = globalForDb.__dbPool ?? new Pool({ connectionString: env.DATABASE_URL });
+const pool =
+  globalForDb.__dbPool ??
+  new Pool({
+    connectionString: env.DATABASE_URL,
+    // Une base injoignable doit échouer vite, pas laisser la page tourner sans fin.
+    connectionTimeoutMillis: 5_000,
+  });
 
 if (process.env.NODE_ENV !== "production") {
   globalForDb.__dbPool = pool;

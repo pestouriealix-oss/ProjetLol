@@ -18,6 +18,10 @@ const schema = z.object({
   RIOT_API_BASE_URL: optional,
   /** Autre adresse pour Data Dragon (miroir, tests). Par défaut, celle de Riot. */
   DDRAGON_BASE_URL: optional,
+  /** Clé de PandaScore (onglet Esport). Sans elle, l'onglet explique qu'elle manque. */
+  PANDASCORE_TOKEN: optional,
+  /** Autre adresse pour PandaScore (tests). */
+  PANDASCORE_BASE_URL: optional,
 });
 
 const parsed = schema.safeParse(process.env);

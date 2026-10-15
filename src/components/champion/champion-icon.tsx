@@ -19,7 +19,8 @@ export function ChampionIcon({
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const box = cn("size-10 shrink-0 overflow-hidden rounded-control bg-raised", className);
+  // `block` : la taille tient même hors d'un conteneur flex (dans une liste, par exemple).
+  const box = cn("block size-10 shrink-0 overflow-hidden rounded-control bg-raised", className);
 
   if (!src || failed) {
     return (

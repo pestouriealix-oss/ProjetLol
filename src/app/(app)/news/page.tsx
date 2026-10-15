@@ -63,7 +63,8 @@ export default async function NewsPage() {
                   <h2 id="previous-title" className="display text-2xl text-ink">
                     {copy.previous}
                   </h2>
-                  <ul className="grid gap-2 sm:grid-cols-2">
+                  {/* Une grille serrée : vingt patchs ne doivent pas faire vingt grandes cartes. */}
+                  <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-5">
                     {previous.map((patch) => (
                       <li key={patch.id}>
                         <a
@@ -71,14 +72,12 @@ export default async function NewsPage() {
                           {...externalLink}
                           aria-label={copy.notesFor(patch.id)}
                           title={copy.opensRiot}
-                          className="group flex items-center justify-between gap-4 rounded-panel border border-line bg-surface px-5 py-3.5 transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:bg-raised"
+                          className="group flex h-12 items-center justify-between gap-2 rounded-control border border-line bg-surface pr-2.5 pl-3.5 transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:bg-raised"
                         >
-                          <span className="display text-2xl text-ink tabular">
-                            {copy.patch(patch.id)}
-                          </span>
+                          <span className="display text-xl text-ink tabular">{patch.id}</span>
                           <ArrowUpRight
                             aria-hidden
-                            className="size-5 text-ink-faint transition-[translate,color] duration-(--duration-base) ease-(--ease-spring) group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
+                            className="size-4 shrink-0 text-ink-faint transition-[translate,color] duration-(--duration-base) ease-(--ease-spring) group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
                           />
                         </a>
                       </li>

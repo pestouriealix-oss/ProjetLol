@@ -12,6 +12,12 @@ export const riotAccountSchema = z.object({
   tagLine: z.string(),
 });
 
+export const summonerSchema = z.looseObject({
+  puuid: z.string(),
+  profileIconId: z.number().int(),
+  summonerLevel: z.number().int(),
+});
+
 export const leagueEntrySchema = z.looseObject({
   queueType: z.string(),
   tier: z.string(),
@@ -54,7 +60,125 @@ export const matchSchema = z.looseObject({
   }),
 });
 
+/** Spectator-V5 : la partie en cours d'un joueur. */
+export const activeGameSchema = z.looseObject({
+  gameId: z.number(),
+  gameQueueConfigId: z.number().int().optional().default(0),
+  gameMode: z.string().optional().default(""),
+  /** Début de la partie (millisecondes) ; 0 tant que le chargement n'est pas fini. */
+  gameStartTime: z.number().optional().default(0),
+  gameLength: z.number().optional().default(0),
+  participants: z.array(
+    z.looseObject({
+      puuid: z.string().nullable().optional().default(null),
+      teamId: z.number().int(),
+      championId: z.number().int(),
+      spell1Id: z.number().int().optional().default(0),
+      spell2Id: z.number().int().optional().default(0),
+      riotId: z.string().optional(),
+      bot: z.boolean().optional().default(false),
+      perks: z
+        .looseObject({
+          perkIds: z.array(z.number().int()).optional().default([]),
+          perkStyle: z.number().int().optional(),
+          perkSubStyle: z.number().int().optional(),
+        })
+        .optional(),
+    }),
+  ),
+  bannedChampions: z
+    .array(z.looseObject({ championId: z.number().int(), teamId: z.number().int() }))
+    .optional()
+    .default([]),
+});
+
+export type ActiveGameDto = z.infer<typeof activeGameSchema>;
 export type RiotAccountDto = z.infer<typeof riotAccountSchema>;
+export type SummonerDto = z.infer<typeof summonerSchema>;
 export type LeagueEntryDto = z.infer<typeof leagueEntrySchema>;
 export type MatchDto = z.infer<typeof matchSchema>;
 export type MatchParticipantDto = z.infer<typeof matchParticipantSchema>;
+
+/**
+ * Lecture détaillée d'une partie stockée, pour la page de détail : les dix
+ * joueurs avec leurs objets, sorts et runes, et les objectifs des équipes.
+ * Les champs absents des anciennes parties prennent une valeur neutre.
+ */
+const int = z.number().int().optional().default(0);
+
+const objectiveSchema = z.looseObject({ kills: int }).optional().default({ kills: 0 });
+
+export const matchDetailParticipantSchema = z.looseObject({
+  puuid: z.string(),
+  teamId: z.number().int(),
+  championName: z.string(),
+  teamPosition: z.string().optional().default(""),
+  riotIdGameName: z.string().optional(),
+  riotIdTagline: z.string().optional(),
+  win: z.boolean(),
+  champLevel: int,
+  kills: int,
+  deaths: int,
+  assists: int,
+  totalMinionsKilled: int,
+  neutralMinionsKilled: int,
+  goldEarned: int,
+  totalDamageDealtToChampions: int,
+  totalDamageTaken: int,
+  visionScore: int,
+  wardsPlaced: int,
+  controlWardsPlaced: int,
+  item0: int,
+  item1: int,
+  item2: int,
+  item3: int,
+  item4: int,
+  item5: int,
+  item6: int,
+  summoner1Id: int,
+  summoner2Id: int,
+  perks: z
+    .looseObject({
+      styles: z.array(
+        z.looseObject({
+          description: z.string().optional(),
+          style: z.number().int(),
+          selections: z.array(z.looseObject({ perk: z.number().int() })),
+        }),
+      ),
+    })
+    .optional(),
+});
+
+export const matchDetailTeamSchema = z.looseObject({
+  teamId: z.number().int(),
+  win: z.boolean(),
+  objectives: z
+    .looseObject({
+      champion: objectiveSchema,
+      tower: objectiveSchema,
+      inhibitor: objectiveSchema,
+      dragon: objectiveSchema,
+      baron: objectiveSchema,
+      riftHerald: objectiveSchema,
+      horde: objectiveSchema,
+      atakhan: objectiveSchema,
+    })
+    .optional(),
+});
+
+export const matchDetailSchema = z.looseObject({
+  metadata: z.looseObject({ matchId: z.string().min(1) }),
+  info: z.looseObject({
+    gameCreation: z.number(),
+    gameStartTimestamp: z.number().optional(),
+    gameDuration: z.number(),
+    gameVersion: z.string(),
+    queueId: z.number().int(),
+    participants: z.array(matchDetailParticipantSchema).min(1),
+    teams: z.array(matchDetailTeamSchema).optional().default([]),
+  }),
+});
+
+export type MatchDetailDto = z.infer<typeof matchDetailSchema>;
+export type MatchDetailParticipantDto = z.infer<typeof matchDetailParticipantSchema>;

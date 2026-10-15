@@ -145,3 +145,120 @@ export async function listChampionRecords(
     .orderBy(desc(games), participations.championName)
     .limit(options.limit);
 }
+
+/**
+ * Une partie jouée par l'un des comptes de l'utilisateur, avec le compte qui
+ * l'a jouée. Renvoie `null` si aucun de ses comptes n'y a participé : on ne
+ * montre jamais une partie à quelqu'un qui n'y était pas.
+ */
+export async function findPlayedMatch(
+  userId: string,
+  matchId: string,
+): Promise<{ details: unknown; puuid: string; accountId: string } | null> {
+  const [row] = await db
+    .select({
+      details: matches.details,
+      puuid: riotAccounts.puuid,
+      accountId: riotAccounts.id,
+    })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(and(eq(riotAccounts.userId, userId), eq(matches.id, matchId)))
+    .orderBy(desc(riotAccounts.isPrimary))
+    .limit(1);
+  if (!row?.puuid) return null;
+  return { details: row.details, puuid: row.puuid, accountId: row.accountId };
+}
+
+/** File de parties à prendre en compte : toutes les classées, ou une seule. */
+export type QueueFilter = "ALL" | "SOLO" | "FLEX";
+
+const queueCondition = (queue: QueueFilter) =>
+  queue === "SOLO"
+    ? eq(matches.queueId, 420)
+    : queue === "FLEX"
+      ? eq(matches.queueId, 440)
+      : inArray(matches.queueId, [420, 440]);
+
+/** Totaux d'un groupe de parties, à partir desquels l'interface calcule moyennes et taux. */
+const totals = {
+  games: sql<number>`count(*)::int`,
+  wins: sql<number>`count(*) filter (where ${participations.win})::int`,
+  kills: sql<number>`sum(${participations.kills})::int`,
+  deaths: sql<number>`sum(${participations.deaths})::int`,
+  assists: sql<number>`sum(${participations.assists})::int`,
+  cs: sql<number>`sum(${participations.cs})::int`,
+  damage: sql<number>`sum(${participations.damageToChampions})::bigint::float8`,
+  vision: sql<number>`sum(${participations.visionScore})::int`,
+  killParticipation: sql<number>`avg(${participations.killParticipation})::float8`,
+  seconds: sql<number>`sum(${matches.durationSeconds})::int`,
+};
+
+export type PerformanceTotals = {
+  games: number;
+  wins: number;
+  kills: number;
+  deaths: number;
+  assists: number;
+  cs: number;
+  damage: number;
+  vision: number;
+  killParticipation: number;
+  seconds: number;
+};
+
+/** Performances par champion, du plus joué au moins joué. */
+export async function listChampionStats(
+  userId: string,
+  accountId: string,
+  queue: QueueFilter,
+): Promise<(PerformanceTotals & { championName: string })[]> {
+  return db
+    .select({ championName: participations.championName, ...totals })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(and(ownedAccount(userId, accountId), queueCondition(queue)))
+    .groupBy(participations.championName)
+    .orderBy(desc(count()), participations.championName);
+}
+
+/** Performances par rôle (les parties sans poste attribué par Riot sont à part, rôle `null`). */
+export async function listRoleStats(
+  userId: string,
+  accountId: string,
+  queue: QueueFilter,
+): Promise<(PerformanceTotals & { role: PlayedMatch["role"] })[]> {
+  return db
+    .select({ role: participations.role, ...totals })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(and(ownedAccount(userId, accountId), queueCondition(queue)))
+    .groupBy(participations.role)
+    .orderBy(desc(count()));
+}
+
+/** Bilan contre chaque champion adverse rencontré au même poste. */
+export async function listMatchups(
+  userId: string,
+  accountId: string,
+  queue: QueueFilter,
+): Promise<{ opponent: string; games: number; wins: number }[]> {
+  const opponent = sql<string>`${participations.stats}->>'opponentChampion'`;
+  return db
+    .select({
+      opponent,
+      games: sql<number>`count(*)::int`,
+      wins: sql<number>`count(*) filter (where ${participations.win})::int`,
+    })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(
+      and(ownedAccount(userId, accountId), queueCondition(queue), sql`${opponent} is not null`),
+    )
+    .groupBy(opponent)
+    .orderBy(desc(count()));
+}

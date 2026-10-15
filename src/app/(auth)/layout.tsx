@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
+import { HowItWorks } from "@/components/auth/how-it-works";
 import { Wordmark } from "@/components/brand/wordmark";
-import { SheetDemo } from "@/components/draft/sheet-demo";
 import { Entrance } from "@/components/layout/entrance";
 import { LegalFooter } from "@/components/layout/legal-footer";
 import { t } from "@/i18n/fr";
@@ -9,8 +9,8 @@ import { t } from "@/i18n/fr";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <Entrance className="flex min-h-dvh flex-col">
-      {/* Entre 1024 et 1280 px, la colonne de gauche se resserre pour laisser à
-          la fiche sa pleine largeur. */}
+      {/* Entre 1024 et 1280 px, la colonne de gauche se resserre pour laisser au
+          parcours sa pleine largeur. */}
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-x-12 gap-y-14 px-4 pt-8 pb-16 group-data-entering/shell:shell-rise sm:px-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:pt-12 xl:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] xl:gap-x-24">
         <main id="contenu" className="flex flex-col">
           <Wordmark />
@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <div className="mt-10">{children}</div>
         </main>
         <aside className="flex justify-center lg:sticky lg:top-10 lg:justify-end">
-          <SheetDemo />
+          <HowItWorks />
         </aside>
       </div>
       <LegalFooter />

@@ -39,3 +39,56 @@ export function formatRelative(date: Date, now: Date = new Date()): string {
   }
   return "à l'instant";
 }
+
+/** Fuseau des heures affichées pour l'esport (l'application parle aux joueurs de France). */
+export const DISPLAY_TIME_ZONE = "Europe/Paris";
+
+/** « 18:00 », à l'heure de Paris. */
+export function formatTime(date: Date, timeZone: string = DISPLAY_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("fr-FR", { timeZone, hour: "2-digit", minute: "2-digit" }).format(
+    date,
+  );
+}
+
+/** « 15 oct. », à l'heure de Paris. */
+export function formatShortDate(date: Date, timeZone: string = DISPLAY_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("fr-FR", { timeZone, day: "numeric", month: "short" }).format(
+    date,
+  );
+}
+
+/** « 15 octobre », à l'heure de Paris. */
+export function formatLongDate(date: Date, timeZone: string = DISPLAY_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("fr-FR", { timeZone, day: "numeric", month: "long" }).format(date);
+}
+
+/**
+ * Titre d'un jour de calendrier (« 2026-10-15 ») : « Aujourd'hui », « Demain »,
+ * « Hier », sinon « Jeudi 15 octobre ».
+ */
+export function formatDayHeading(
+  day: string,
+  now: Date,
+  words: { today: string; tomorrow: string; yesterday: string },
+  timeZone: string = DISPLAY_TIME_ZONE,
+): string {
+  const key = (date: Date) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
+  const shift = (days: number) => key(new Date(now.getTime() + days * 24 * 3600 * 1000));
+  if (day === key(now)) return words.today;
+  if (day === shift(1)) return words.tomorrow;
+  if (day === shift(-1)) return words.yesterday;
+  // Midi UTC : le même jour calendaire quel que soit le fuseau d'Europe.
+  const label = new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date(`${day}T12:00:00Z`));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}

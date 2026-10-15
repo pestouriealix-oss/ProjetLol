@@ -1,14 +1,19 @@
 import type { Platform } from "@/lib/config";
 
 import type { RiotClient } from "./client";
+import { RiotApiError } from "./errors";
 import {
+  activeGameSchema,
   leagueEntriesSchema,
   matchIdsSchema,
   matchSchema,
   riotAccountSchema,
+  summonerSchema,
+  type ActiveGameDto,
   type LeagueEntryDto,
   type MatchDto,
   type RiotAccountDto,
+  type SummonerDto,
 } from "./schemas";
 
 /** Les appels à l'API Riot dont l'application a besoin, et rien d'autre. */
@@ -26,6 +31,30 @@ export function createRiotApi(client: RiotClient) {
         { kind: "account", platform },
         `/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`,
         riotAccountSchema,
+      );
+    },
+
+    /** Spectator-V5 : la partie que le joueur est en train de jouer, ou `null`. */
+    async getActiveGame(platform: Platform, puuid: string): Promise<ActiveGameDto | null> {
+      try {
+        return await client.get(
+          { kind: "platform", platform },
+          `/lol/spectator/v5/active-games/by-summoner/${encodeURIComponent(puuid)}`,
+          activeGameSchema,
+        );
+      } catch (error) {
+        // Riot répond « introuvable » quand le joueur n'est pas en partie.
+        if (error instanceof RiotApiError && error.kind === "not_found") return null;
+        throw error;
+      }
+    },
+
+    /** Summoner-V4 : icône d'invocateur et niveau du joueur. */
+    getSummoner(platform: Platform, puuid: string): Promise<SummonerDto> {
+      return client.get(
+        { kind: "platform", platform },
+        `/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(puuid)}`,
+        summonerSchema,
       );
     },
 

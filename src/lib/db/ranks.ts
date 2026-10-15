@@ -52,3 +52,20 @@ export async function listLatestRanks(userId: string, accountId: string): Promis
     .orderBy(rankSnapshots.queue, desc(rankSnapshots.takenAt));
   return rows.map((row) => row.snapshot);
 }
+
+/** Tous les relevés d'une file, du plus ancien au plus récent (au plus `limit`, les plus récents). */
+export async function listRankHistory(
+  userId: string,
+  accountId: string,
+  queue: string,
+  options: { limit: number },
+): Promise<RankSnapshot[]> {
+  const rows = await db
+    .select({ snapshot: rankSnapshots })
+    .from(rankSnapshots)
+    .innerJoin(riotAccounts, eq(rankSnapshots.riotAccountId, riotAccounts.id))
+    .where(and(ownedAccount(userId, accountId), eq(rankSnapshots.queue, queue)))
+    .orderBy(desc(rankSnapshots.takenAt))
+    .limit(options.limit);
+  return rows.map((row) => row.snapshot).reverse();
+}
