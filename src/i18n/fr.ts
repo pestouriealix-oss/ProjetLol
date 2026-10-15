@@ -308,7 +308,6 @@ export const fr = {
     title: "Actus",
     intro: "Les patchs du jeu, dans l'ordre, avec un lien vers les notes officielles de Riot.",
     current: "Patch actuel",
-    patch: (id: string) => `Patch ${id}`,
     readNotes: "Lire les notes de patch",
     notesFor: (id: string) => `Notes du patch ${id}`,
     previous: "Patchs précédents",

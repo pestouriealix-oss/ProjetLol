@@ -10,7 +10,9 @@ export default function Page() {
     <>
       <h1 className="display text-4xl text-ink sm:text-5xl">{t.legal.privacy}</h1>
       <div>
-        <Badge tone="warn">{t.legal.draftNotice}</Badge>
+        <Badge tone="warn" className="h-auto min-h-6 py-1 whitespace-normal">
+          {t.legal.draftNotice}
+        </Badge>
       </div>
       <p className="text-lg text-ink-muted">{t.legal.privacyBody}</p>
     </>

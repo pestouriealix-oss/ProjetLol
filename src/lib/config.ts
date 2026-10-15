@@ -2,7 +2,7 @@
  * Configuration centrale de l'application.
  * Le nom du produit n'est pas encore arrêté : il vit ici et nulle part ailleurs.
  */
-export const APP_NAME = "Coach";
+export const APP_NAME = "Kairos";
 
 export const ROLES = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"] as const;
 export type Role = (typeof ROLES)[number];
