@@ -118,7 +118,11 @@ export default async function DashboardPage({
       <div className="grid items-start gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="flex flex-col gap-4 max-lg:order-2">
           <RankCard ranks={ranks} synced={lastSyncedAt !== null} />
-          <ChampionRecords records={records} champions={champions} />
+          <ChampionRecords
+            records={records}
+            champions={champions}
+            statsHref={`/stats?compte=${account.id}`}
+          />
         </div>
 
         <section aria-labelledby="recent-title" className="flex min-w-0 flex-col gap-4">

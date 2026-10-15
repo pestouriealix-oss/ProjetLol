@@ -141,6 +141,22 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
       "RANKED_SOLO_5x5 EMERALD III 42",
     ]);
 
+    const [leeSin] = await matchesApi.listChampionStats(alice, account.id, "ALL");
+    expect(leeSin).toMatchObject({ championName: "LeeSin", games: 3, wins: 2, cs: 540 });
+    expect(await matchesApi.listChampionStats(alice, account.id, "FLEX")).toEqual([]);
+    expect(await matchesApi.listRoleStats(alice, account.id, "SOLO")).toMatchObject([
+      { role: "JUNGLE", games: 3 },
+    ]);
+    expect(await matchesApi.listMatchups(alice, account.id, "ALL")).toEqual([
+      { opponent: "Ivern", games: 3, wins: 2 },
+    ]);
+    const history = await ranksApi.listRankHistory(alice, account.id, "RANKED_SOLO_5x5", {
+      limit: 10,
+    });
+    expect(history.map((rank) => `${rank.tier} ${rank.division} ${rank.lp}`)).toEqual([
+      "EMERALD III 42",
+    ]);
+
     const champions = await matchesApi.listChampionRecords(alice, account.id, { limit: 5 });
     expect(champions).toEqual([
       { championName: "LeeSin", games: 3, wins: 2, kills: 21, deaths: 6, assists: 27 },
@@ -231,6 +247,12 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
     });
     expect(await matchesApi.listPlayedMatches(bob, account.id, { limit: 10 })).toEqual([]);
     expect(await matchesApi.listChampionRecords(bob, account.id, { limit: 10 })).toEqual([]);
+    expect(await matchesApi.listChampionStats(bob, account.id, "ALL")).toEqual([]);
+    expect(await matchesApi.listRoleStats(bob, account.id, "ALL")).toEqual([]);
+    expect(await matchesApi.listMatchups(bob, account.id, "ALL")).toEqual([]);
+    expect(
+      await ranksApi.listRankHistory(bob, account.id, "RANKED_SOLO_5x5", { limit: 10 }),
+    ).toEqual([]);
     expect(await matchesApi.listKnownMatchIds(bob, account.id, ids(41))).toEqual([]);
     expect(await matchesApi.findPlayedMatch(bob, ids(41)[0]!)).toBeNull();
     expect(await matchesApi.findPlayedMatch(alice, ids(41)[0]!)).toMatchObject({
