@@ -4,6 +4,7 @@ import {
   EXCERPT_LENGTH,
   decodeEntities,
   frenchSpacing,
+  keepRecent,
   mergeArticles,
   parseFeed,
   plainText,
@@ -174,6 +175,34 @@ describe("mise en forme du texte", () => {
   it("coupe à la fin d'un mot", () => {
     expect(truncate("Karmine Corp gagne la finale", 16)).toBe("Karmine Corp…");
     expect(truncate("Court", 16)).toBe("Court");
+  });
+});
+
+describe("keepRecent", () => {
+  const at = (date: string | null): Article => ({
+    url: date ?? "sans-date",
+    title: "",
+    excerpt: "",
+    publishedAt: date ? new Date(date) : null,
+    imageUrl: null,
+    source: { id: "en", name: "Site EN", lang: "en" },
+  });
+
+  it("ne garde que les articles de moins de deux semaines, datés", () => {
+    const now = new Date("2026-10-19T12:00:00Z");
+    const kept = keepRecent(
+      [
+        at("2026-10-19T08:00:00Z"),
+        at("2026-10-06T12:00:00Z"),
+        at("2026-08-12T12:00:00Z"),
+        at(null),
+      ],
+      now,
+    );
+    expect(kept.map((article) => article.url)).toEqual([
+      "2026-10-19T08:00:00Z",
+      "2026-10-06T12:00:00Z",
+    ]);
   });
 });
 

@@ -48,4 +48,18 @@ describe("client PandaScore", () => {
       await kind(createEsportApi({ token: "x", fetch: respond(200, { pas: "une liste" }) })),
     ).toBe("unavailable");
   });
+
+  it("rend une liste vide quand une étape n'a pas encore de classement, d'arbre ou de matchs", async () => {
+    const api = createEsportApi({ token: "x", fetch: respond(404, { error: "Not found" }) });
+    expect(await api.tournamentStandings(1)).toEqual([]);
+    expect(await api.tournamentBracket(1)).toEqual([]);
+    expect(await api.tournamentMatches(1)).toEqual([]);
+  });
+
+  it("garde le 404 comme une erreur pour la liste des compétitions", async () => {
+    const api = createEsportApi({ token: "x", fetch: respond(404, {}) });
+    await expect(api.listTournaments("running", ["s"])).rejects.toThrow(
+      "PandaScore a répondu 404 pour /lol/tournaments/running.",
+    );
+  });
 });

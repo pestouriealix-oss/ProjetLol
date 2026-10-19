@@ -44,6 +44,8 @@ export function createEsportApi({
     path: string,
     schema: Schema,
     query: Record<string, string | number> = {},
+    /** Valeur rendue quand PandaScore répond 404 (donnée pas encore publiée). */
+    whenMissing?: z.infer<Schema>,
   ): Promise<z.infer<Schema>> => {
     if (!token) throw new EsportApiError("missing_key", "PANDASCORE_TOKEN n'est pas définie.");
 
@@ -69,8 +71,12 @@ export function createEsportApi({
     if (response.status === 429) {
       throw new EsportApiError("rate_limited", "Limite d'appels de PandaScore atteinte.");
     }
+    if (response.status === 404 && whenMissing !== undefined) return whenMissing;
     if (!response.ok) {
-      throw new EsportApiError("unavailable", `PandaScore a répondu ${response.status}.`);
+      throw new EsportApiError(
+        "unavailable",
+        `PandaScore a répondu ${response.status} pour ${path}.`,
+      );
     }
 
     let body: unknown;
@@ -114,18 +120,24 @@ export function createEsportApi({
     },
 
     tournamentMatches(tournamentId: number): Promise<EsportMatch[]> {
-      return get(`/tournaments/${tournamentId}/matches`, matchesSchema, {
-        sort: "scheduled_at",
-        per_page: 100,
-      });
+      return get(
+        `/tournaments/${tournamentId}/matches`,
+        matchesSchema,
+        { sort: "scheduled_at", per_page: 100 },
+        [],
+      );
     },
 
+    /**
+     * Classement d'une étape. PandaScore répond 404 tant qu'il n'existe pas
+     * (étape pas commencée, ou étape sans classement) : la liste est alors vide.
+     */
     tournamentStandings(tournamentId: number): Promise<Standing[]> {
-      return get(`/tournaments/${tournamentId}/standings`, standingsSchema, { per_page: 50 });
+      return get(`/tournaments/${tournamentId}/standings`, standingsSchema, { per_page: 50 }, []);
     },
 
     tournamentBracket(tournamentId: number): Promise<BracketMatch[]> {
-      return get(`/tournaments/${tournamentId}/brackets`, bracketSchema, { per_page: 100 });
+      return get(`/tournaments/${tournamentId}/brackets`, bracketSchema, { per_page: 100 }, []);
     },
   };
 }

@@ -3,7 +3,7 @@ import "server-only";
 import { APP_NAME } from "@/lib/config";
 import { env } from "@/lib/env";
 
-import { mergeArticles, parseFeed, toArticles, type Article } from "./feed";
+import { keepRecent, mergeArticles, parseFeed, toArticles, type Article } from "./feed";
 import { NEWS_SOURCES, type NewsSource } from "./sources";
 
 export type { Article } from "./feed";
@@ -47,18 +47,18 @@ async function loadSource(source: NewsSource): Promise<Article[]> {
 }
 
 /**
- * Les derniers articles de toutes les sources. Une source qui ne répond pas
- * n'empêche pas d'afficher les autres ; si aucune ne répond, la liste est vide
- * et toutes figurent dans `failed`.
+ * Les articles récents (moins de deux semaines) de toutes les sources. Une
+ * source qui ne répond pas n'empêche pas d'afficher les autres ; si aucune ne
+ * répond, la liste est vide et toutes figurent dans `failed`.
  */
-export async function listArticles(): Promise<ArticleList> {
+export async function listArticles(now: Date = new Date()): Promise<ArticleList> {
   const results = await Promise.allSettled(NEWS_SOURCES.map(loadSource));
   const lists: Article[][] = [];
   const failed: NewsSource[] = [];
   results.forEach((result, index) => {
     const source = NEWS_SOURCES[index]!;
     if (result.status === "fulfilled") {
-      lists.push(result.value.slice(0, PER_SOURCE_LIMIT));
+      lists.push(keepRecent(result.value, now).slice(0, PER_SOURCE_LIMIT));
     } else {
       console.error(`Flux d'articles indisponible : ${source.name}`, result.reason);
       failed.push(source);

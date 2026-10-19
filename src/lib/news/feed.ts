@@ -200,6 +200,24 @@ export function toArticles(source: NewsSource, items: FeedItem[]): Article[] {
   });
 }
 
+/** Au-delà de cet âge, un article n'est plus une actu : il n'est pas affiché. */
+export const MAX_ARTICLE_AGE_DAYS = 14;
+
+/**
+ * Les articles publiés depuis moins de `maxAgeDays` jours. Un article sans date
+ * lisible est écarté : rien ne garantit qu'il soit récent.
+ */
+export function keepRecent(
+  articles: Article[],
+  now: Date,
+  maxAgeDays: number = MAX_ARTICLE_AGE_DAYS,
+): Article[] {
+  const oldest = now.getTime() - maxAgeDays * 24 * 60 * 60 * 1000;
+  return articles.filter(
+    (article) => article.publishedAt !== null && article.publishedAt.getTime() >= oldest,
+  );
+}
+
 /**
  * Regroupe les articles de toutes les sources : du plus récent au plus ancien,
  * sans doublon (même adresse), dans la limite donnée.

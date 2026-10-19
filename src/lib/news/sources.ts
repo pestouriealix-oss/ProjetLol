@@ -22,10 +22,16 @@ export type NewsSource = {
 };
 
 /** Mots qui signalent un article sur League of Legends ou sa scène. */
-const LEAGUE_TOPICS =
+export const LEAGUE_TOPICS =
   /league of legends|\blol\b|\bworlds\b|\bmsi\b|\blfl\b|\blec\b|\blck\b|\blpl\b|karmine|\bfaker\b|\bT1\b/i;
 
 export const NEWS_SOURCES: readonly NewsSource[] = [
+  {
+    id: "dotesports-en",
+    name: "Dot Esports",
+    lang: "en",
+    feedUrl: "https://dotesports.com/league-of-legends/feed",
+  },
   {
     id: "dexerto-en",
     name: "Dexerto",
@@ -39,5 +45,11 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
     lang: "fr",
     feedUrl: "https://www.dexerto.fr/feed/",
     match: LEAGUE_TOPICS,
+  },
+  {
+    id: "journaldugeek-fr",
+    name: "Journal du Geek",
+    lang: "fr",
+    feedUrl: "https://www.journaldugeek.com/tag/league-of-legends/feed/",
   },
 ];

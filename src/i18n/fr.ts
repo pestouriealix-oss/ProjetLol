@@ -226,6 +226,11 @@ export const fr = {
     enemies: "Adversaires",
     you: "Toi",
     slot: "En attente",
+    board: {
+      caption: "Les champions de la partie, voie par voie",
+      role: "Rôle",
+      hint: "Les champions apparaîtront ici dès que tu colles ta capture.",
+    },
     sheet: {
       title: "Ta fiche",
       body: "Elle s'écrira ici pendant le chargement de la partie.",
@@ -449,9 +454,10 @@ export const fr = {
       readOn: (source: string) => `Lire sur ${source}`,
       opensOn: (source: string) => `S'ouvre sur ${source}`,
       langTag: { fr: "FR", en: "EN" },
-      emptyTitle: "Aucun article pour l'instant",
-      emptyBody: "Les sites suivis n'ont rien publié sur League of Legends récemment.",
-      emptyLanguageTitle: "Aucun article dans cette langue pour l'instant",
+      emptyTitle: "Rien de neuf pour l'instant",
+      emptyBody:
+        "Les sites suivis n'ont rien publié sur League of Legends ces deux dernières semaines.",
+      emptyLanguageTitle: "Rien de neuf dans cette langue pour l'instant",
       emptyLanguageBody: "Les articles dans les autres langues restent disponibles.",
       showAll: "Voir toutes les langues",
       errorTitle: "Les articles n'ont pas pu être chargés",
@@ -593,6 +599,10 @@ export const fr = {
     finished: "Terminée",
     dates: (from: string, to: string) => `Du ${from} au ${to}`,
     stages: "Étapes de la compétition",
+    pending: {
+      standings: "Le classement de cette étape apparaîtra après ses premiers matchs.",
+      bracket: "L'arbre de cette étape apparaîtra quand les affiches seront connues.",
+    },
     stageNames: {
       "play-in": "Play-in",
       swiss: "Phase suisse",

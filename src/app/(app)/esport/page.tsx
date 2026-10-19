@@ -139,10 +139,16 @@ export default async function EsportPage({ searchParams }: { searchParams: Espor
           ) : null}
 
           {content.kind === "bracket" ? (
-            <BracketView sections={layoutBracket(content.bracket)} />
+            content.bracket.length > 0 ? (
+              <BracketView sections={layoutBracket(content.bracket)} />
+            ) : (
+              <Pending>{copy.pending.bracket}</Pending>
+            )
           ) : null}
-          {content.kind === "standings" && content.standings.length > 0 ? (
-            isSwissStage(stage.name) ? (
+          {content.kind === "standings" ? (
+            content.standings.length === 0 ? (
+              <Pending>{copy.pending.standings}</Pending>
+            ) : isSwissStage(stage.name) ? (
               <SwissBoard groups={swissGroups(content.standings)} />
             ) : (
               <StandingsTable standings={content.standings} />
@@ -291,6 +297,15 @@ async function loadView(
     .slice(0, 8);
 
   return { competition, stages, stage, content, others };
+}
+
+/** Une étape dont le classement ou l'arbre n'est pas encore publié. */
+function Pending({ children }: { children: string }) {
+  return (
+    <p className="rounded-panel border border-dashed border-line-strong px-4 py-3 text-sm text-ink-muted">
+      {children}
+    </p>
+  );
 }
 
 function Message({ title, body }: { title: string; body: string }) {
