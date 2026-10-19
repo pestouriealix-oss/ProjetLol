@@ -128,6 +128,36 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await api.listRiotAccounts(erin)).toEqual([]);
   });
 
+  it("chaque utilisateur ne voit et ne compte que ses fiches de draft", async () => {
+    const drafts = await import("./draft-analyses");
+    const [bobAccount] = await api.listRiotAccounts(bob);
+    const analysis = {
+      patch: "16.20",
+      myChampion: "LeeSin",
+      myRole: "JUNGLE" as const,
+      allies: {},
+      enemies: {},
+      content: {},
+      promptVersion: "test@1",
+    };
+    // Alice ne peut pas rattacher sa fiche au compte Riot de Bob.
+    const aliceId = await drafts.createDraftAnalysis(alice, {
+      ...analysis,
+      riotAccountId: bobAccount?.id ?? null,
+    });
+    const bobId = await drafts.createDraftAnalysis(bob, { ...analysis, riotAccountId: null });
+
+    expect((await drafts.findDraftAnalysis(alice, aliceId))?.riotAccountId).toBeNull();
+    expect(await drafts.findDraftAnalysis(alice, bobId)).toBeNull();
+    expect(await drafts.findDraftAnalysis(bob, aliceId)).toBeNull();
+    expect((await drafts.listDraftAnalyses(alice, { limit: 10 })).map((row) => row.id)).toEqual([
+      aliceId,
+    ]);
+    const today = new Date(Date.now() - 60_000);
+    expect(await drafts.countDraftAnalysesSince(alice, today)).toBe(1);
+    expect(await drafts.countDraftAnalysesSince(bob, today)).toBe(1);
+  });
+
   it("refuse un second compte avec le même e-mail", async () => {
     const email = `test-dup-${randomUUID()}@example.test`;
     const first = await usersApi.createUserWithPassword({ email, name: null, passwordHash: "x" });

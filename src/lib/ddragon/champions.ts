@@ -18,6 +18,10 @@ const championsSchema = z.object({
 const ID_FIXES: Record<string, string> = { FiddleSticks: "Fiddlesticks" };
 
 export type ChampionAssets = {
+  /** Version de Data Dragon (« 16.20.1 ») : le patch en cours. */
+  version: string;
+  /** Tous les champions, triés par nom affiché. */
+  list: () => { id: string; name: string; iconUrl: string }[];
   /** Nom affiché du champion (« Lee Sin »), à défaut son identifiant. */
   name: (championId: string) => string;
   /** Portrait carré du champion, servi par Data Dragon. */
@@ -47,7 +51,16 @@ export async function getChampionAssets(): Promise<ChampionAssets | null> {
     const byKey = new Map(
       Object.values(data).flatMap((champion) => (champion.key ? [[champion.key, champion]] : [])),
     );
+    const sorted = Object.values(data)
+      .map((champion) => ({
+        id: champion.id,
+        name: champion.name,
+        iconUrl: `${BASE_URL}/cdn/${latest.version}/img/champion/${champion.id}.png`,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr"));
     return {
+      version: latest.version,
+      list: () => sorted,
       name: (id) => data[fix(id)]?.name ?? id,
       iconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/champion/${fix(id)}.png`,
       profileIconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/profileicon/${id}.png`,

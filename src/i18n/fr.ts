@@ -225,8 +225,34 @@ export const fr = {
     title: "Nouvelle game",
     soon: "Bientôt",
     capture: {
-      title: "Colle une capture de ta sélection des champions",
-      body: "Ctrl + V, ou dépose l'image ici. Les dix champions seront reconnus et placés dans le tableau.",
+      title: "Colle une capture de ta draft",
+      body: "Ctrl + V (ou Cmd + V), dépose l'image ici, ou choisis-la. Fin de sélection des champions ou écran de chargement.",
+      choose: "Choisir une image",
+      reading: "Lecture de la capture…",
+      read: (count: number) =>
+        count === 10
+          ? "Les dix champions sont placés. Vérifie, puis lance ta fiche."
+          : `${count} champion${count > 1 ? "s" : ""} placé${count > 1 ? "s" : ""} sur 10. Complète les cases vides en cliquant dessus.`,
+      unrecognized: (count: number) =>
+        `${count} champion${count > 1 ? "s" : ""} non reconnu${count > 1 ? "s" : ""} : choisis-le${count > 1 ? "s" : ""} à la main.`,
+      dropHere: "Dépose la capture ici",
+      errors: {
+        bad_image: "Cette image ne peut pas être lue. Utilise une capture PNG, JPEG ou WebP.",
+        not_a_draft:
+          "Ce n'est pas une sélection des champions ni un écran de chargement. Essaie une autre capture.",
+        too_many:
+          "Trop de captures envoyées en une heure. Remplis le tableau à la main en attendant.",
+        missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
+        invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",
+        rate_limited: "Le service de lecture est très demandé. Réessaie dans une minute.",
+        unavailable: "La lecture n'a pas abouti. Réessaie, ou remplis le tableau à la main.",
+        refused: "La capture n'a pas pu être analysée. Essaie une autre image.",
+        invalid_output: "La lecture a donné un résultat inutilisable. Réessaie.",
+        champions_unavailable:
+          "La liste des champions ne répond pas pour l'instant. Réessaie dans un instant.",
+        invalid_draft: "La draft est incomplète.",
+        quota: "Limite atteinte pour aujourd'hui.",
+      },
     },
     allies: "Ton équipe",
     enemies: "Adversaires",
@@ -235,17 +261,84 @@ export const fr = {
     board: {
       caption: "Les champions de la partie, voie par voie",
       role: "Rôle",
-      hint: "Les champions apparaîtront ici dès que tu colles ta capture.",
+      hint: "Clique sur une case pour choisir un champion, et sur un rôle pour dire lequel est le tien.",
+      readOnlyHint: "La draft telle qu'elle a été analysée.",
+      choose: (role: string, side: string) =>
+        `Choisir le champion ${side === "ours" ? "allié" : "adverse"} au poste ${role}`,
+      change: (champion: string) => `${champion}, changer`,
+      setMine: (role: string) => `Je joue ${role}`,
+      mine: (role: string) => `${role}, ton rôle`,
+      duplicate: (champion: string) => `${champion} est présent deux fois.`,
+    },
+    picker: {
+      title: "Choisir un champion",
+      search: "Rechercher",
+      placeholder: "Nom du champion",
+      empty: "Aucun champion ne correspond.",
+      clear: "Vider la case",
+      close: "Fermer",
+    },
+    analyse: {
+      action: "Écrire ma fiche",
+      writing: "Écriture…",
+      needs: "Il faut au moins ton champion et ton vis-à-vis.",
+      remaining: (count: number, limit: number) =>
+        `${count} fiche${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""} sur ${limit} (24 h)`,
+      saved: "Fiche enregistrée. Ouvre-la sur ton téléphone pendant le chargement :",
+      openSheet: "Ouvrir la fiche",
+      again: "Réessayer",
+      errors: {
+        quota: "Tu as atteint ta limite de fiches pour les dernières 24 heures.",
+        invalid_draft: "La draft est incomplète ou contient un champion en double.",
+        missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
+        invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",
+        rate_limited: "Le coach est très demandé. Réessaie dans une minute.",
+        unavailable: "La fiche n'a pas pu être écrite. Réessaie.",
+        refused: "Le coach n'a pas pu répondre pour cette draft.",
+        invalid_output: "La fiche reçue était incomplète. Réessaie.",
+        champions_unavailable:
+          "La liste des champions ne répond pas pour l'instant. Réessaie dans un instant.",
+        not_a_draft: "La draft est incomplète.",
+      },
+    },
+    noKey: {
+      title: "Le coach n'est pas encore branché",
+      body: "La clé de l'API Anthropic manque sur le serveur (ANTHROPIC_API_KEY). Tu peux déjà remplir le tableau à la main.",
     },
     sheet: {
       title: "Ta fiche",
-      body: "Elle s'écrira ici pendant le chargement de la partie.",
+      body: "Elle s'écrira ici dès que tu la lances, en quelques secondes.",
       items: [
         "Comment ton équipe gagne, et comment la leur gagne",
-        "Plusieurs plans de début de partie, tracés sur la carte",
-        "Qui est le plus fort, et à quel moment",
-        "Le danger principal à surveiller",
+        "Ton matchup en voie, et plusieurs façons de le jouer",
+        "Les moments où le rapport de force bascule",
+        "Ce qui te fait perdre le duel",
       ],
+      win: {
+        title: "Conditions de victoire",
+        ours: "Vous gagnez",
+        theirs: "Ils gagnent",
+      },
+      matchup: {
+        title: (champion: string) => `Ton matchup contre ${champion}`,
+        verdict: {
+          favorable: "Favorable",
+          even: "Équilibré",
+          unfavorable: "Défavorable",
+        },
+        keyMoments: "Moments clés",
+        options: "Façons de le jouer",
+        option: (index: number) => `Option ${index} : `,
+        watchOut: "À surveiller",
+      },
+      writing: "Le coach écrit ta fiche…",
+      patch: (patch: string) => `Patch ${patch}`,
+      createdAt: (date: string) => `Écrite ${date}`,
+    },
+    saved: {
+      title: "Fiche de draft",
+      back: "Nouvelle game",
+      notFound: "Cette fiche n'existe pas ou n'est pas à toi.",
     },
   },
   matches: {

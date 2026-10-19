@@ -13,7 +13,10 @@ const schema = z.object({
   AUTH_DISCORD_ID: optional,
   AUTH_DISCORD_SECRET: optional,
   RIOT_API_KEY: optional,
+  /** Clé de l'API Anthropic (coach de draft). Sans elle, la page l'explique. */
   ANTHROPIC_API_KEY: optional,
+  /** Autre adresse pour l'API Anthropic (tests). */
+  ANTHROPIC_BASE_URL: optional,
   /** Autre adresse pour l'API Riot (tests). Par défaut, les serveurs de Riot. */
   RIOT_API_BASE_URL: optional,
   /** Autre adresse pour Data Dragon (miroir, tests). Par défaut, celle de Riot. */

@@ -1,7 +1,11 @@
 import { XMLParser } from "fast-xml-parser";
 import { z } from "zod";
 
+import { frenchSpacing } from "../format";
+
 import type { NewsSource } from "./sources";
+
+export { frenchSpacing };
 
 /**
  * Lecture d'un flux RSS 2.0 et mise en forme des articles. Rien ici ne touche
@@ -123,14 +127,6 @@ export function plainText(value: string): string {
       .replace(/[^\S\u00a0\u202f]+/g, " ")
       .trim()
   );
-}
-
-/**
- * Typographie française : espace insécable avant « : ; ! ? » et à l'intérieur
- * des guillemets, pour qu'un signe ne se retrouve jamais seul en début de ligne.
- */
-export function frenchSpacing(value: string): string {
-  return value.replace(/ ([:;!?»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
 }
 
 /** Coupe à la fin d'un mot, avant `length`, et ajoute « … ». */

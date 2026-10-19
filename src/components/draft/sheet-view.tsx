@@ -1,0 +1,184 @@
+import type { ReactNode } from "react";
+
+import { Slash } from "@/components/brand/slash";
+import { ChampionIcon } from "@/components/champion/champion-icon";
+import { Skeleton } from "@/components/ui/skeleton";
+import { t } from "@/i18n/fr";
+import { cn } from "@/lib/cn";
+import type { SheetView as Sheet, Verdict } from "@/lib/draft/sheet-view";
+
+import { TeamMark, ThreatMark } from "./team-mark";
+
+const copy = t.draft.sheet;
+
+const VERDICT_TONE: Record<Verdict, string> = {
+  favorable: "border-win/40 text-win",
+  even: "border-line-strong text-ink-muted",
+  unfavorable: "border-loss/40 text-loss",
+};
+
+/**
+ * La fiche du coach : conditions de victoire, puis le matchup en voie et ses
+ * options. Pendant l'écriture, chaque texte grandit à sa place et ce qui n'est
+ * pas encore écrit garde une ligne d'attente, pour que rien ne saute.
+ */
+export function SheetView({
+  sheet,
+  opponent,
+  writing = false,
+}: {
+  sheet: Sheet;
+  opponent: { name: string; iconUrl: string | null } | null;
+  /** Vrai pendant l'écriture : les parties manquantes s'affichent en attente. */
+  writing?: boolean;
+}) {
+  const win = sheet.winConditions;
+  const matchup = sheet.matchup;
+  const options = matchup?.options ?? [];
+
+  return (
+    <article className="flex flex-col gap-6" aria-busy={writing}>
+      <section aria-labelledby="sheet-win" className="flex flex-col gap-3">
+        <h3 id="sheet-win" className="display text-xl text-ink">
+          {copy.win.title}
+        </h3>
+        <dl className="flex flex-col gap-3">
+          <WinLine side="ours" label={copy.win.ours} text={win?.ours} writing={writing} />
+          <WinLine side="theirs" label={copy.win.theirs} text={win?.theirs} writing={writing} />
+        </dl>
+      </section>
+
+      <section aria-labelledby="sheet-matchup" className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          {opponent ? (
+            <ChampionIcon name={opponent.name} src={opponent.iconUrl} className="size-10" />
+          ) : null}
+          <div className="flex min-w-0 flex-col items-start gap-1">
+            <h3 id="sheet-matchup" className="display text-xl text-ink">
+              {copy.matchup.title(opponent?.name ?? "?")}
+            </h3>
+            {matchup?.verdict ? (
+              <span
+                className={cn(
+                  "rounded-pill border px-2 text-xs leading-5 font-semibold",
+                  VERDICT_TONE[matchup.verdict],
+                )}
+              >
+                {copy.matchup.verdict[matchup.verdict]}
+              </span>
+            ) : writing ? (
+              <Skeleton className="h-5 w-20 rounded-pill" />
+            ) : null}
+          </div>
+        </div>
+
+        <Growing text={matchup?.summary} writing={writing} className="text-ink" lines={2} />
+
+        <Block label={copy.matchup.keyMoments}>
+          <Growing
+            text={matchup?.keyMoments}
+            writing={writing}
+            className="text-ink-muted"
+            lines={2}
+          />
+        </Block>
+
+        <Block label={copy.matchup.options}>
+          {options.length > 0 ? (
+            <ol className="flex flex-col gap-3">
+              {options.map((option, index) => (
+                <li key={index} className="flex gap-2.5">
+                  <Slash className="mt-[0.3em] h-[0.85em] text-accent" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-ink">
+                      <span className="sr-only">{copy.matchup.option(index + 1)}</span>
+                      {option.title ?? ""}
+                    </p>
+                    <Growing
+                      text={option.detail}
+                      writing={writing}
+                      className="text-ink-muted"
+                      lines={1}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : writing ? (
+            <Lines count={3} />
+          ) : null}
+        </Block>
+
+        <div className="flex gap-2.5 rounded-control border border-warn/30 bg-warn-soft px-3 py-2.5">
+          <ThreatMark className="mt-1" />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-warn">{copy.matchup.watchOut}</p>
+            <Growing text={matchup?.watchOut} writing={writing} className="text-ink" lines={1} />
+          </div>
+        </div>
+      </section>
+    </article>
+  );
+}
+
+function WinLine({
+  side,
+  label,
+  text,
+  writing,
+}: {
+  side: "ours" | "theirs";
+  label: string;
+  text: string | undefined;
+  writing: boolean;
+}) {
+  return (
+    <div className="flex gap-2.5">
+      <TeamMark side={side} className="mt-1.5" />
+      <div className="min-w-0 flex-1">
+        <dt className="text-sm font-semibold text-ink">{label}</dt>
+        <dd>
+          <Growing text={text} writing={writing} className="text-ink-muted" lines={2} />
+        </dd>
+      </div>
+    </div>
+  );
+}
+
+function Block({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-xs font-semibold tracking-[0.04em] text-ink-faint uppercase">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+/** Un texte qui s'écrit : affiché tel quel, ou des lignes d'attente s'il n'a pas commencé. */
+function Growing({
+  text,
+  writing,
+  className,
+  lines,
+}: {
+  text: string | undefined;
+  writing: boolean;
+  className?: string;
+  lines: number;
+}) {
+  if (text) return <p className={cn("text-pretty", className)}>{text}</p>;
+  return writing ? <Lines count={lines} /> : null;
+}
+
+function Lines({ count }: { count: number }) {
+  return (
+    <div className="flex flex-col gap-2 py-1">
+      {Array.from({ length: count }, (_, index) => (
+        <Skeleton
+          key={index}
+          className={cn("h-3.5 rounded-pill", index === count - 1 ? "w-3/5" : "w-full")}
+        />
+      ))}
+    </div>
+  );
+}

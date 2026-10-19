@@ -15,7 +15,7 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 | 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)      | Fait    |
 | Esport | Calendrier, résultats, arbres et classements (PandaScore)        | Fait    |
 | Actus  | Articles en français et en anglais (flux RSS), patchs            | Fait    |
-| 3      | Coach de draft (capture, extraction, fiche en streaming)         | À faire |
+| 3      | Coach de draft (capture, extraction, fiche en streaming)         | Fait    |
 | 4b     | Bilan d'une partie                                               | À faire |
 | 5      | Tableau de bord global                                           | À faire |
 | 6      | Finitions, pages légales définitives                             | À faire |
@@ -58,6 +58,22 @@ gardées une minute en cache) :
    (fichier `.env`), puis relance `npm run dev`.
 
 Sans clé, l'onglet explique qu'elle manque.
+
+### Clé Anthropic (coach de draft)
+
+La page « Nouvelle game » lit la capture de la draft avec Claude Haiku et écrit
+la fiche avec Claude Sonnet (prompts versionnés dans `src/lib/llm/prompts/`) :
+
+1. Crée un compte sur <https://console.anthropic.com> et ajoute du crédit
+   (**Billing**).
+2. **Settings → API Keys → Create Key**, puis copie la clé dans
+   `ANTHROPIC_API_KEY` (fichier `.env`) et relance `npm run dev`.
+
+Chaque fiche est enregistrée (`draft_analyses`) et a sa propre adresse
+(`/draft/<id>`), pour la relire sur téléphone pendant le chargement. Le nombre
+de fiches par 24 heures dépend de l'offre (`src/lib/auth/entitlements.ts`), et
+les lectures de capture sont limitées à 30 par heure. Sans clé, la page
+l'explique et le tableau reste remplissable à la main.
 
 ### Articles (onglet Actus)
 
