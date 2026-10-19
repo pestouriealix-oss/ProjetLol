@@ -16,16 +16,8 @@ import {
   type NewsSource,
 } from "../src/lib/news/sources";
 
-/** Recherche Google Actualités (agrège L'Équipe, Millenium, Sheep, Dexerto…), sur sept jours. */
-const googleNews = (lang: "fr" | "en") =>
-  lang === "fr"
-    ? "https://news.google.com/rss/search?q=%22League+of+Legends%22+when:7d&hl=fr&gl=FR&ceid=FR:fr"
-    : "https://news.google.com/rss/search?q=%22League+of+Legends%22+when:7d&hl=en-US&gl=US&ceid=US:en";
-
 const CANDIDATES: NewsSource[] = [
   ...NEWS_SOURCES,
-  { id: "gnews-fr", name: "Google Actus FR", lang: "fr", feedUrl: googleNews("fr") },
-  { id: "gnews-en", name: "Google Actus EN", lang: "en", feedUrl: googleNews("en") },
   {
     id: "dexerto-fr-lol",
     name: "Dexerto FR (LoL)",

@@ -62,10 +62,18 @@ Sans clé, l'onglet explique qu'elle manque.
 ### Articles (onglet Actus)
 
 L'onglet Actus affiche les derniers articles sur League of Legends et sa scène,
-lus dans les flux RSS publics des sites (liste dans `src/lib/news/sources.ts`) :
-titre, court extrait et lien vers l'article, jamais son texte. Chaque flux est
-relu au plus tous les quarts d'heure. Aucune clé n'est nécessaire ; un site qui
-ne répond pas est signalé sans masquer les autres.
+lus dans des flux RSS publics (liste dans `src/lib/news/sources.ts`) : titre,
+court extrait et lien vers l'article, jamais son texte. Seuls les articles de
+moins de deux semaines s'affichent, une vingtaine au plus. Chaque flux est relu
+au plus tous les quarts d'heure ; un site qui ne répond pas est signalé sans
+masquer les autres. `npm run news:check` teste des flux candidats.
+
+La plupart des sites d'esport bloquent les lecteurs RSS : l'essentiel vient donc
+de Google Actualités (recherche « League of Legends », en français et en
+anglais). Ses conditions réservent ces flux à un usage personnel et non
+commercial : **avant d'ouvrir le site au public payant**, il faudra passer par
+une API d'actualités sous licence (GNews, NewsAPI…) ou des accords avec les
+sites.
 
 ### Connexion Discord (facultatif)
 

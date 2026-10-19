@@ -84,6 +84,7 @@ describe("toArticles", () => {
       excerpt: "Un échiquier signé par Faker et Chovy est mis en vente.",
       publishedAt: new Date("2026-10-18T14:30:00Z"),
       imageUrl: "https://cdn.example.com/echiquier.jpg?w=640&q=80",
+      publisher: "Site EN",
       source: { id: "en", name: "Site EN", lang: "en" },
     });
   });
@@ -137,6 +138,30 @@ describe("toArticles", () => {
     ]);
   });
 
+  it("lit un agrégateur : site d'origine, titre sans suffixe, pas d'extrait", () => {
+    const aggregator: NewsSource = {
+      id: "gnews",
+      name: "Google Actualités",
+      lang: "fr",
+      feedUrl: "https://news.google.com/rss",
+      aggregator: true,
+    };
+    const items = parseFeed(
+      feed(`<item>
+        <title>Worlds 2026 : la KC en phase suisse - Millenium</title>
+        <link>https://news.google.com/rss/articles/abc?oc=5</link>
+        <pubDate>Mon, 19 Oct 2026 07:00:00 GMT</pubDate>
+        <description>&lt;a href="https://news.google.com/rss/articles/abc"&gt;Worlds 2026 : la KC en phase suisse&lt;/a&gt;&amp;nbsp;&amp;nbsp;&lt;font color="#6f6f6f"&gt;Millenium&lt;/font&gt;</description>
+        <source url="https://www.millenium.org">Millenium</source>
+      </item>`),
+    );
+    const [article] = toArticles(aggregator, items);
+    expect(article?.publisher).toBe("Millenium");
+    expect(article?.title).toBe("Worlds 2026\u00a0: la KC en phase suisse");
+    expect(article?.excerpt).toBe("");
+    expect(article?.url).toBe("https://news.google.com/rss/articles/abc?oc=5");
+  });
+
   it("laisse la date vide quand elle est illisible", () => {
     const items = parseFeed(
       feed(
@@ -185,6 +210,7 @@ describe("keepRecent", () => {
     excerpt: "",
     publishedAt: date ? new Date(date) : null,
     imageUrl: null,
+    publisher: "Site EN",
     source: { id: "en", name: "Site EN", lang: "en" },
   });
 
@@ -213,6 +239,7 @@ describe("mergeArticles", () => {
     excerpt: "",
     publishedAt: date ? new Date(date) : null,
     imageUrl: null,
+    publisher: "Site EN",
     source: { id: "en", name: "Site EN", lang: "en" },
   });
 

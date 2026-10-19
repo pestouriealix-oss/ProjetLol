@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { t } from "@/i18n/fr";
+import { cn } from "@/lib/cn";
 import { formatRelative } from "@/lib/format";
 import type { Article } from "@/lib/news";
 
@@ -22,16 +23,24 @@ export function ArticleList({ articles, now }: { articles: Article[]; now: Date 
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            title={copy.opensOn(article.source.name)}
-            className="group grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 rounded-panel border border-line bg-surface p-3 transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:bg-raised sm:grid-cols-[10rem_minmax(0,1fr)] sm:p-3.5"
+            title={copy.opensOn(article.publisher)}
+            className={cn(
+              "group grid items-start gap-4 rounded-panel border border-line bg-surface p-3 transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:bg-raised sm:p-3.5",
+              // Sans vignette (la plupart des articles d'agrégateur), la ligne reste compacte.
+              article.imageUrl
+                ? "grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[10rem_minmax(0,1fr)]"
+                : "grid-cols-[minmax(0,1fr)]",
+            )}
           >
-            <ArticleThumb
-              src={article.imageUrl}
-              className="order-last aspect-[4/3] w-20 sm:order-first sm:aspect-video sm:w-40"
-            />
+            {article.imageUrl ? (
+              <ArticleThumb
+                src={article.imageUrl}
+                className="order-last aspect-[4/3] w-20 sm:order-first sm:aspect-video sm:w-40"
+              />
+            ) : null}
             <div className="flex min-w-0 flex-col gap-1">
               <p className="flex items-center gap-2 text-xs text-ink-faint">
-                <span className="truncate font-semibold text-ink-muted">{article.source.name}</span>
+                <span className="truncate font-semibold text-ink-muted">{article.publisher}</span>
                 <span className="rounded-[4px] border border-line-strong px-1 text-[0.625rem] leading-4 font-bold tracking-[0.04em] text-ink-muted">
                   {copy.langTag[article.source.lang]}
                 </span>
@@ -47,7 +56,7 @@ export function ArticleList({ articles, now }: { articles: Article[]; now: Date 
               </p>
               <h3 className="line-clamp-3 font-semibold text-ink sm:line-clamp-2 sm:text-lg sm:leading-snug">
                 {article.title}
-                <span className="sr-only"> ({copy.opensOn(article.source.name)})</span>
+                <span className="sr-only"> ({copy.opensOn(article.publisher)})</span>
               </h3>
               {article.excerpt ? (
                 <p className="hidden text-sm text-ink-muted sm:line-clamp-2">{article.excerpt}</p>

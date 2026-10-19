@@ -16,6 +16,8 @@ export type Article = {
   excerpt: string;
   publishedAt: Date | null;
   imageUrl: string | null;
+  /** Le site qui a publié l'article (pour un agrégateur, le site d'origine). */
+  publisher: string;
   source: Pick<NewsSource, "id" | "name" | "lang">;
 };
 
@@ -51,6 +53,8 @@ const itemSchema = z.object({
   "media:thumbnail": oneOrMany(withUrl).optional(),
   "media:content": oneOrMany(withUrl).optional(),
   enclosure: oneOrMany(withUrl).optional(),
+  /** Site d'origine, chez un agrégateur (Google Actualités). */
+  source: text.optional(),
 });
 
 const feedSchema = z.object({
@@ -169,13 +173,22 @@ function imageOf(item: FeedItem): string | null {
   return null;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /** Les articles d'une source, prêts à afficher. */
 export function toArticles(source: NewsSource, items: FeedItem[]): Article[] {
   return items.flatMap((item) => {
     const url = webUrl(decodeEntities(item.link));
     const tidy = (value: string) =>
       source.lang === "fr" ? frenchSpacing(plainText(value)) : plainText(value);
-    const title = tidy(item.title);
+    const publisher = source.aggregator && item.source ? plainText(item.source) : source.name;
+    // Un agrégateur ajoute « - Site » à la fin du titre : le site est déjà affiché à part.
+    const rawTitle = source.aggregator
+      ? plainText(item.title).replace(new RegExp(`\\s+[-–—|]\\s+${escapeRegExp(publisher)}$`), "")
+      : item.title;
+    const title = tidy(rawTitle);
     if (!url || title === "") return [];
 
     if (source.match) {
@@ -188,12 +201,13 @@ export function toArticles(source: NewsSource, items: FeedItem[]): Article[] {
       {
         url,
         title,
-        excerpt: truncate(
-          tidy(item.description ?? "").replace(WORDPRESS_FOOTER, ""),
-          EXCERPT_LENGTH,
-        ),
+        // Chez un agrégateur, la description ne fait que répéter le titre.
+        excerpt: source.aggregator
+          ? ""
+          : truncate(tidy(item.description ?? "").replace(WORDPRESS_FOOTER, ""), EXCERPT_LENGTH),
         publishedAt: published && !Number.isNaN(published.getTime()) ? published : null,
         imageUrl: imageOf(item),
+        publisher,
         source: { id: source.id, name: source.name, lang: source.lang },
       },
     ];

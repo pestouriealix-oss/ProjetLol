@@ -474,7 +474,7 @@ export const fr = {
           ? `${sources} ne répondent pas pour l'instant : leurs articles manquent.`
           : `${sources} ne répond pas pour l'instant : ses articles manquent.`,
       credit:
-        "Titres et extraits viennent des flux RSS des sites. Chaque article se lit en entier chez son auteur.",
+        "Titres et extraits viennent des flux RSS des sites et de Google Actualités. Chaque article se lit en entier chez son auteur.",
     },
     current: "Patch actuel",
     readNotes: "Lire les notes de patch",

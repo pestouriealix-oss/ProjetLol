@@ -11,9 +11,9 @@ export type { NewsLanguage, NewsSource } from "./sources";
 /** Au-delà, un flux est refusé (un flux RSS fait quelques centaines de Ko). */
 const MAX_FEED_BYTES = 3_000_000;
 /** Articles gardés par source : un site très prolifique ne masque pas les autres. */
-const PER_SOURCE_LIMIT = 20;
+const PER_SOURCE_LIMIT = 8;
 /** Nombre d'articles affichés, toutes sources confondues. */
-const ARTICLE_LIMIT = 40;
+const ARTICLE_LIMIT = 20;
 
 export type ArticleList = {
   articles: Article[];
