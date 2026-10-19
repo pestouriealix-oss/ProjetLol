@@ -4,25 +4,26 @@ import { cn } from "@/lib/cn";
 import { Mark } from "./mark";
 
 /**
- * Le nom de l'application, dont le K est la marque : un seul K, dessiné, puis
- * le reste du nom dans la police de titre. La marque prend exactement la
- * hauteur des capitales.
+ * Le logo : l'icône (le K, dans sa tuile, la même que l'onglet du navigateur)
+ * puis le nom en entier dans la police de titre.
  *
  * Au survol du lien qui le contient, le bras corail se détache un peu plus :
  * le moment saisi.
  */
 export function Wordmark({ className }: { className?: string }) {
-  const rest = APP_NAME.slice(1);
   return (
-    <span className={cn("group/wordmark inline-flex items-baseline text-2xl", className)}>
-      <span className="sr-only">{APP_NAME}</span>
-      <span aria-hidden className="inline-flex items-baseline gap-[0.07em]">
+    <span className={cn("group/wordmark inline-flex items-center gap-[0.4em] text-2xl", className)}>
+      <span
+        aria-hidden
+        className="grid size-[1.25em] shrink-0 place-items-center rounded-[0.28em] border border-line-strong/70 bg-raised"
+      >
         <Mark
-          className="h-[0.712em] translate-y-[0.005em] self-baseline text-ink"
-          accentClassName="fill-accent transition-[translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-hover/wordmark:translate-x-[0.6px] group-hover/wordmark:-translate-y-[0.6px]"
+          compact
+          className="h-[0.78em] text-ink"
+          accentClassName="fill-accent transition-[translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-hover/wordmark:translate-x-[0.8px] group-hover/wordmark:-translate-y-[0.8px]"
         />
-        <span className="display leading-none tracking-[0.035em] text-ink">{rest}</span>
       </span>
+      <span className="display leading-none tracking-[0.04em] text-ink">{APP_NAME}</span>
     </span>
   );
 }
