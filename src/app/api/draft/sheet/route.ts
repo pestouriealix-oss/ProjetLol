@@ -9,8 +9,9 @@ import { llm, LlmError } from "@/lib/llm";
 /**
  * Écrit une fiche de draft et la diffuse au fur et à mesure, une ligne JSON
  * par événement (NDJSON) :
+ * - `{ type: "facts", facts }` : les données vérifiées utilisées (statistiques, Data Dragon) ;
  * - `{ type: "partial", sheet }` : la fiche en cours d'écriture ;
- * - `{ type: "done", id, sheet }` : la fiche finale, enregistrée ;
+ * - `{ type: "done", id, sheet, facts }` : la fiche finale, enregistrée ;
  * - `{ type: "error", error }` : la raison de l'échec (voir CoachErrorKind).
  */
 
@@ -39,13 +40,14 @@ export async function POST(request: Request) {
       const send = (event: unknown) =>
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       try {
-        const { id, sheet } = await writeDraftSheet(
+        const { id, sheet, facts } = await writeDraftSheet(
           user.id,
           body.draft,
           (partial) => send({ type: "partial", sheet: partial }),
           request.signal,
+          (facts) => send({ type: "facts", facts }),
         );
-        send({ type: "done", id, sheet });
+        send({ type: "done", id, sheet, facts });
       } catch (error) {
         const kind =
           error instanceof CoachError || error instanceof LlmError ? error.kind : "unavailable";

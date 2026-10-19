@@ -5,7 +5,8 @@ import { ChampionIcon } from "@/components/champion/champion-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
-import type { SheetView as Sheet, Verdict } from "@/lib/draft/sheet-view";
+import type { SheetFacts, SheetView as Sheet, Verdict } from "@/lib/draft/sheet-view";
+import { formatInteger, formatPercent } from "@/lib/format";
 
 import { TeamMark, ThreatMark } from "./team-mark";
 
@@ -72,6 +73,8 @@ export function SheetView({
           </div>
         </div>
 
+        {sheet.facts ? <DuelStat facts={sheet.facts} /> : null}
+
         <Growing text={matchup?.summary} writing={writing} className="text-ink" lines={2} />
 
         <Block label={copy.matchup.keyMoments}>
@@ -117,7 +120,50 @@ export function SheetView({
           </div>
         </div>
       </section>
+
+      {sheet.facts ? <Sources facts={sheet.facts} /> : null}
     </article>
+  );
+}
+
+/** Le résultat réel du duel dans nos parties analysées, avec sa taille d'échantillon. */
+function DuelStat({ facts }: { facts: SheetFacts }) {
+  const stats = facts.stats;
+  if (!stats) return null;
+  const duel = stats.matchup;
+  if (!duel || duel.games === 0) {
+    return <p className="text-sm text-ink-faint">{copy.matchup.statNone}</p>;
+  }
+  if (!stats.reliable) {
+    return (
+      <p className="text-sm text-ink-faint">{copy.matchup.statThin(formatInteger(duel.games))}</p>
+    );
+  }
+  return (
+    <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+      <span className="font-semibold text-ink tabular">
+        {copy.matchup.stat(formatPercent(duel.wins / duel.games), formatInteger(duel.games))}
+      </span>
+      <span className="text-ink-faint">
+        {copy.matchup.statsLevel} · {copy.patch(stats.patch)}
+      </span>
+    </p>
+  );
+}
+
+/** D'où viennent les chiffres de la fiche. */
+function Sources({ facts }: { facts: SheetFacts }) {
+  return (
+    <footer className="flex flex-col gap-1 border-t border-line pt-3 text-xs text-ink-faint">
+      <p className="font-semibold text-ink-muted">{copy.sources.title}</p>
+      <p>
+        {facts.stats
+          ? copy.sources.stats(formatInteger(facts.stats.matches), facts.stats.patch)
+          : copy.sources.noStats}
+      </p>
+      <p>{copy.sources.ddragon(facts.ddragonVersion)}</p>
+      <p>{copy.sources.coach}</p>
+    </footer>
   );
 }
 

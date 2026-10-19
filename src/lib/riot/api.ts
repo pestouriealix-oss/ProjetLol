@@ -4,6 +4,8 @@ import type { RiotClient } from "./client";
 import { RiotApiError } from "./errors";
 import {
   activeGameSchema,
+  apexLeagueSchema,
+  ladderEntriesSchema,
   leagueEntriesSchema,
   matchIdsSchema,
   matchSchema,
@@ -66,6 +68,48 @@ export function createRiotApi(client: RiotClient) {
         { kind: "platform", platform },
         `/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`,
         leagueEntriesSchema,
+      );
+    },
+
+    /** League-V4 : une page de joueurs d'un palier et d'une division (Solo/Duo). */
+    getLadderPage(
+      platform: Platform,
+      tier: "EMERALD" | "DIAMOND",
+      division: "I" | "II" | "III" | "IV",
+      page: number,
+    ): Promise<{ puuid: string }[]> {
+      return client.get(
+        { kind: "platform", platform },
+        `/lol/league/v4/entries/RANKED_SOLO_5x5/${tier}/${division}`,
+        ladderEntriesSchema,
+        { page },
+      );
+    },
+
+    /** League-V4 : toute la ligue Maître, Grand Maître ou Challenger (Solo/Duo). */
+    async getApexLadder(
+      platform: Platform,
+      tier: "master" | "grandmaster" | "challenger",
+    ): Promise<{ puuid: string }[]> {
+      const league = await client.get(
+        { kind: "platform", platform },
+        `/lol/league/v4/${tier}leagues/by-queue/RANKED_SOLO_5x5`,
+        apexLeagueSchema,
+      );
+      return league.entries;
+    },
+
+    /** Match-V5 : dernières parties Solo/Duo d'un joueur depuis une date (secondes). */
+    getSoloMatchIds(
+      platform: Platform,
+      puuid: string,
+      options: { count: number; startTime: number },
+    ): Promise<string[]> {
+      return client.get(
+        { kind: "regional", platform },
+        `/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids`,
+        matchIdsSchema,
+        { queue: 420, start: 0, count: options.count, startTime: options.startTime },
       );
     },
 

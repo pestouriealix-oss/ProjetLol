@@ -61,8 +61,10 @@ Sans clé, l'onglet explique qu'elle manque.
 
 ### Clé Anthropic (coach de draft)
 
-La page « Nouvelle game » lit la capture de la draft avec Claude Haiku et écrit
-la fiche avec Claude Sonnet (prompts versionnés dans `src/lib/llm/prompts/`) :
+La page « Nouvelle game » remplit la draft toute seule : dès l'écran de
+chargement, elle la lit chez Riot (Spectator-V5, vérifiée toutes les 20 s), ou à
+défaut dans une capture lue par Claude Haiku. La fiche est écrite par Claude
+Sonnet (prompts versionnés dans `src/lib/llm/prompts/`) :
 
 1. Crée un compte sur <https://console.anthropic.com> et ajoute du crédit
    (**Billing**).
@@ -73,7 +75,33 @@ Chaque fiche est enregistrée (`draft_analyses`) et a sa propre adresse
 (`/draft/<id>`), pour la relire sur téléphone pendant le chargement. Le nombre
 de fiches par 24 heures dépend de l'offre (`src/lib/auth/entitlements.ts`), et
 les lectures de capture sont limitées à 30 par heure. Sans clé, la page
-l'explique et le tableau reste remplissable à la main.
+l'explique ; la partie en cours remplit quand même le tableau.
+
+### Statistiques de matchups (fiche de draft)
+
+La fiche s'appuie sur des données vérifiées, données au modèle avant qu'il
+écrive et citées en bas de la fiche :
+
+- **Compétences** : passif, sorts et délais de récupération des deux champions
+  du duel, pour le patch en cours (Data Dragon, en français).
+- **Taux de victoire** : calculés par nous à partir de vraies parties classées
+  Solo/Duo Émeraude et plus (API Riot officielle : League-V4 puis Match-V5),
+  par patch, poste et duel. Affichés avec leur nombre de parties ; en dessous
+  de 40 parties, la fiche le dit au lieu de donner un chiffre. Seuls des
+  compteurs et l'identifiant des parties sont gardés, aucun joueur.
+
+Pour remplir ces statistiques, lance la collecte (elle utilise `RIOT_API_KEY`
+et la base du `.env`) :
+
+```bash
+npm run matchups:collect                     # 30 minutes sur EUW
+npm run matchups:collect -- --minutes 120    # plus longtemps
+```
+
+Avec une clé de développement, compte environ 2 000 parties par heure : il en
+faut quelques milliers pour couvrir les duels courants d'un patch. On peut
+l'arrêter à tout moment (Ctrl + C) ; ce qui est compté reste compté. Les mêmes
+compteurs servent à deviner les postes de la partie en cours.
 
 ### Articles (onglet Actus)
 

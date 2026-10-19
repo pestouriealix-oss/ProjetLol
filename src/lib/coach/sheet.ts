@@ -6,7 +6,9 @@ import { countDraftAnalysesSince, createDraftAnalysis } from "@/lib/db/draft-ana
 import { listLatestRanks } from "@/lib/db/ranks";
 import { listRiotAccounts } from "@/lib/db/riot-accounts";
 import { getChampionAssets } from "@/lib/ddragon/champions";
+import type { ChampionDetails } from "@/lib/ddragon/champion-details";
 import { canAnalyse, duplicateChampions, type Draft } from "@/lib/draft/draft";
+import type { SheetFacts } from "@/lib/draft/sheet-view";
 import { frenchSpacing } from "@/lib/format";
 import { llm, MODELS } from "@/lib/llm";
 import {
@@ -19,6 +21,7 @@ import {
 import { t } from "@/i18n/fr";
 
 import { CoachError } from "./errors";
+import { loadMatchupFacts } from "./facts";
 
 export type { DraftSheet };
 
@@ -63,7 +66,9 @@ export async function writeDraftSheet(
   draft: Draft,
   onPartial: (partial: unknown) => void,
   signal?: AbortSignal,
-): Promise<{ id: string; sheet: DraftSheet }> {
+  /** Reçoit les données vérifiées dès qu'elles sont connues, avant l'écriture. */
+  onFacts: (facts: SheetFacts) => void = () => {},
+): Promise<{ id: string; sheet: DraftSheet; facts: SheetFacts }> {
   const champions = await getChampionAssets();
   if (!champions) throw new CoachError("champions_unavailable", "Data Dragon ne répond pas.");
   const known = new Set(champions.list().map((champion) => champion.id));
@@ -91,6 +96,19 @@ export async function writeDraftSheet(
   const rank = solo ? (t.dashboard.rank.tiers[solo.tier] ?? solo.tier) : null;
 
   const patch = patchOf(champions.version);
+  const myId = draft.allies[draft.myRole]!;
+  const theirId = draft.enemies[draft.myRole]!;
+  const grounded = await loadMatchupFacts({
+    ddragonVersion: champions.version,
+    role: draft.myRole,
+    mine: { id: myId, key: champions.keyOf(myId) },
+    theirs: { id: theirId, key: champions.keyOf(theirId) },
+  });
+  onFacts(grounded.facts);
+  const sheetOf = (details: ChampionDetails | null) =>
+    details ? { name: details.name, passive: details.passive, spells: details.spells } : null;
+  const stats = grounded.facts.stats;
+
   const sheet = tidy(
     await llm.streamTool(
       {
@@ -104,6 +122,18 @@ export async function writeDraftSheet(
           allies: names(draft.allies),
           enemies: names(draft.enemies),
           rank,
+          ddragonVersion: champions.version,
+          champions: { mine: sheetOf(grounded.mine), theirs: sheetOf(grounded.theirs) },
+          stats: stats
+            ? {
+                patch: stats.patch,
+                matches: stats.matches,
+                duel: stats.matchup,
+                reliable: stats.reliable,
+                mineAtRole: grounded.roleRates.mine,
+                theirsAtRole: grounded.roleRates.theirs,
+              }
+            : null,
         }),
       },
       onPartial,
@@ -118,8 +148,8 @@ export async function writeDraftSheet(
     myRole: draft.myRole,
     allies: draft.allies,
     enemies: draft.enemies,
-    content: sheet,
+    content: { ...sheet, facts: grounded.facts },
     promptVersion: DRAFT_SHEET_VERSION,
   });
-  return { id, sheet };
+  return { id, sheet, facts: grounded.facts };
 }

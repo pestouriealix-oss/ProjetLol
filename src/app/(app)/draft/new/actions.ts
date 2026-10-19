@@ -4,11 +4,13 @@ import { z } from "zod";
 
 import { requireUser } from "@/lib/auth/session";
 import { CoachError, type CoachErrorKind } from "@/lib/coach/errors";
+import { loadLiveDraft } from "@/lib/coach/live-draft";
 import { readDraftFromScreenshot, SCREENSHOT_TYPES } from "@/lib/coach/read-draft";
 import { ROLES } from "@/lib/config";
 import { attemptKey, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
 import type { Draft } from "@/lib/draft/draft";
 import { LlmError } from "@/lib/llm";
+import { RiotApiError } from "@/lib/riot";
 
 export type ReadScreenshotError = CoachErrorKind | "bad_image" | "too_many";
 
@@ -57,5 +59,33 @@ export async function readScreenshot(formData: FormData): Promise<ReadScreenshot
     }
     console.error("Lecture de capture impossible", error);
     return { ok: false, error: "unavailable" };
+  }
+}
+
+export type LiveDraftError = CoachErrorKind | "riot_unavailable" | "too_many";
+
+export type LoadLiveDraftResult =
+  | { ok: true; status: "found"; draft: Draft; riotId: string }
+  | { ok: true; status: "not_in_game" | "no_account" }
+  | { ok: false; error: LiveDraftError };
+
+/** Vérifications de la partie en cours par utilisateur et par heure (une toutes les 20 s au plus). */
+const LIVE_CHECKS_PER_HOUR = { max: 200, windowSeconds: 3600 };
+
+/** La draft de la partie en cours, lue chez Riot dès l'écran de chargement. */
+export async function loadLiveGameDraft(): Promise<LoadLiveDraftResult> {
+  const user = await requireUser();
+
+  const key = attemptKey("draft-live", user.id);
+  if (await isRateLimited(key, LIVE_CHECKS_PER_HOUR.max)) return { ok: false, error: "too_many" };
+  await recordAttempt(key, LIVE_CHECKS_PER_HOUR.windowSeconds);
+
+  try {
+    const result = await loadLiveDraft(user.id);
+    return { ok: true, ...result };
+  } catch (error) {
+    if (error instanceof CoachError) return { ok: false, error: error.kind };
+    console.error("Partie en cours illisible", error);
+    return { ok: false, error: error instanceof RiotApiError ? "riot_unavailable" : "unavailable" };
   }
 }

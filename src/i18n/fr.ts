@@ -232,20 +232,19 @@ export const fr = {
       read: (count: number) =>
         count === 10
           ? "Les dix champions sont placés. Vérifie, puis lance ta fiche."
-          : `${count} champion${count > 1 ? "s" : ""} placé${count > 1 ? "s" : ""} sur 10. Complète les cases vides en cliquant dessus.`,
+          : `${count} champion${count > 1 ? "s" : ""} placé${count > 1 ? "s" : ""} sur 10. Clique sur une case vide pour la corriger.`,
       unrecognized: (count: number) =>
-        `${count} champion${count > 1 ? "s" : ""} non reconnu${count > 1 ? "s" : ""} : choisis-le${count > 1 ? "s" : ""} à la main.`,
+        `${count} champion${count > 1 ? "s" : ""} non reconnu${count > 1 ? "s" : ""} : clique sur sa case pour le corriger.`,
       dropHere: "Dépose la capture ici",
       errors: {
         bad_image: "Cette image ne peut pas être lue. Utilise une capture PNG, JPEG ou WebP.",
         not_a_draft:
           "Ce n'est pas une sélection des champions ni un écran de chargement. Essaie une autre capture.",
-        too_many:
-          "Trop de captures envoyées en une heure. Remplis le tableau à la main en attendant.",
+        too_many: "Trop de captures envoyées en une heure. Réessaie un peu plus tard.",
         missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
         invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",
         rate_limited: "Le service de lecture est très demandé. Réessaie dans une minute.",
-        unavailable: "La lecture n'a pas abouti. Réessaie, ou remplis le tableau à la main.",
+        unavailable: "La lecture n'a pas abouti. Réessaie avec une autre capture.",
         refused: "La capture n'a pas pu être analysée. Essaie une autre image.",
         invalid_output: "La lecture a donné un résultat inutilisable. Réessaie.",
         champions_unavailable:
@@ -254,6 +253,27 @@ export const fr = {
         quota: "Limite atteinte pour aujourd'hui.",
       },
     },
+    live: {
+      title: "Ta partie en cours",
+      waiting:
+        "Dès que ta partie charge, la draft se remplit toute seule : Riot la donne à l'écran de chargement, pas pendant la sélection.",
+      checking: "Recherche de ta partie…",
+      found: (riotId: string) =>
+        `Draft de ta partie chargée (${riotId}). Vérifie les postes, puis lance ta fiche.`,
+      stopped:
+        "La recherche automatique s'est arrêtée au bout d'un quart d'heure. Relance-la quand ta partie charge.",
+      check: "Vérifier maintenant",
+      noAccount: "Lie ton compte Riot : la draft de tes parties se remplira toute seule.",
+      settings: "Lier mon compte",
+      or: "ou",
+      errors: {
+        riot_unavailable: "Riot ne répond pas pour l'instant. Utilise une capture en attendant.",
+        too_many: "Trop de vérifications en une heure. Utilise une capture en attendant.",
+        champions_unavailable:
+          "La liste des champions ne répond pas pour l'instant. Réessaie dans un instant.",
+        unavailable: "La recherche de ta partie n'a pas abouti. Réessaie dans un instant.",
+      } as Partial<Record<string, string>> & { unavailable: string },
+    },
     allies: "Ton équipe",
     enemies: "Adversaires",
     you: "Toi",
@@ -261,7 +281,8 @@ export const fr = {
     board: {
       caption: "Les champions de la partie, voie par voie",
       role: "Rôle",
-      hint: "Clique sur une case pour choisir un champion, et sur un rôle pour dire lequel est le tien.",
+      hint: "Une erreur ? Clique sur un champion pour le corriger, ou sur un poste pour dire lequel est le tien.",
+      waitingHint: "Le tableau se remplit avec ta partie en cours, ou avec une capture.",
       readOnlyHint: "La draft telle qu'elle a été analysée.",
       choose: (role: string, side: string) =>
         `Choisir le champion ${side === "ours" ? "allié" : "adverse"} au poste ${role}`,
@@ -282,6 +303,7 @@ export const fr = {
       action: "Écrire ma fiche",
       writing: "Écriture…",
       needs: "Il faut au moins ton champion et ton vis-à-vis.",
+      waiting: "La fiche se lance dès que la draft est remplie.",
       remaining: (count: number, limit: number) =>
         `${count} fiche${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""} sur ${limit} (24 h)`,
       saved: "Fiche enregistrée. Ouvre-la sur ton téléphone pendant le chargement :",
@@ -303,7 +325,7 @@ export const fr = {
     },
     noKey: {
       title: "Le coach n'est pas encore branché",
-      body: "La clé de l'API Anthropic manque sur le serveur (ANTHROPIC_API_KEY). Tu peux déjà remplir le tableau à la main.",
+      body: "La clé de l'API Anthropic manque sur le serveur (ANTHROPIC_API_KEY) : la lecture des captures et les fiches sont désactivées.",
     },
     sheet: {
       title: "Ta fiche",
@@ -330,6 +352,20 @@ export const fr = {
         options: "Façons de le jouer",
         option: (index: number) => `Option ${index} : `,
         watchOut: "À surveiller",
+        stat: (rate: string, games: string) => `${rate} de victoires sur ${games} parties`,
+        statThin: (games: string) =>
+          `Seulement ${games} parties pour ce duel : trop peu pour un chiffre fiable`,
+        statNone: "Duel pas encore vu dans nos parties analysées",
+        statsLevel: "Émeraude et plus",
+      },
+      sources: {
+        title: "Sources",
+        stats: (matches: string, patch: string) =>
+          `Taux de victoire : ${matches} parties classées Émeraude et plus analysées (API Riot), patch ${patch}.`,
+        noStats: "Pas encore de statistiques de parties : aucun pourcentage dans cette fiche.",
+        ddragon: (version: string) =>
+          `Compétences et délais : Data Dragon ${version} (données officielles de Riot).`,
+        coach: "Le reste est l'analyse du coach à partir de ces données.",
       },
       writing: "Le coach écrit ta fiche…",
       patch: (patch: string) => `Patch ${patch}`,

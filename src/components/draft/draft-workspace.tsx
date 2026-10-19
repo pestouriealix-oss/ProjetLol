@@ -1,9 +1,14 @@
 "use client";
 
-import { ImageUp, LoaderCircle } from "lucide-react";
+import { ImageUp, LoaderCircle, RadioTower } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { readScreenshot, type ReadScreenshotError } from "@/app/(app)/draft/new/actions";
+import {
+  loadLiveGameDraft,
+  readScreenshot,
+  type LiveDraftError,
+  type ReadScreenshotError,
+} from "@/app/(app)/draft/new/actions";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { ErrorNotice } from "@/components/ui/notice";
@@ -18,7 +23,12 @@ import {
   filledCount,
   type Draft,
 } from "@/lib/draft/draft";
-import { readSheetView, type SheetView as Sheet } from "@/lib/draft/sheet-view";
+import {
+  readSheetView,
+  sheetFactsSchema,
+  type SheetFacts,
+  type SheetView as Sheet,
+} from "@/lib/draft/sheet-view";
 
 import { ChampionPicker, type PickerChampion } from "./champion-picker";
 import { DraftBoard, type DraftSideKey } from "./draft-board";
@@ -36,6 +46,18 @@ type ReadState =
   | { status: "error"; error: ReadScreenshotError };
 
 type SheetErrorKind = keyof typeof copy.analyse.errors;
+
+type LiveState =
+  | { status: "checking" }
+  | { status: "waiting" }
+  | { status: "found"; riotId: string }
+  | { status: "no_account" }
+  | { status: "stopped" }
+  | { status: "error"; error: LiveDraftError };
+
+/** Intervalle entre deux recherches de la partie en cours, et durée de la recherche automatique. */
+const LIVE_POLL_MS = 20_000;
+const LIVE_POLL_FOR_MS = 15 * 60_000;
 
 type SheetState =
   | { status: "idle" }
@@ -68,6 +90,8 @@ export function DraftWorkspace({
   const [sheet, setSheet] = useState<SheetState>({ status: "idle" });
   const [remaining, setRemaining] = useState(quota.remaining);
   const [dragging, setDragging] = useState(false);
+  const [live, setLive] = useState<LiveState>({ status: "checking" });
+  const liveSince = useRef<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -85,6 +109,42 @@ export function DraftWorkspace({
   const writing = sheet.status === "writing";
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  /** Cherche la partie en cours chez Riot ; la trouve dès l'écran de chargement. */
+  const checkLive = useCallback(async () => {
+    try {
+      const result = await loadLiveGameDraft();
+      if (!result.ok) {
+        setLive({ status: "error", error: result.error });
+      } else if (result.status === "found") {
+        setDraft(result.draft);
+        setRead({ status: "idle" });
+        setSheet((current) => (current.status === "writing" ? current : { status: "idle" }));
+        setLive({ status: "found", riotId: result.riotId });
+      } else if (result.status === "no_account") {
+        setLive({ status: "no_account" });
+      } else {
+        liveSince.current ??= Date.now();
+        const expired = Date.now() - liveSince.current > LIVE_POLL_FOR_MS;
+        setLive({ status: expired ? "stopped" : "waiting" });
+      }
+    } catch {
+      setLive({ status: "error", error: "unavailable" });
+    }
+  }, []);
+
+  // Première recherche à l'ouverture, puis toutes les 20 s tant que la draft est vide.
+  const empty = filledCount(draft) === 0;
+  useEffect(() => {
+    if (live.status !== "checking" && (live.status !== "waiting" || !empty)) return;
+    // Recherche demandée : tout de suite ; sinon à l'intervalle, page visible seulement.
+    const delay = live.status === "checking" ? 0 : LIVE_POLL_MS;
+    const timer = window.setTimeout(() => {
+      if (live.status === "checking" || document.visibilityState === "visible") void checkLive();
+      else setLive({ status: "waiting" });
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [live, empty, checkLive]);
 
   const readFile = useCallback(
     async (file: File) => {
@@ -144,6 +204,7 @@ export function DraftWorkspace({
     );
 
     let latest: Sheet = {};
+    let facts: SheetFacts | undefined;
     try {
       const response = await fetch("/api/draft/sheet", {
         method: "POST",
@@ -168,11 +229,15 @@ export function DraftWorkspace({
         for (const line of lines) {
           const event = readEvent(line);
           if (!event) continue;
-          if (event.type === "partial") {
-            latest = readSheetView(event.sheet);
+          if (event.type === "facts") {
+            facts = event.facts;
+            latest = { ...latest, facts };
+            setSheet({ status: "writing", sheet: latest });
+          } else if (event.type === "partial") {
+            latest = { ...readSheetView(event.sheet), facts };
             setSheet({ status: "writing", sheet: latest });
           } else if (event.type === "done" && event.id) {
-            latest = readSheetView(event.sheet);
+            latest = { ...readSheetView(event.sheet), facts: event.facts ?? facts };
             setSheet({ status: "done", sheet: latest, id: event.id });
             setRemaining((count) => Math.max(0, count - 1));
             // La fiche a désormais sa propre adresse : un rechargement la retrouve.
@@ -209,6 +274,21 @@ export function DraftWorkspace({
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="flex min-w-0 flex-col gap-5">
+        {/* La partie en cours : la draft arrive toute seule dès l'écran de chargement. */}
+        <LivePanel
+          live={live}
+          onCheck={() => {
+            liveSince.current = Date.now();
+            setLive({ status: "checking" });
+          }}
+        />
+        <p
+          aria-hidden
+          className="-my-2 text-center text-xs font-semibold tracking-[0.08em] text-ink-faint uppercase"
+        >
+          {copy.live.or}
+        </p>
+
         {/* La capture : coller, déposer ou choisir. */}
         <div
           onDragOver={(event) => {
@@ -281,10 +361,15 @@ export function DraftWorkspace({
             draft={draft}
             champion={champion}
             duplicates={duplicates}
-            onPick={(side, role) => setPicking({ side, role })}
-            onSetMine={(role) => setDraft((current) => ({ ...current, myRole: role }))}
+            // Rien à corriger tant que ni la partie ni une capture n'ont rempli le tableau.
+            onPick={empty ? undefined : (side, role) => setPicking({ side, role })}
+            onSetMine={
+              empty ? undefined : (role) => setDraft((current) => ({ ...current, myRole: role }))
+            }
           />
-          <p className="text-sm text-ink-faint">{copy.board.hint}</p>
+          <p className="text-sm text-ink-faint">
+            {empty ? copy.board.waitingHint : copy.board.hint}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -303,7 +388,11 @@ export function DraftWorkspace({
             )}
           </Button>
           <p className="text-sm text-ink-muted">
-            {!ready ? copy.analyse.needs : copy.analyse.remaining(remaining, quota.limit)}
+            {empty
+              ? copy.analyse.waiting
+              : !ready
+                ? copy.analyse.needs
+                : copy.analyse.remaining(remaining, quota.limit)}
           </p>
         </div>
       </div>
@@ -374,9 +463,68 @@ export function DraftWorkspace({
   );
 }
 
+/** État de la recherche de la partie en cours, avec de quoi la relancer. */
+function LivePanel({ live, onCheck }: { live: LiveState; onCheck: () => void }) {
+  const text =
+    live.status === "checking"
+      ? copy.live.checking
+      : live.status === "waiting"
+        ? copy.live.waiting
+        : live.status === "found"
+          ? copy.live.found(live.riotId)
+          : live.status === "stopped"
+            ? copy.live.stopped
+            : live.status === "no_account"
+              ? copy.live.noAccount
+              : (copy.live.errors[live.error] ?? copy.live.errors.unavailable);
+  return (
+    <div className="flex flex-col gap-4 rounded-panel border border-line bg-surface px-5 py-5 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <span className="relative grid size-7 shrink-0 place-items-center">
+          {live.status === "checking" ? (
+            <LoaderCircle aria-hidden className="size-7 animate-spin text-ink-muted" />
+          ) : (
+            <RadioTower
+              aria-hidden
+              className={cn("size-7", live.status === "found" ? "text-ink" : "text-ink-faint")}
+            />
+          )}
+          {live.status === "waiting" ? (
+            <span
+              aria-hidden
+              className="absolute -top-0.5 -right-0.5 size-2 animate-pulse rounded-full bg-warn motion-reduce:animate-none"
+            />
+          ) : null}
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold text-ink">{copy.live.title}</h2>
+          <p className="pt-0.5 text-ink-muted" role="status" aria-live="polite">
+            {text}
+          </p>
+        </div>
+      </div>
+      {live.status === "no_account" ? (
+        <Button asChild variant="secondary" className="shrink-0">
+          <Link href="/settings">{copy.live.settings}</Link>
+        </Button>
+      ) : (
+        <Button
+          variant="secondary"
+          className="shrink-0"
+          disabled={live.status === "checking"}
+          onClick={onCheck}
+        >
+          {copy.live.check}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 type StreamEvent = {
-  type: "partial" | "done" | "error";
+  type: "facts" | "partial" | "done" | "error";
   sheet?: unknown;
+  facts?: SheetFacts;
   id?: string;
   error?: SheetErrorKind;
 };
@@ -387,11 +535,26 @@ function readEvent(line: string): StreamEvent | null {
   try {
     const value: unknown = JSON.parse(line);
     if (typeof value !== "object" || value === null || !("type" in value)) return null;
-    const event = value as { type: unknown; sheet?: unknown; id?: unknown; error?: unknown };
-    if (event.type !== "partial" && event.type !== "done" && event.type !== "error") return null;
+    const event = value as {
+      type: unknown;
+      sheet?: unknown;
+      facts?: unknown;
+      id?: unknown;
+      error?: unknown;
+    };
+    if (
+      event.type !== "facts" &&
+      event.type !== "partial" &&
+      event.type !== "done" &&
+      event.type !== "error"
+    ) {
+      return null;
+    }
+    const facts = sheetFactsSchema.safeParse(event.facts);
     return {
       type: event.type,
       sheet: event.sheet,
+      facts: facts.success ? facts.data : undefined,
       id: typeof event.id === "string" ? event.id : undefined,
       error:
         typeof event.error === "string" && event.error in copy.analyse.errors

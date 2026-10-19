@@ -30,6 +30,11 @@ export const leagueEntriesSchema = z.array(leagueEntrySchema);
 
 export const matchIdsSchema = z.array(z.string().min(1));
 
+/** Joueurs d'un palier (League-V4) : seul le PUUID sert, pour trouver leurs parties. */
+export const ladderEntriesSchema = z.array(z.looseObject({ puuid: z.string().min(1) }));
+/** Ligue Maître, Grand Maître ou Challenger (League-V4). */
+export const apexLeagueSchema = z.looseObject({ entries: ladderEntriesSchema });
+
 export const matchParticipantSchema = z.looseObject({
   puuid: z.string(),
   teamId: z.number().int(),

@@ -29,6 +29,13 @@
       "when": 1792065655404,
       "tag": "0003_mean_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792417923104,
+      "tag": "0004_cool_whiplash",
+      "breakpoints": true
     }
   ]
 }

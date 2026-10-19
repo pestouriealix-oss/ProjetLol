@@ -308,3 +308,51 @@ export const authAttempts = pgTable("auth_attempts", {
   count: integer("count").notNull(),
   resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
 });
+
+/**
+ * Parties classées lues pour les statistiques de matchups. Seuls l'identifiant
+ * et le patch sont gardés : aucun joueur, aucune donnée personnelle. Sert à ne
+ * jamais compter deux fois la même partie.
+ */
+export const statMatches = pgTable(
+  "stat_matches",
+  {
+    id: text("id").primaryKey(),
+    platform: platformEnum("platform").notNull(),
+    /** « 16.20 ». */
+    patch: text("patch").notNull(),
+    collectedAt: createdAt(),
+  },
+  (table) => [index("stat_matches_patch_idx").on(table.patch)],
+);
+
+/**
+ * Résultats agrégés, par patch, rôle, champion et adversaire direct (même rôle
+ * en face). Champions désignés par leur numéro Riot (clé Data Dragon). Chaque
+ * duel est compté des deux côtés.
+ */
+export const matchupStats = pgTable(
+  "matchup_stats",
+  {
+    patch: text("patch").notNull(),
+    role: roleEnum("role").notNull(),
+    champion: integer("champion").notNull(),
+    opponent: integer("opponent").notNull(),
+    games: integer("games").notNull().default(0),
+    wins: integer("wins").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.patch, table.role, table.champion, table.opponent] })],
+);
+
+/** Parties et victoires par patch, rôle et champion (sert aussi à deviner les rôles). */
+export const championRoleStats = pgTable(
+  "champion_role_stats",
+  {
+    patch: text("patch").notNull(),
+    role: roleEnum("role").notNull(),
+    champion: integer("champion").notNull(),
+    games: integer("games").notNull().default(0),
+    wins: integer("wins").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.patch, table.role, table.champion] })],
+);

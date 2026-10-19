@@ -70,6 +70,15 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
       async getActiveGame() {
         return null;
       },
+      async getLadderPage() {
+        return [];
+      },
+      async getApexLadder() {
+        return [];
+      },
+      async getSoloMatchIds() {
+        return [];
+      },
       async getSummoner(_platform, summonerPuuid) {
         return { puuid: summonerPuuid, profileIconId: 4568, summonerLevel: 312 };
       },

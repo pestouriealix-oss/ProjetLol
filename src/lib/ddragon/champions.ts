@@ -10,7 +10,13 @@ const BASE_URL = env.DDRAGON_BASE_URL ?? "https://ddragon.leagueoflegends.com";
 const championsSchema = z.object({
   data: z.record(
     z.string(),
-    z.looseObject({ id: z.string(), key: z.string().optional(), name: z.string() }),
+    z.looseObject({
+      id: z.string(),
+      key: z.string().optional(),
+      name: z.string(),
+      /** Catégories du champion (« Fighter », « Mage », « Marksman »…). */
+      tags: z.array(z.string()).optional().default([]),
+    }),
   ),
 });
 
@@ -30,6 +36,10 @@ export type ChampionAssets = {
   profileIconUrl: (profileIconId: number) => string;
   /** Champion par son numéro (celui de Spectator-V5) : identifiant, nom et portrait. */
   byKey: (key: number) => { id: string; name: string; iconUrl: string } | null;
+  /** Numéro du champion (Match-V5, Spectator-V5), ou `null` s'il est inconnu. */
+  keyOf: (championId: string) => number | null;
+  /** Catégories Data Dragon du champion (« Fighter », « Support »…). */
+  tags: (championId: string) => string[];
 };
 
 /**
@@ -64,6 +74,11 @@ export async function getChampionAssets(): Promise<ChampionAssets | null> {
       name: (id) => data[fix(id)]?.name ?? id,
       iconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/champion/${fix(id)}.png`,
       profileIconUrl: (id) => `${BASE_URL}/cdn/${latest.version}/img/profileicon/${id}.png`,
+      keyOf: (id) => {
+        const key = Number(data[fix(id)]?.key);
+        return Number.isInteger(key) ? key : null;
+      },
+      tags: (id) => data[fix(id)]?.tags ?? [],
       byKey: (key) => {
         const champion = byKey.get(String(key));
         return champion
