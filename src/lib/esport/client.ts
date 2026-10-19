@@ -81,7 +81,15 @@ export function createEsportApi({
     }
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
-      throw new EsportApiError("unavailable", `Réponse inattendue de PandaScore pour ${path}.`);
+      // Les premiers écarts avec le schéma attendu, pour corriger vite d'après les journaux.
+      const issues = parsed.error.issues
+        .slice(0, 3)
+        .map((issue) => `${issue.path.join(".") || "(racine)"} : ${issue.message}`)
+        .join(" ; ");
+      throw new EsportApiError(
+        "unavailable",
+        `Réponse inattendue de PandaScore pour ${path} (${issues}).`,
+      );
     }
     return parsed.data;
   };
