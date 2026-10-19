@@ -26,16 +26,24 @@ const OBJECTIVES: (keyof DetailObjectives)[] = ["towers", "dragons", "barons", "
  * joueurs. Sur grand écran, un tableau à colonnes comme sur les sites de
  * statistiques ; sur téléphone, une ligne compacte par joueur.
  */
+/**
+ * Classement de chaque joueur, par PUUID : le rang lisible, `null` s'il n'est
+ * pas classé dans la file de la partie. Absent : pas encore connu.
+ */
+export type PlayerRanks = ReadonlyMap<string, string | null>;
+
 export function TeamTable({
   team,
   maxDamage,
   durationMinutes,
   assets,
+  ranks,
 }: {
   team: DetailTeam;
   maxDamage: number;
   durationMinutes: number;
   assets: AssetResolver;
+  ranks?: PlayerRanks;
 }) {
   const titleId = `equipe-${team.teamId}`;
   const title = team.isMine ? copy.ourTeam : copy.theirTeam;
@@ -111,6 +119,7 @@ export function TeamTable({
               <PlayerRow
                 key={player.puuid}
                 player={player}
+                rank={ranks?.get(player.puuid)}
                 maxDamage={maxDamage}
                 durationMinutes={durationMinutes}
                 assets={assets}
@@ -123,7 +132,13 @@ export function TeamTable({
       {/* Téléphone et tablette : une ligne compacte par joueur. */}
       <ul className="flex flex-col gap-1.5 lg:hidden">
         {team.players.map((player) => (
-          <PlayerCard key={player.puuid} player={player} maxDamage={maxDamage} assets={assets} />
+          <PlayerCard
+            key={player.puuid}
+            player={player}
+            rank={ranks?.get(player.puuid)}
+            maxDamage={maxDamage}
+            assets={assets}
+          />
         ))}
       </ul>
     </section>
@@ -132,11 +147,13 @@ export function TeamTable({
 
 function PlayerRow({
   player,
+  rank,
   maxDamage,
   durationMinutes,
   assets,
 }: {
   player: DetailPlayer;
+  rank: string | null | undefined;
   maxDamage: number;
   durationMinutes: number;
   assets: AssetResolver;
@@ -153,7 +170,7 @@ function PlayerRow({
         <Loadout player={player} assets={assets} />
       </td>
       <td className="py-2.5 pr-3">
-        <PlayerName player={player} assets={assets} />
+        <PlayerName player={player} rank={rank} assets={assets} />
       </td>
       <td className="py-2.5 pr-3 whitespace-nowrap">
         <Score player={player} />
@@ -183,10 +200,12 @@ function PlayerRow({
 
 function PlayerCard({
   player,
+  rank,
   maxDamage,
   assets,
 }: {
   player: DetailPlayer;
+  rank: string | null | undefined;
   maxDamage: number;
   assets: AssetResolver;
 }) {
@@ -198,7 +217,7 @@ function PlayerCard({
       )}
     >
       <Loadout player={player} assets={assets} />
-      <PlayerName player={player} assets={assets} />
+      <PlayerName player={player} rank={rank} assets={assets} stacked />
       <div className="text-right">
         <Score player={player} />
       </div>
@@ -260,8 +279,25 @@ function Loadout({ player, assets }: { player: DetailPlayer; assets: AssetResolv
   );
 }
 
-function PlayerName({ player, assets }: { player: DetailPlayer; assets: AssetResolver }) {
+function PlayerName({
+  player,
+  rank,
+  assets,
+  stacked = false,
+}: {
+  player: DetailPlayer;
+  rank: string | null | undefined;
+  assets: AssetResolver;
+  /** Carte de téléphone : le rang sur sa propre ligne, réservée d'avance. */
+  stacked?: boolean;
+}) {
   const champion = assets.champion(player.championName);
+  const rankText =
+    rank === undefined ? null : (
+      <span title={copy.rank.hint} className={rank ? "font-semibold text-ink" : "text-ink-faint"}>
+        {rank ?? copy.rank.unranked}
+      </span>
+    );
   return (
     <div className="min-w-0">
       <p className="flex min-w-0 items-baseline gap-1.5">
@@ -280,7 +316,16 @@ function PlayerName({ player, assets }: { player: DetailPlayer; assets: AssetRes
       <p className="flex min-w-0 items-center gap-1.5 text-sm text-ink-muted">
         {player.role ? <RoleGlyph role={player.role} className="size-3.5" /> : null}
         <span className="truncate">{champion.name}</span>
+        {rankText && !stacked ? (
+          <span className="flex shrink-0 items-center gap-1.5">
+            <span aria-hidden className="text-ink-faint">
+              ·
+            </span>
+            {rankText}
+          </span>
+        ) : null}
       </p>
+      {stacked ? <p className="h-4 truncate text-xs leading-4">{rankText}</p> : null}
     </div>
   );
 }

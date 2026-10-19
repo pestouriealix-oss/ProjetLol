@@ -6,7 +6,12 @@ import { Suspense } from "react";
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { PageShell } from "@/components/layout/page-shell";
 import { Duel } from "@/components/match-detail/duel";
-import { TeamTable, type AssetResolver } from "@/components/match-detail/team-table";
+import {
+  TeamTable,
+  type AssetResolver,
+  type PlayerRanks,
+} from "@/components/match-detail/team-table";
+import { rankLabel } from "@/components/stats/lp-points";
 import { TimelineSection, TimelineSkeleton } from "@/components/match-detail/timeline-section";
 import { ErrorNotice } from "@/components/ui/notice";
 import { Link } from "@/components/ui/link";
@@ -17,7 +22,10 @@ import { getChampionAssets } from "@/lib/ddragon/champions";
 import { getGameAssets } from "@/lib/ddragon/game-assets";
 import { findPlayedMatch } from "@/lib/db/matches";
 import { formatDuration, formatRelative } from "@/lib/format";
-import { buildMatchDetail } from "@/lib/stats/match-detail";
+import type { Platform } from "@/lib/config";
+import { loadPlayerRanks } from "@/lib/riot";
+import { rankQueueFor } from "@/lib/stats/live-game";
+import { buildMatchDetail, type DetailTeam } from "@/lib/stats/match-detail";
 import { rankedQueue } from "@/lib/stats/participation";
 
 export const metadata: Metadata = { title: t.matchDetail.title };
@@ -70,6 +78,13 @@ export default async function MatchDetailPage({
   const opponent = me.role ? (theirs.players.find((p) => p.role === me.role) ?? null) : null;
   const queue = rankedQueue(detail.queueId) ?? "OTHER";
   const minutes = detail.durationSeconds / 60;
+  const tables: TeamsProps = {
+    ours,
+    theirs,
+    maxDamage: detail.maxDamage,
+    durationMinutes: minutes,
+    assets,
+  };
 
   return (
     <PageShell
@@ -115,18 +130,16 @@ export default async function MatchDetailPage({
         </header>
       }
     >
-      <TeamTable
-        team={ours}
-        maxDamage={detail.maxDamage}
-        durationMinutes={minutes}
-        assets={assets}
-      />
-      <TeamTable
-        team={theirs}
-        maxDamage={detail.maxDamage}
-        durationMinutes={minutes}
-        assets={assets}
-      />
+      {/* Les tableaux s'affichent tout de suite ; les rangs (dix appels à Riot)
+          arrivent ensuite, à la même place. */}
+      <Suspense fallback={<Teams {...tables} />}>
+        <RankedTeams
+          {...tables}
+          platform={played.platform}
+          queueId={detail.queueId}
+          puuids={[...ours.players, ...theirs.players].map((player) => player.puuid)}
+        />
+      </Suspense>
       <div className="max-w-2xl">
         <Duel me={me} opponent={opponent} assets={assets} />
       </div>
@@ -140,6 +153,48 @@ export default async function MatchDetailPage({
       </Suspense>
     </PageShell>
   );
+}
+
+type TeamsProps = {
+  ours: DetailTeam;
+  theirs: DetailTeam;
+  maxDamage: number;
+  durationMinutes: number;
+  assets: AssetResolver;
+  ranks?: PlayerRanks;
+};
+
+function Teams({ ours, theirs, ranks, ...shared }: TeamsProps) {
+  return (
+    <>
+      <TeamTable team={ours} ranks={ranks} {...shared} />
+      <TeamTable team={theirs} ranks={ranks} {...shared} />
+    </>
+  );
+}
+
+/** Les deux équipes avec le classement actuel de chaque joueur, dans la file de la partie. */
+async function RankedTeams({
+  platform,
+  queueId,
+  puuids,
+  ...teams
+}: TeamsProps & { platform: Platform; queueId: number; puuids: string[] }) {
+  let entries: Awaited<ReturnType<typeof loadPlayerRanks>>;
+  try {
+    entries = await loadPlayerRanks(platform, puuids);
+  } catch (error) {
+    // Sans les rangs, la partie reste lisible : les tableaux restent tels quels.
+    console.error("Rangs des joueurs indisponibles", error);
+    return <Teams {...teams} />;
+  }
+  const queue = rankQueueFor(queueId);
+  const ranks = new Map<string, string | null>();
+  for (const [puuid, list] of entries) {
+    const entry = list.find((candidate) => candidate.queueType === queue);
+    ranks.set(puuid, entry ? rankLabel(entry.tier, entry.rank) : null);
+  }
+  return <Teams {...teams} ranks={ranks} />;
 }
 
 function BackLink({ href }: { href: string }) {

@@ -268,6 +268,10 @@ export const fr = {
   },
   matchDetail: {
     title: "Détail de la partie",
+    rank: {
+      unranked: "Non classé",
+      hint: "Classement actuel du joueur dans cette file (Riot ne garde pas celui du jour de la partie)",
+    },
     back: "Toutes les parties",
     patch: (patch: string) => `Patch ${patch}`,
     ourTeam: "Ton équipe",
