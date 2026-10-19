@@ -1,10 +1,9 @@
 import "server-only";
 
-import { APP_NAME } from "@/lib/config";
 import { env } from "@/lib/env";
 
 import { keepRecent, mergeArticles, parseFeed, toArticles, type Article } from "./feed";
-import { NEWS_SOURCES, type NewsSource } from "./sources";
+import { FEED_ACCEPT, FEED_USER_AGENT, NEWS_SOURCES, type NewsSource } from "./sources";
 
 export type { Article } from "./feed";
 export type { NewsLanguage, NewsSource } from "./sources";
@@ -31,10 +30,7 @@ function feedUrlOf(source: NewsSource): string {
 
 async function loadSource(source: NewsSource): Promise<Article[]> {
   const response = await fetch(feedUrlOf(source), {
-    headers: {
-      Accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8",
-      "User-Agent": `${APP_NAME}/1.0 (lecteur RSS)`,
-    },
+    headers: { Accept: FEED_ACCEPT, "User-Agent": FEED_USER_AGENT },
     // Un quart d'heure : assez frais pour l'actu, et chaque site n'est lu
     // qu'une fois par quart d'heure, quel que soit le nombre de visiteurs.
     next: { revalidate: 900 },

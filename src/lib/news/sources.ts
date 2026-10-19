@@ -6,7 +6,13 @@
  * couvre d'autres jeux que League of Legends.
  */
 
+import { APP_NAME } from "../config";
+
 export type NewsLanguage = "fr" | "en";
+
+/** Comment le site se présente aux flux : un lecteur RSS, sous son vrai nom. */
+export const FEED_USER_AGENT = `${APP_NAME}/1.0 (lecteur RSS)`;
+export const FEED_ACCEPT = "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8";
 
 export type NewsSource = {
   /** Identifiant stable (sert aussi de nom de fichier pour les flux de test). */

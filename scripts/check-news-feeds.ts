@@ -8,10 +8,24 @@
  * sites). Rien n'est enregistré : le résultat s'affiche dans le terminal.
  */
 import { keepRecent, MAX_ARTICLE_AGE_DAYS, parseFeed, toArticles } from "../src/lib/news/feed";
-import { LEAGUE_TOPICS, NEWS_SOURCES, type NewsSource } from "../src/lib/news/sources";
+import {
+  FEED_ACCEPT,
+  FEED_USER_AGENT,
+  LEAGUE_TOPICS,
+  NEWS_SOURCES,
+  type NewsSource,
+} from "../src/lib/news/sources";
+
+/** Recherche Google Actualités (agrège L'Équipe, Millenium, Sheep, Dexerto…), sur sept jours. */
+const googleNews = (lang: "fr" | "en") =>
+  lang === "fr"
+    ? "https://news.google.com/rss/search?q=%22League+of+Legends%22+when:7d&hl=fr&gl=FR&ceid=FR:fr"
+    : "https://news.google.com/rss/search?q=%22League+of+Legends%22+when:7d&hl=en-US&gl=US&ceid=US:en";
 
 const CANDIDATES: NewsSource[] = [
   ...NEWS_SOURCES,
+  { id: "gnews-fr", name: "Google Actus FR", lang: "fr", feedUrl: googleNews("fr") },
+  { id: "gnews-en", name: "Google Actus EN", lang: "en", feedUrl: googleNews("en") },
   {
     id: "dexerto-fr-lol",
     name: "Dexerto FR (LoL)",
@@ -83,7 +97,7 @@ const CANDIDATES: NewsSource[] = [
 async function check(source: NewsSource): Promise<string> {
   try {
     const response = await fetch(source.feedUrl, {
-      headers: { Accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8" },
+      headers: { Accept: FEED_ACCEPT, "User-Agent": FEED_USER_AGENT },
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) return `✗ ${response.status}`;
@@ -95,6 +109,7 @@ async function check(source: NewsSource): Promise<string> {
       .sort((a, b) => b.getTime() - a.getTime())[0];
     return `${recent.length > 0 ? "✓" : "·"} ${articles.length} sur LoL, ${recent.length} de moins de ${MAX_ARTICLE_AGE_DAYS} jours, dernier : ${newest?.toISOString().slice(0, 10) ?? "aucun"}`;
   } catch (error) {
+    if (error instanceof Error && error.name === "ZodError") return "✗ pas un flux RSS lisible";
     return `✗ ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`;
   }
 }
