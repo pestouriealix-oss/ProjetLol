@@ -50,6 +50,7 @@ export async function readScreenshot(formData: FormData): Promise<ReadScreenshot
     const result = await readDraftFromScreenshot(
       { data, mediaType: capture.type as (typeof SCREENSHOT_TYPES)[number] },
       myRole,
+      user.id,
     );
     return { ok: true, ...result };
   } catch (error) {

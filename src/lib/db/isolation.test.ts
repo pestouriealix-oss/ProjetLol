@@ -158,6 +158,27 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await drafts.countDraftAnalysesSince(bob, today)).toBe(1);
   });
 
+  it("chaque utilisateur ne compte que sa propre consommation du modèle", async () => {
+    const usages = await import("./llm-usages");
+    const since = new Date(Date.now() - 60_000);
+    const usage = {
+      model: "claude-sonnet-5-5",
+      inputTokens: 3000,
+      outputTokens: 1000,
+      cacheWriteTokens: 0,
+      cacheReadTokens: 500,
+    };
+    await usages.recordLlmUsage(alice, "DRAFT_ANALYSIS", usage);
+    await usages.recordLlmUsage(alice, "DRAFT_ANALYSIS", usage);
+    await usages.recordLlmUsage(bob, "DRAFT_EXTRACTION", usage);
+
+    const aliceSum = await usages.sumLlmUsage(alice, since);
+    expect(aliceSum.calls).toBe(2);
+    expect(aliceSum.costMicroUsd).toBe(2 * (3000 * 2 + 1000 * 10 + 500 * 0.1));
+    expect((await usages.sumLlmUsage(bob, since)).calls).toBe(1);
+    expect(await usages.siteLlmSpendSince(since)).toBeGreaterThanOrEqual(3 * 16050);
+  });
+
   it("refuse un second compte avec le même e-mail", async () => {
     const email = `test-dup-${randomUUID()}@example.test`;
     const first = await usersApi.createUserWithPassword({ email, name: null, passwordHash: "x" });

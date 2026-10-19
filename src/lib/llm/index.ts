@@ -13,7 +13,7 @@ export const llm = createLlm({ apiKey: env.ANTHROPIC_API_KEY, baseURL: env.ANTHR
  */
 export const MODELS = {
   readDraft: "claude-haiku-5-5",
-  draftSheet: "claude-sonnet-5-5",
+  draftSheet: env.DRAFT_SHEET_MODEL ?? "claude-sonnet-5-5",
 } as const;
 
 export { LlmError, type LlmErrorKind } from "./errors";

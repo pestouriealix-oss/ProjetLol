@@ -78,6 +78,15 @@ de fiches par 24 heures dépend de l'offre (`src/lib/auth/entitlements.ts`), et
 les lectures de capture sont limitées à 30 par heure. Sans clé, la page
 l'explique ; la partie en cours remplit quand même le tableau.
 
+Chaque appel au modèle est compté (`llm_usages` : jetons et coût en
+micro-dollars, d'après `src/lib/llm/pricing.ts`), et le prompt système est mis
+en cache. Deux réglages facultatifs du `.env` :
+
+- `DRAFT_SHEET_MODEL` : le modèle de la fiche (Sonnet par défaut,
+  `claude-haiku-5-5` pour comparer).
+- `LLM_MONTHLY_BUDGET_USD` : au-delà de ce montant dépensé dans le mois, les
+  fiches gratuites se mettent en pause jusqu'au mois suivant ; Premium continue.
+
 ### Statistiques de matchups (fiche de draft)
 
 La fiche s'appuie sur des données vérifiées, données au modèle avant qu'il

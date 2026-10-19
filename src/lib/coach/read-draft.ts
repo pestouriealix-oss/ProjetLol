@@ -14,6 +14,7 @@ import {
 } from "@/lib/llm/prompts/read-draft";
 
 import { CoachError } from "./errors";
+import { trackUsage } from "./usage";
 import { loadRoleHints } from "./roles";
 
 export const SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
@@ -33,6 +34,7 @@ export type ReadDraftResult = {
 export async function readDraftFromScreenshot(
   image: { data: string; mediaType: ScreenshotType },
   fallbackRole: Role,
+  userId: string,
 ): Promise<ReadDraftResult> {
   const champions = await getChampionAssets();
   if (!champions) throw new CoachError("champions_unavailable", "Data Dragon ne répond pas.");
@@ -43,6 +45,7 @@ export async function readDraftFromScreenshot(
     system: READ_DRAFT_SYSTEM,
     maxTokens: 1000,
     tool: READ_DRAFT_TOOL,
+    onUsage: (usage) => trackUsage(userId, "DRAFT_EXTRACTION", usage),
     content: [
       { type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } },
       { type: "text", text: readDraftInstructions(list) },

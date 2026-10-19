@@ -17,6 +17,16 @@ const schema = z.object({
   ANTHROPIC_API_KEY: optional,
   /** Autre adresse pour l'API Anthropic (tests). */
   ANTHROPIC_BASE_URL: optional,
+  /** Modèle qui écrit les fiches (« claude-haiku-5-5 » pour l'essayer). Par défaut, Sonnet. */
+  DRAFT_SHEET_MODEL: optional,
+  /** Plafond de dépense mensuelle du modèle, en dollars : au-delà, les fiches gratuites s'arrêtent. */
+  LLM_MONTHLY_BUDGET_USD: optional.pipe(
+    z
+      .string()
+      .regex(/^\d+(\.\d+)?$/, "LLM_MONTHLY_BUDGET_USD doit être un nombre")
+      .transform(Number)
+      .optional(),
+  ),
   /** Autre adresse pour l'API Riot (tests). Par défaut, les serveurs de Riot. */
   RIOT_API_BASE_URL: optional,
   /** Autre adresse pour Data Dragon (miroir, tests). Par défaut, celle de Riot. */

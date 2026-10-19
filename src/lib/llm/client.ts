@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 import { LlmError } from "./errors";
+import type { LlmUsage } from "./pricing";
 
 /**
  * Appels au modèle, toujours sous la forme d'un outil imposé : le modèle
@@ -23,6 +24,8 @@ export type ToolCall<T> = {
   content: Anthropic.MessageParam["content"];
   tool: ToolSpec<T>;
   maxTokens: number;
+  /** Reçoit les tokens consommés par l'appel (pour le suivi des coûts). */
+  onUsage?: (usage: LlmUsage) => void;
 };
 
 export type LlmClientOptions = {
@@ -45,7 +48,15 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
       params: {
         model: call.model,
         max_tokens: call.maxTokens,
-        system: call.system,
+        // La partie fixe (outil + instructions) est mise en cache chez Anthropic :
+        // facturée bien moins cher d'un appel à l'autre.
+        system: [
+          {
+            type: "text" as const,
+            text: call.system,
+            cache_control: { type: "ephemeral" as const },
+          },
+        ],
         messages: [{ role: "user" as const, content: call.content }],
         tools: [
           {
@@ -61,7 +72,15 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
     };
   };
 
-  const finish = <T>(message: Anthropic.Message, tool: ToolSpec<T>): T => {
+  const finish = <T>(message: Anthropic.Message, call: ToolCall<T>): T => {
+    const tool = call.tool;
+    call.onUsage?.({
+      model: call.model,
+      inputTokens: message.usage.input_tokens,
+      outputTokens: message.usage.output_tokens,
+      cacheWriteTokens: message.usage.cache_creation_input_tokens ?? 0,
+      cacheReadTokens: message.usage.cache_read_input_tokens ?? 0,
+    });
     if (message.stop_reason === "refusal") {
       throw new LlmError("refused", "Le modèle a refusé de répondre.");
     }
@@ -84,7 +103,7 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
     async callTool<T>(call: ToolCall<T>): Promise<T> {
       const { client, params } = request(call);
       try {
-        return finish(await client.messages.create(params), call.tool);
+        return finish(await client.messages.create(params), call);
       } catch (error) {
         throw toLlmError(error);
       }
@@ -104,7 +123,7 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
       try {
         const stream = client.messages.stream(params, { signal });
         stream.on("inputJson", (_delta, snapshot) => onPartial(snapshot));
-        return finish(await stream.finalMessage(), call.tool);
+        return finish(await stream.finalMessage(), call);
       } catch (error) {
         throw toLlmError(error);
       }

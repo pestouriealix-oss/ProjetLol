@@ -311,6 +311,8 @@ export const fr = {
       again: "Réessayer",
       errors: {
         quota: "Tu as atteint ta limite de fiches pour les dernières 24 heures.",
+        budget:
+          "Les fiches gratuites sont en pause jusqu'au mois prochain : le coach a atteint son budget mensuel.",
         invalid_draft: "La draft est incomplète ou contient un champion en double.",
         missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
         invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",

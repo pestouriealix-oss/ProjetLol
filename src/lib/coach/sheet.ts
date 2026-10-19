@@ -22,6 +22,7 @@ import { t } from "@/i18n/fr";
 
 import { CoachError } from "./errors";
 import { loadMatchupFacts } from "./facts";
+import { trackUsage } from "./usage";
 
 export type { DraftSheet };
 
@@ -116,6 +117,7 @@ export async function writeDraftSheet(
         system: DRAFT_SHEET_SYSTEM,
         maxTokens: 2000,
         tool: DRAFT_SHEET_TOOL,
+        onUsage: (usage) => trackUsage(userId, "DRAFT_ANALYSIS", usage),
         content: draftSheetMessage({
           patch,
           myRole: draft.myRole,

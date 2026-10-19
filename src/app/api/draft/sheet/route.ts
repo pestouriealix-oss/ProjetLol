@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { CoachError } from "@/lib/coach/errors";
 import { remainingSheets, writeDraftSheet } from "@/lib/coach/sheet";
+import { freeCoachPaused } from "@/lib/coach/usage";
 import { draftSchema } from "@/lib/draft/draft";
 import { llm, LlmError } from "@/lib/llm";
 
@@ -30,6 +31,9 @@ export async function POST(request: Request) {
     return json(400, { type: "error", error: "invalid_draft" });
   }
   if (!llm.isConfigured) return json(503, { type: "error", error: "missing_key" });
+
+  // Plafond mensuel du site atteint : les fiches gratuites attendent le mois suivant.
+  if (await freeCoachPaused(user.plan)) return json(429, { type: "error", error: "budget" });
 
   const { remaining } = await remainingSheets(user.id, user.plan);
   if (remaining <= 0) return json(429, { type: "error", error: "quota" });
