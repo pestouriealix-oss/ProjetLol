@@ -431,7 +431,39 @@ export const fr = {
   },
   news: {
     title: "Actus",
-    intro: "Les patchs du jeu, dans l'ordre, avec un lien vers les notes officielles de Riot.",
+    intro:
+      "La scène et le jeu en articles, en français et en anglais, et les patchs avec leurs notes officielles.",
+    views: {
+      label: "Contenu",
+      articles: "Articles",
+      patches: "Patchs",
+    },
+    languages: {
+      label: "Langue des articles",
+      all: "Toutes",
+      fr: "Français",
+      en: "Anglais",
+    },
+    articles: {
+      title: "Derniers articles",
+      readOn: (source: string) => `Lire sur ${source}`,
+      opensOn: (source: string) => `S'ouvre sur ${source}`,
+      langTag: { fr: "FR", en: "EN" },
+      emptyTitle: "Aucun article pour l'instant",
+      emptyBody: "Les sites suivis n'ont rien publié sur League of Legends récemment.",
+      emptyLanguageTitle: "Aucun article dans cette langue pour l'instant",
+      emptyLanguageBody: "Les articles dans les autres langues restent disponibles.",
+      showAll: "Voir toutes les langues",
+      errorTitle: "Les articles n'ont pas pu être chargés",
+      errorBody:
+        "Les sites d'actualité ne répondent pas pour l'instant. Réessaie dans quelques minutes.",
+      partial: (sources: string, count: number) =>
+        count > 1
+          ? `${sources} ne répondent pas pour l'instant : leurs articles manquent.`
+          : `${sources} ne répond pas pour l'instant : ses articles manquent.`,
+      credit:
+        "Titres et extraits viennent des flux RSS des sites. Chaque article se lit en entier chez son auteur.",
+    },
     current: "Patch actuel",
     readNotes: "Lire les notes de patch",
     notesFor: (id: string) => `Notes du patch ${id}`,

@@ -14,6 +14,7 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 | 2      | API Riot, Data Dragon, synchronisation des parties               | Fait    |
 | 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)      | Fait    |
 | Esport | Calendrier, résultats, arbres et classements (PandaScore)        | Fait    |
+| Actus  | Articles en français et en anglais (flux RSS), patchs            | Fait    |
 | 3      | Coach de draft (capture, extraction, fiche en streaming)         | À faire |
 | 4b     | Bilan d'une partie                                               | À faire |
 | 5      | Tableau de bord global                                           | À faire |
@@ -57,6 +58,14 @@ gardées une minute en cache) :
    (fichier `.env`), puis relance `npm run dev`.
 
 Sans clé, l'onglet explique qu'elle manque.
+
+### Articles (onglet Actus)
+
+L'onglet Actus affiche les derniers articles sur League of Legends et sa scène,
+lus dans les flux RSS publics des sites (liste dans `src/lib/news/sources.ts`) :
+titre, court extrait et lien vers l'article, jamais son texte. Chaque flux est
+relu au plus tous les quarts d'heure. Aucune clé n'est nécessaire ; un site qui
+ne répond pas est signalé sans masquer les autres.
 
 ### Connexion Discord (facultatif)
 
@@ -108,6 +117,7 @@ src/
     validation/         Schémas Zod partagés
     draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
     ddragon/            Data Dragon : patchs, noms et portraits des champions
+    news/               Flux RSS des sites d'actualité (titre, extrait, lien)
     riot/               Client de l'API Riot (comptes, classement, parties)
     stats/              Ce qu'on retient d'une partie brute
     sync/               Synchronisation d'un compte Riot

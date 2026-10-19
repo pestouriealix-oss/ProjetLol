@@ -22,6 +22,8 @@ const schema = z.object({
   PANDASCORE_TOKEN: optional,
   /** Autre adresse pour PandaScore (tests). */
   PANDASCORE_BASE_URL: optional,
+  /** Serveur de flux RSS de test (un fichier `<source>.xml` par site). Par défaut, les vrais sites. */
+  NEWS_FEEDS_BASE_URL: optional,
 });
 
 const parsed = schema.safeParse(process.env);
