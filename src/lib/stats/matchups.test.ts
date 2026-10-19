@@ -8,6 +8,7 @@ import {
   patchOfVersion,
   roleShares,
   sampleMatch,
+  statsVerdict,
   winRate,
   MIN_RELIABLE_GAMES,
 } from "./matchups";
@@ -84,6 +85,14 @@ describe("lecture des chiffres", () => {
     expect(winRate(10, 6)).toEqual({ games: 10, wins: 6, rate: 0.6, reliable: false });
     expect(winRate(MIN_RELIABLE_GAMES, 20).reliable).toBe(true);
     expect(winRate(0, 0).rate).toBe(0);
+  });
+
+  it("tire un verdict des statistiques seulement quand elles sont fiables", () => {
+    expect(statsVerdict({ games: 790, wins: 445 })).toBe("favorable");
+    expect(statsVerdict({ games: 100, wins: 50 })).toBe("even");
+    expect(statsVerdict({ games: 100, wins: 48 })).toBe("unfavorable");
+    expect(statsVerdict({ games: 12, wins: 10 })).toBeNull();
+    expect(statsVerdict(null)).toBeNull();
   });
 });
 

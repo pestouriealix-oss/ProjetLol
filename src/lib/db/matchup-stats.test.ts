@@ -40,4 +40,14 @@ describe.skipIf(!hasDatabase)("statistiques de matchups", () => {
       { role: "JUNGLE", champion: 64, games: 2, wins: 2 },
     ]);
   });
+
+  it("garde un duel écrit une seule fois et le ressert", async () => {
+    const notes = await import("./matchup-notes");
+    const key = `test|${randomUUID()}`;
+    expect(await notes.findMatchupNote(key)).toBeNull();
+    const note = { key, patch: "0.0", model: "m", promptVersion: "p" };
+    await notes.saveMatchupNote({ ...note, content: { summary: "premier" } });
+    await notes.saveMatchupNote({ ...note, content: { summary: "second" } });
+    expect(await notes.findMatchupNote(key)).toEqual({ summary: "premier" });
+  });
 });

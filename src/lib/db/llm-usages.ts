@@ -5,7 +5,7 @@ import type { LlmUsage } from "@/lib/llm/pricing";
 import { costMicroUsd } from "@/lib/llm/pricing";
 
 import { db } from "./client";
-import { llmUsages } from "./schema";
+import { draftAnalyses, llmUsages } from "./schema";
 
 /**
  * Suivi de ce que coûte le modèle : un enregistrement par appel (tokens et
@@ -56,4 +56,33 @@ export async function siteLlmSpendSince(since: Date): Promise<number> {
     .from(llmUsages)
     .where(gte(llmUsages.createdAt, since));
   return Number(row?.cost ?? 0);
+}
+
+/**
+ * Bilan du site depuis `since`, pour régler les prix : par type d'appel et par
+ * modèle, le nombre d'appels et leur coût ; et le nombre de fiches écrites.
+ * Uniquement des totaux, aucun détail par personne.
+ */
+export async function siteLlmCostReport(since: Date): Promise<{
+  sheets: number;
+  rows: { kind: LlmCallKind; model: string; calls: number; costMicroUsd: number }[];
+}> {
+  const rows = await db
+    .select({
+      kind: llmUsages.kind,
+      model: llmUsages.model,
+      calls: sql<number>`count(*)::int`,
+      costMicroUsd: sql<number>`coalesce(sum(${llmUsages.costMicroUsd}), 0)::bigint`,
+    })
+    .from(llmUsages)
+    .where(gte(llmUsages.createdAt, since))
+    .groupBy(llmUsages.kind, llmUsages.model);
+  const [sheets] = await db
+    .select({ value: sql<number>`count(*)::int` })
+    .from(draftAnalyses)
+    .where(gte(draftAnalyses.createdAt, since));
+  return {
+    sheets: sheets?.value ?? 0,
+    rows: rows.map((row) => ({ ...row, costMicroUsd: Number(row.costMicroUsd) })),
+  };
 }

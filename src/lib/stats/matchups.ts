@@ -84,6 +84,25 @@ export function winRate(games: number, wins: number): WinRate {
   };
 }
 
+/** Seuils du verdict d'un duel, d'après son taux de victoire (mêmes que dans le prompt). */
+export const FAVORABLE_RATE = 0.52;
+export const UNFAVORABLE_RATE = 0.48;
+
+/**
+ * Le verdict que dictent les statistiques d'un duel, ou `null` si elles sont
+ * absentes ou trop maigres pour trancher.
+ */
+export function statsVerdict(
+  record: { games: number; wins: number } | null,
+): "favorable" | "even" | "unfavorable" | null {
+  if (!record) return null;
+  const { rate, reliable } = winRate(record.games, record.wins);
+  if (!reliable) return null;
+  if (rate >= FAVORABLE_RATE) return "favorable";
+  if (rate <= UNFAVORABLE_RATE) return "unfavorable";
+  return "even";
+}
+
 /**
  * Le rôle de chaque champion d'une équipe dont on ne connaît que les choix
  * (partie en cours) : la répartition la plus probable, d'après la part de

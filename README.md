@@ -78,9 +78,18 @@ de fiches par 24 heures dépend de l'offre (`src/lib/auth/entitlements.ts`), et
 les lectures de capture sont limitées à 30 par heure. Sans clé, la page
 l'explique ; la partie en cours remplit quand même le tableau.
 
+La fiche part en deux appels simultanés : les conditions de victoire (propres à
+la partie) et le duel contre le vis-à-vis. Le duel ne dépend que des deux
+champions (et du duo en bas) : il est gardé (`matchup_notes`) et resservi aux
+joueurs suivants du même duel, sur le même patch, avec le même modèle et le
+même verdict des statistiques. Il s'affiche alors aussitôt et ne coûte rien.
+
+Offres : 3 fiches par jour en gratuit, 40 en Premium.
+
 Chaque appel au modèle est compté (`llm_usages` : jetons et coût en
-micro-dollars, d'après `src/lib/llm/pricing.ts`), et le prompt système est mis
-en cache. Deux réglages facultatifs du `.env` :
+micro-dollars, d'après `src/lib/llm/pricing.ts`). `npm run llm:costs` donne le
+coût moyen réel d'une fiche et la part des duels resservis, pour régler les
+prix. Deux réglages facultatifs du `.env` :
 
 - `DRAFT_SHEET_MODEL` : le modèle de la fiche (Sonnet par défaut,
   `claude-haiku-5-5` pour comparer).

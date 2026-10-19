@@ -356,3 +356,22 @@ export const championRoleStats = pgTable(
   },
   (table) => [primaryKey({ columns: [table.patch, table.role, table.champion] })],
 );
+
+/**
+ * Duels déjà écrits par le modèle, resservis à tous les joueurs du même duel :
+ * un texte par clé (version du prompt, modèle, patch, poste, champions, duo en
+ * bas, verdict des statistiques). Aucune donnée personnelle.
+ */
+export const matchupNotes = pgTable(
+  "matchup_notes",
+  {
+    key: text("key").primaryKey(),
+    /** « 16.20 » : sert à vider les anciens patchs. */
+    patch: text("patch").notNull(),
+    model: text("model").notNull(),
+    promptVersion: text("prompt_version").notNull(),
+    content: jsonb("content").notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [index("matchup_notes_patch_idx").on(table.patch)],
+);

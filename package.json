@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run lint && npm run test",
     "news:check": "tsx scripts/check-news-feeds.ts",
-    "matchups:collect": "node --env-file=.env --conditions=react-server --import tsx scripts/collect-matchups.ts"
+    "matchups:collect": "node --env-file=.env --conditions=react-server --import tsx scripts/collect-matchups.ts",
+    "llm:costs": "node --env-file=.env --conditions=react-server --import tsx scripts/llm-costs.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

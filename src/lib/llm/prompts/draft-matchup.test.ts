@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { formatInteger, formatPercent } from "@/lib/format";
 
-import { draftSheetMessage, type SheetRequest } from "./draft-sheet";
+import { draftMatchupMessage, type MatchupRequest } from "./draft-matchup";
 
-const base: SheetRequest = {
+const base: MatchupRequest = {
   patch: "16.20",
   ddragonVersion: "16.20.1",
-  myRole: "JUNGLE",
-  allies: { TOP: "Garen", JUNGLE: "Lee Sin", MID: "Ahri", ADC: "Caitlyn", SUPPORT: "Lux" },
-  enemies: { TOP: "Sett", JUNGLE: "Ivern", MID: "Orianna", ADC: "Kog'Maw", SUPPORT: "Lulu" },
-  rank: "Émeraude",
+  role: "JUNGLE",
+  mine: "Lee Sin",
+  theirs: "Ivern",
+  partners: null,
   champions: {
     mine: {
       name: "Lee Sin",
@@ -29,9 +29,9 @@ const base: SheetRequest = {
   },
 };
 
-describe("draftSheetMessage", () => {
+describe("draftMatchupMessage", () => {
   it("donne au modèle la fiche technique et les statistiques vérifiées", () => {
-    const message = draftSheetMessage(base);
+    const message = draftMatchupMessage(base);
     expect(message).toContain("Données vérifiées (Data Dragon 16.20.1)");
     expect(message).toContain("- Q, Onde sonore (délai 11/10/9/8/7 s) : Projectile.");
     expect(message).toContain("Ivern : fiche technique indisponible.");
@@ -42,13 +42,26 @@ describe("draftSheetMessage", () => {
   });
 
   it("dit clairement quand il n'y a pas de statistique", () => {
-    expect(draftSheetMessage({ ...base, stats: null })).toContain(
+    expect(draftMatchupMessage({ ...base, stats: null })).toContain(
       "Aucune statistique de parties classées disponible",
     );
-    const thin = draftSheetMessage({
+    const thin = draftMatchupMessage({
       ...base,
       stats: { ...base.stats!, duel: { games: 12, wins: 7 }, reliable: false },
     });
     expect(thin).toContain("peu fiable");
+  });
+
+  it("ne parle que du duel, avec le duo en bas", () => {
+    const solo = draftMatchupMessage(base);
+    expect(solo).not.toContain("En bas");
+    const bot = draftMatchupMessage({
+      ...base,
+      role: "ADC",
+      mine: "Caitlyn",
+      theirs: "Kog'Maw",
+      partners: { mine: "Lux", theirs: "Lulu" },
+    });
+    expect(bot).toContain("le duo du joueur est Caitlyn avec Lux ; en face, Kog'Maw avec Lulu");
   });
 });
