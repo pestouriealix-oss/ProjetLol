@@ -4,7 +4,8 @@ import { z } from "zod";
 import { PageShell } from "@/components/layout/page-shell";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
 import { AccountSwitcher } from "@/components/profile/account-switcher";
-import { LpChart, type ChartPoint } from "@/components/stats/lp-chart";
+import { LpChart } from "@/components/stats/lp-chart";
+import { lpChartFloors, lpChartPoints } from "@/components/stats/lp-points";
 import { ChampionStatsTable, Matchups, RoleStats } from "@/components/stats/performance";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
@@ -15,16 +16,12 @@ import { cn } from "@/lib/cn";
 import { getChampionAssets } from "@/lib/ddragon/champions";
 import { listChampionStats, listMatchups, listRoleStats, type QueueFilter } from "@/lib/db/matches";
 import { listRankHistory } from "@/lib/db/ranks";
-import { formatShortDate } from "@/lib/format";
-import { rankHistory, tierFloors } from "@/lib/stats/ladder";
 
 import { getSelectedAccount } from "../selected-account";
 
 export const metadata: Metadata = { title: t.stats.title };
 
 const copy = t.stats;
-const tiers = t.dashboard.rank.tiers;
-const APEX_TIERS = new Set(["MASTER", "GRANDMASTER", "CHALLENGER"]);
 
 const QUEUE_PARAM = { tout: "ALL", solo: "SOLO", flex: "FLEX" } as const satisfies Record<
   string,
@@ -77,20 +74,8 @@ export default async function StatsPage({ searchParams }: { searchParams: StatsS
     getChampionAssets(),
   ]);
 
-  const rankLabel = (tier: string, division: string) =>
-    `${tiers[tier] ?? tier}${APEX_TIERS.has(tier) ? "" : ` ${division}`}`;
-  const history = rankHistory(snapshots);
-  const points: ChartPoint[] = history.map((point) => ({
-    date: formatShortDate(point.at),
-    rank: rankLabel(point.tier, point.division),
-    lp: point.lp,
-    points: point.points,
-    time: point.at.getTime(),
-  }));
-  const floors = tierFloors().map((floor) => ({
-    label: tiers[floor.tier] ?? floor.tier,
-    points: floor.points,
-  }));
+  const points = lpChartPoints(snapshots);
+  const floors = lpChartFloors();
 
   const href = (file: string) => `/stats?compte=${account.id}&file=${file}`;
 

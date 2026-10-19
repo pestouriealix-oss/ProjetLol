@@ -6,6 +6,7 @@ import { LiveBanner } from "@/components/live/live-banner";
 import { MatchList } from "@/components/matches/match-list";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
 import { ChampionRecords } from "@/components/profile/champion-records";
+import { LpCard } from "@/components/profile/lp-card";
 import { ProfileHeader, type ProfileAccount } from "@/components/profile/profile-header";
 import { RankCard } from "@/components/profile/rank-card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { t } from "@/i18n/fr";
 import { requireUser } from "@/lib/auth/session";
 import { getChampionAssets } from "@/lib/ddragon/champions";
 import { listChampionRecords, listPlayedMatches } from "@/lib/db/matches";
-import { listLatestRanks } from "@/lib/db/ranks";
+import { listLatestRanks, listRankHistory } from "@/lib/db/ranks";
 import { formatRelative } from "@/lib/format";
 
 import { getSelectedAccount, type AccountSearchParams } from "../selected-account";
@@ -88,8 +89,10 @@ export default async function DashboardPage({
     );
   }
 
-  const [ranks, records, matches] = await Promise.all([
+  const [ranks, soloHistory, flexHistory, records, matches] = await Promise.all([
     listLatestRanks(user.id, account.id),
+    listRankHistory(user.id, account.id, "RANKED_SOLO_5x5", { limit: 300 }),
+    listRankHistory(user.id, account.id, "RANKED_FLEX_SR", { limit: 300 }),
     listChampionRecords(user.id, account.id, { limit: 5 }),
     listPlayedMatches(user.id, account.id, { limit: RECENT_MATCHES }),
   ]);
@@ -118,6 +121,7 @@ export default async function DashboardPage({
       <div className="grid items-start gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="flex flex-col gap-4 max-lg:order-2">
           <RankCard ranks={ranks} synced={lastSyncedAt !== null} />
+          <LpCard solo={soloHistory} flex={flexHistory} statsHref={`/stats?compte=${account.id}`} />
           <ChampionRecords
             records={records}
             champions={champions}

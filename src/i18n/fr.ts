@@ -135,6 +135,12 @@ export const fr = {
   },
   dashboard: {
     level: (level: number) => `Niveau ${level}`,
+    lp: {
+      title: "Courbe des LP",
+      empty:
+        "Elle se dessine au fil des mises à jour, dès que ton rang bouge. Riot ne donne pas l'historique d'avant.",
+      details: "Voir le détail",
+    },
     title: "Tableau de bord",
     accounts: "Compte affiché",
     manage: "Gérer les comptes",

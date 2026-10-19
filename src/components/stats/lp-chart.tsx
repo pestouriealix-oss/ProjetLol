@@ -31,7 +31,16 @@ const PAD = { top: 16, right: 16, bottom: 16, left: 16 };
  * le relevé le plus proche, avec une ligne verticale et une bulle ; le même
  * contenu existe en tableau pour qui ne voit pas le graphique.
  */
-export function LpChart({ points, floors }: { points: ChartPoint[]; floors: ChartFloor[] }) {
+export function LpChart({
+  points,
+  floors,
+  compact = false,
+}: {
+  points: ChartPoint[];
+  floors: ChartFloor[];
+  /** Version courte, pour une colonne étroite (tableau de bord). */
+  compact?: boolean;
+}) {
   const [active, setActive] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const hintId = useId();
@@ -97,7 +106,10 @@ export function LpChart({ points, floors }: { points: ChartPoint[]; floors: Char
         onFocus={() => setActive(points.length - 1)}
         onBlur={() => setActive(null)}
         onKeyDown={onKey}
-        className="relative h-56 touch-pan-y rounded-panel border border-line bg-surface outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent sm:h-64"
+        className={cn(
+          "relative touch-pan-y rounded-panel border border-line bg-surface outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent",
+          compact ? "h-40" : "h-56 sm:h-64",
+        )}
       >
         <svg
           aria-hidden
