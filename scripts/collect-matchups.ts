@@ -7,9 +7,9 @@
  *   npm run matchups:collect -- --interval 100   # clé de production, plus rapide
  *
  * Utilise RIOT_API_KEY et DATABASE_URL du fichier .env. Les appels sont espacés
- * pour rester sous la limite d'une clé de développement (100 par 2 minutes) :
- * environ 2 000 parties par heure. On peut l'arrêter à tout moment (Ctrl + C),
- * ce qui est compté reste compté.
+ * pour rester sous la limite d'une clé de développement (100 par 2 minutes) en
+ * laissant de la marge au site : environ 1 800 parties par heure. On peut
+ * l'arrêter à tout moment (Ctrl + C), ce qui est compté reste compté.
  */
 import { parseArgs } from "node:util";
 
@@ -22,8 +22,12 @@ const { values } = parseArgs({
   options: {
     minutes: { type: "string", default: "30" },
     platform: { type: "string", default: "EUW1" },
-    /** Écart entre deux appels (ms). 1300 pour une clé de développement ; moins avec une clé de production. */
-    interval: { type: "string", default: "1300" },
+    /**
+     * Écart entre deux appels (ms). 1500 avec une clé de développement : 80 appels
+     * sur les 100 permis toutes les 2 minutes, le reste pour le site. Moins avec
+     * une clé de production.
+     */
+    interval: { type: "string", default: "1500" },
   },
 });
 

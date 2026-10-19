@@ -62,9 +62,10 @@ Sans clé, l'onglet explique qu'elle manque.
 ### Clé Anthropic (coach de draft)
 
 La page « Nouvelle game » remplit la draft toute seule : dès l'écran de
-chargement, elle la lit chez Riot (Spectator-V5, vérifiée toutes les 20 s), ou à
-défaut dans une capture lue par Claude Haiku. La fiche est écrite par Claude
-Sonnet (prompts versionnés dans `src/lib/llm/prompts/`) :
+chargement, elle la lit chez Riot (Spectator-V5, vérifiée toutes les 10 s) et
+lance aussitôt la fiche. À défaut, une capture lue par Claude Haiku remplit le
+tableau. La fiche est écrite par Claude Sonnet (prompts versionnés dans
+`src/lib/llm/prompts/`) :
 
 1. Crée un compte sur <https://console.anthropic.com> et ajoute du crédit
    (**Billing**).
@@ -98,7 +99,8 @@ npm run matchups:collect                     # 30 minutes sur EUW
 npm run matchups:collect -- --minutes 120    # plus longtemps
 ```
 
-Avec une clé de développement, compte environ 2 000 parties par heure : il en
+Avec une clé de développement, compte environ 1 800 parties par heure (la
+collecte laisse une vingtaine d'appels sur cent au site) : il en
 faut quelques milliers pour couvrir les duels courants d'un patch. On peut
 l'arrêter à tout moment (Ctrl + C) ; ce qui est compté reste compté. Les mêmes
 compteurs servent à deviner les postes de la partie en cours.

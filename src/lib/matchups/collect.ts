@@ -31,7 +31,10 @@ export type CollectOptions = {
   platform: Platform;
   /** Durée de la collecte, en millisecondes. */
   budgetMs: number;
-  /** Écart minimal entre deux appels à Riot (clé de développement : 100 appels par 2 minutes). */
+  /**
+   * Écart minimal entre deux appels à Riot. Clé de développement : 100 appels par
+   * 2 minutes ; 1,5 s en laisse une vingtaine au site (partie en cours, synchro).
+   */
   minIntervalMs?: number;
   /** Parties plus anciennes ignorées (en jours). */
   lookbackDays?: number;
@@ -92,7 +95,7 @@ export async function collectMatchups(
   {
     platform,
     budgetMs,
-    minIntervalMs = 1300,
+    minIntervalMs = 1500,
     lookbackDays = 14,
     matchesPerPlayer = 10,
     playersPerLadder = 25,

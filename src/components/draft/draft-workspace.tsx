@@ -55,8 +55,12 @@ type LiveState =
   | { status: "stopped" }
   | { status: "error"; error: LiveDraftError };
 
-/** Intervalle entre deux recherches de la partie en cours, et durée de la recherche automatique. */
-const LIVE_POLL_MS = 20_000;
+/**
+ * Intervalle entre deux recherches de la partie en cours, et durée de la
+ * recherche automatique. Dix secondes : la draft arrive vite pendant
+ * l'écran de chargement, pour 12 appels à Riot toutes les 2 minutes.
+ */
+const LIVE_POLL_MS = 10_000;
 const LIVE_POLL_FOR_MS = 15 * 60_000;
 
 type SheetState =
@@ -92,6 +96,9 @@ export function DraftWorkspace({
   const [dragging, setDragging] = useState(false);
   const [live, setLive] = useState<LiveState>({ status: "checking" });
   const liveSince = useRef<number | null>(null);
+  /** Fiche à lancer d'elle-même : une seule fois, pour la draft trouvée dans la partie en cours. */
+  const [autoStart, setAutoStart] = useState<Draft | null>(null);
+  const autoStarted = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -121,6 +128,10 @@ export function DraftWorkspace({
         setRead({ status: "idle" });
         setSheet((current) => (current.status === "writing" ? current : { status: "idle" }));
         setLive({ status: "found", riotId: result.riotId });
+        if (!autoStarted.current) {
+          autoStarted.current = true;
+          setAutoStart(result.draft);
+        }
       } else if (result.status === "no_account") {
         setLive({ status: "no_account" });
       } else {
@@ -193,7 +204,7 @@ export function DraftWorkspace({
     return () => window.removeEventListener("paste", onPaste);
   }, [readFile]);
 
-  const analyse = async () => {
+  const analyse = async (target: Draft = draft) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -209,7 +220,7 @@ export function DraftWorkspace({
       const response = await fetch("/api/draft/sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draft }),
+        body: JSON.stringify({ draft: target }),
         signal: controller.signal,
       });
       if (!response.body) throw new Error("Réponse vide");
@@ -253,6 +264,18 @@ export function DraftWorkspace({
       setSheet({ status: "error", sheet: latest, error: "unavailable" });
     }
   };
+
+  // Draft trouvée dans la partie en cours : la fiche part toute seule, pour
+  // gagner un clic et quelques secondes de lecture pendant le chargement.
+  useEffect(() => {
+    if (!autoStart) return;
+    const timer = window.setTimeout(() => {
+      setAutoStart(null);
+      const valid = canAnalyse(autoStart) && duplicateChampions(autoStart).length === 0;
+      if (valid && coachReady && remaining > 0) void analyse(autoStart);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  });
 
   const setChampion = (side: DraftSideKey, role: Role, id: string | null) => {
     setDraft((current) => ({ ...current, [side]: { ...current[side], [role]: id } }));

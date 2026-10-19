@@ -69,8 +69,8 @@ export type LoadLiveDraftResult =
   | { ok: true; status: "not_in_game" | "no_account" }
   | { ok: false; error: LiveDraftError };
 
-/** Vérifications de la partie en cours par utilisateur et par heure (une toutes les 20 s au plus). */
-const LIVE_CHECKS_PER_HOUR = { max: 200, windowSeconds: 3600 };
+/** Vérifications de la partie en cours par utilisateur et par heure (une toutes les 10 s au plus). */
+const LIVE_CHECKS_PER_HOUR = { max: 400, windowSeconds: 3600 };
 
 /** La draft de la partie en cours, lue chez Riot dès l'écran de chargement. */
 export async function loadLiveGameDraft(): Promise<LoadLiveDraftResult> {
