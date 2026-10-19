@@ -11,7 +11,7 @@ import {
   type AssetResolver,
   type PlayerRanks,
 } from "@/components/match-detail/team-table";
-import { rankLabel } from "@/components/stats/lp-points";
+import type { RankValue } from "@/components/rank/rank-badge";
 import { TimelineSection, TimelineSkeleton } from "@/components/match-detail/timeline-section";
 import { ErrorNotice } from "@/components/ui/notice";
 import { Link } from "@/components/ui/link";
@@ -189,10 +189,10 @@ async function RankedTeams({
     return <Teams {...teams} />;
   }
   const queue = rankQueueFor(queueId);
-  const ranks = new Map<string, string | null>();
+  const ranks = new Map<string, RankValue | null>();
   for (const [puuid, list] of entries) {
     const entry = list.find((candidate) => candidate.queueType === queue);
-    ranks.set(puuid, entry ? rankLabel(entry.tier, entry.rank) : null);
+    ranks.set(puuid, entry ? { tier: entry.tier, division: entry.rank } : null);
   }
   return <Teams {...teams} ranks={ranks} />;
 }

@@ -37,7 +37,8 @@ Travailler une étape à la fois et attendre la validation entre chacune.
   donne la même `route`, la même structure et les mêmes espacements, pour que le
   contenu se fonde à la place du squelette.
 - **Riot.** Le coach propose toujours plusieurs options ; aucun calcul de MMR ;
-  visuels du jeu via Data Dragon uniquement.
+  visuels du jeu via Data Dragon uniquement, sauf les emblèmes de rang
+  officiels du portail développeur (`public/ranked-emblems`).
 - **Prompts.** Les prompts du modèle vivront dans des fichiers séparés et
   versionnés (`src/lib/llm/prompts/`).
 

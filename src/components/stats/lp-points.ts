@@ -3,22 +3,17 @@ import type { RankSnapshot } from "@/lib/db/schema";
 import { formatShortDate } from "@/lib/format";
 import { rankHistory, tierFloors } from "@/lib/stats/ladder";
 
+import { rankText } from "@/components/rank/rank-badge";
+
 import type { ChartFloor, ChartPoint } from "./lp-chart";
 
 const tiers = t.dashboard.rank.tiers;
-/** Au-dessus de Diamant, il n'y a plus de division. */
-const APEX_TIERS = new Set(["MASTER", "GRANDMASTER", "CHALLENGER"]);
-
-/** « Émeraude III », « Maître ». */
-export function rankLabel(tier: string, division: string): string {
-  return `${tiers[tier] ?? tier}${APEX_TIERS.has(tier) ? "" : ` ${division}`}`;
-}
 
 /** Les relevés de rang d'une file, prêts pour la courbe (un point par changement). */
 export function lpChartPoints(snapshots: RankSnapshot[]): ChartPoint[] {
   return rankHistory(snapshots).map((point) => ({
     date: formatShortDate(point.at),
-    rank: rankLabel(point.tier, point.division),
+    rank: rankText({ tier: point.tier, division: point.division }),
     lp: point.lp,
     points: point.points,
     time: point.at.getTime(),

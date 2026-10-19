@@ -1,6 +1,7 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { TeamMark } from "@/components/draft/team-mark";
 import { GameIcon } from "@/components/match-detail/game-icon";
+import { RankEmblem, rankText, tierTextClass } from "@/components/rank/rank-badge";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
@@ -8,8 +9,6 @@ import { formatPercent } from "@/lib/format";
 import type { LivePlayer, LiveTeam } from "@/lib/stats/live-game";
 
 const copy = t.live;
-const tiers = t.dashboard.rank.tiers;
-const APEX_TIERS = new Set(["MASTER", "GRANDMASTER", "CHALLENGER"]);
 
 /** Images et noms du jeu, résolus côté serveur à partir de Data Dragon. */
 export type LiveAssets = {
@@ -116,11 +115,14 @@ function PlayerRow({ player, assets }: { player: LivePlayer; assets: LiveAssets 
       <div className="col-span-2 sm:col-span-1 sm:text-right">
         {rank ? (
           <>
-            <p className="display text-lg text-ink">
-              {copy.rank(
-                `${tiers[rank.tier] ?? rank.tier}${APEX_TIERS.has(rank.tier) ? "" : ` ${rank.division}`}`,
-                rank.lp,
+            <p
+              className={cn(
+                "flex items-center gap-1.5 display text-lg sm:justify-end",
+                tierTextClass(rank.tier),
               )}
+            >
+              <RankEmblem tier={rank.tier} className="h-5" />
+              {copy.rank(rankText(rank), rank.lp)}
             </p>
             {games > 0 ? (
               <p className="text-xs text-ink-muted tabular">

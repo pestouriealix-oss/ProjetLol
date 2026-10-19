@@ -84,6 +84,20 @@
   /* Carte tactique */
   --color-river: oklch(0.42 0.06 200);
 
+  /* Paliers de classement : la teinte de chaque emblème officiel, assez claire
+     pour un texte sur les surfaces sombres (contraste AA vérifié). Le nom du
+     palier est toujours écrit : la couleur n'en porte jamais seule le sens. */
+  --color-tier-iron: oklch(0.74 0.02 50);
+  --color-tier-bronze: oklch(0.74 0.08 50);
+  --color-tier-silver: oklch(0.84 0.02 240);
+  --color-tier-gold: oklch(0.84 0.11 85);
+  --color-tier-platinum: oklch(0.81 0.09 185);
+  --color-tier-emerald: oklch(0.79 0.14 155);
+  --color-tier-diamond: oklch(0.77 0.12 265);
+  --color-tier-master: oklch(0.75 0.16 310);
+  --color-tier-grandmaster: oklch(0.72 0.17 25);
+  --color-tier-challenger: oklch(0.86 0.1 220);
+
   /* ── Typographie ─────────────────────────────────────────────────────── */
   --font-display: var(--font-display-face), "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-text-face), ui-sans-serif, system-ui, sans-serif;

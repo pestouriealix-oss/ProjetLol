@@ -1,6 +1,7 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { TeamMark } from "@/components/draft/team-mark";
 import { RoleGlyph } from "@/components/map/role-glyph";
+import { RankBadge, type RankValue } from "@/components/rank/rank-badge";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
@@ -30,7 +31,7 @@ const OBJECTIVES: (keyof DetailObjectives)[] = ["towers", "dragons", "barons", "
  * Classement de chaque joueur, par PUUID : le rang lisible, `null` s'il n'est
  * pas classé dans la file de la partie. Absent : pas encore connu.
  */
-export type PlayerRanks = ReadonlyMap<string, string | null>;
+export type PlayerRanks = ReadonlyMap<string, RankValue | null>;
 
 export function TeamTable({
   team,
@@ -153,7 +154,7 @@ function PlayerRow({
   assets,
 }: {
   player: DetailPlayer;
-  rank: string | null | undefined;
+  rank: RankValue | null | undefined;
   maxDamage: number;
   durationMinutes: number;
   assets: AssetResolver;
@@ -205,7 +206,7 @@ function PlayerCard({
   assets,
 }: {
   player: DetailPlayer;
-  rank: string | null | undefined;
+  rank: RankValue | null | undefined;
   maxDamage: number;
   assets: AssetResolver;
 }) {
@@ -286,7 +287,7 @@ function PlayerName({
   stacked = false,
 }: {
   player: DetailPlayer;
-  rank: string | null | undefined;
+  rank: RankValue | null | undefined;
   assets: AssetResolver;
   /** Carte de téléphone : le rang sur sa propre ligne, réservée d'avance. */
   stacked?: boolean;
@@ -294,8 +295,8 @@ function PlayerName({
   const champion = assets.champion(player.championName);
   const rankText =
     rank === undefined ? null : (
-      <span title={copy.rank.hint} className={rank ? "font-semibold text-ink" : "text-ink-faint"}>
-        {rank ?? copy.rank.unranked}
+      <span title={copy.rank.hint}>
+        <RankBadge rank={rank} unranked={copy.rank.unranked} emblemClassName="h-4" />
       </span>
     );
   return (

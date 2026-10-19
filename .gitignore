@@ -42,3 +42,6 @@ next-env.d.ts
 
 # le modèle de configuration, lui, est versionné
 !.env.example
+
+# Archive des emblèmes de Riot (téléchargée à part, voir src/components/rank)
+.emblems-tmp/
