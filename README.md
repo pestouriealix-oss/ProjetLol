@@ -137,9 +137,10 @@ définies. Le paiement n'est pas implémenté.
 
 ### Système de design
 
-L'idée directrice : **le tableau du coach, de nuit**. Un terrain vert sombre,
-des tracés clairs comme à la craie, et une seule couleur vive, le corail,
-réservée à ce que le coach dit de faire (actions, trajets, choix).
+L'idée directrice : **le tableau du coach, de nuit**. Un fond anthracite chaud,
+presque neutre, des tracés clairs comme à la craie, et une seule couleur vive,
+le corail, réservée à ce que le coach dit de faire (actions, trajets, choix). Le
+fond reste discret : la couleur vient des visuels du jeu et des résultats.
 
 - **Jetons.** Couleurs, typographie, rayons, durées et courbes sont définis dans
   `src/app/globals.css`. Les composants n'utilisent que ces jetons : changer la

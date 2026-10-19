@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Couleur du terrain (--color-canvas), en hexadécimal pour la barre du navigateur.
-  themeColor: "#051913",
+  themeColor: "#181412",
   colorScheme: "dark",
 };
 

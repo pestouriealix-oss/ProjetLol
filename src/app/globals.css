@@ -3,9 +3,11 @@
 /*
  * Système de design.
  *
- * Idée directrice : le tableau du coach, de nuit. Un terrain vert sombre, des
- * tracés à la craie, et un seul marqueur de couleur, le corail, réservé à ce
- * que le coach dit de faire (actions, trajets, choix).
+ * Idée directrice : le tableau du coach, de nuit. Un fond anthracite chaud,
+ * presque neutre, des tracés à la craie, et un seul marqueur de couleur, le
+ * corail, réservé à ce que le coach dit de faire (actions, trajets, choix).
+ * Le fond reste discret pour laisser la couleur aux visuels du jeu et aux
+ * résultats (victoire, défaite).
  *
  * Tout ce qui est couleur, typographie, rayon, durée ou courbe se définit ici.
  * Les composants n'utilisent que ces jetons, jamais de valeur en dur.
@@ -49,22 +51,22 @@
 
 @theme {
   /* ── Couleurs ────────────────────────────────────────────────────────────
-     Une seule teinte de vert (172°) déclinée en clarté, pour que les surfaces
-     s'empilent sans jurer. Contrastes vérifiés (WCAG AA) pour chaque couple
-     texte / surface utilisé. */
+     Une seule teinte chaude (55°), très peu saturée, déclinée en clarté, pour
+     que les surfaces s'empilent sans jurer. Contrastes vérifiés (WCAG AA) pour
+     chaque couple texte / surface utilisé. */
 
   /* Terrain : du plus profond au plus proche */
-  --color-field: oklch(0.165 0.026 172);
-  --color-canvas: oklch(0.195 0.03 172);
-  --color-surface: oklch(0.235 0.034 172);
-  --color-raised: oklch(0.28 0.038 172);
-  --color-line: oklch(0.34 0.038 172);
-  --color-line-strong: oklch(0.53 0.04 172);
+  --color-field: oklch(0.165 0.006 55);
+  --color-canvas: oklch(0.195 0.007 55);
+  --color-surface: oklch(0.235 0.009 55);
+  --color-raised: oklch(0.28 0.011 55);
+  --color-line: oklch(0.34 0.011 55);
+  --color-line-strong: oklch(0.53 0.016 55);
 
   /* Craie : le texte */
   --color-ink: oklch(0.955 0.022 92);
-  --color-ink-muted: oklch(0.79 0.03 165);
-  --color-ink-faint: oklch(0.68 0.032 168);
+  --color-ink-muted: oklch(0.79 0.016 55);
+  --color-ink-faint: oklch(0.68 0.016 55);
 
   /* Corail : la voix du coach. Une seule couleur d'action dans l'interface. */
   --color-accent: #ff5a36;
@@ -285,7 +287,7 @@
     pointer-events: none;
     background: radial-gradient(
       80rem 34rem at 50% -14rem,
-      oklch(0.34 0.05 172 / 0.5),
+      oklch(0.34 0.02 55 / 0.5),
       transparent 72%
     );
   }
