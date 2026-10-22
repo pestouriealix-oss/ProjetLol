@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Slash } from "@/components/brand/slash";
 import { Block, Growing, Lines } from "@/components/coach/writing";
 import { t } from "@/i18n/fr";
@@ -8,8 +10,11 @@ import type { ReviewFacts } from "@/lib/stats/review";
 
 const copy = t.matchDetail.review;
 
-/** En dessous de cet écart d'or avec le vis-à-vis, la voie est à égalité. */
+/** En dessous de ces écarts avec le vis-à-vis, c'est l'égalité : pas de couleur. */
 const EVEN_GOLD = 250;
+const EVEN_CS = 5;
+/** Écart avec les habitudes à partir duquel une mesure est colorée (comme dans le prompt). */
+const HABIT_GAP = 0.1;
 
 /**
  * Le bilan d'une partie : un résumé, les chiffres sur lesquels il s'appuie,
@@ -125,20 +130,20 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
 /** Les chiffres clés de la partie, comparés au vis-à-vis et aux habitudes du joueur. */
 export function FactsStrip({ facts }: { facts: ReviewFacts }) {
   const { habits } = facts;
-  const cells: { label: string; value: string; note?: string; tone?: "win" | "loss" }[] = [
+  const cells: { label: string; value: ReactNode; note?: string }[] = [
     ...facts.lane.map((checkpoint) => ({
       label: copy.facts.lane(checkpoint.minute),
-      value: copy.facts.laneValue(
-        formatSignedInteger(checkpoint.goldDiff),
-        formatSignedInteger(checkpoint.csDiff),
+      value: (
+        <>
+          <Signed value={checkpoint.goldDiff} even={EVEN_GOLD}>
+            {copy.facts.gold(formatSignedInteger(checkpoint.goldDiff))}
+          </Signed>
+          <span className="text-ink-faint"> · </span>
+          <Signed value={checkpoint.csDiff} even={EVEN_CS}>
+            {copy.facts.cs(formatSignedInteger(checkpoint.csDiff))}
+          </Signed>
+        </>
       ),
-      // Quelques centaines d'or d'écart, c'est l'égalité : pas de couleur.
-      tone:
-        checkpoint.goldDiff >= EVEN_GOLD
-          ? ("win" as const)
-          : checkpoint.goldDiff <= -EVEN_GOLD
-            ? ("loss" as const)
-            : undefined,
     })),
     ...(facts.deaths.times.length > 0
       ? [
@@ -154,17 +159,29 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
       : []),
     {
       label: copy.facts.csPerMinute,
-      value: formatDecimal(facts.me.csPerMinute),
+      value: (
+        <VersusHabit value={facts.me.csPerMinute} habit={habits?.csPerMinute}>
+          {formatDecimal(facts.me.csPerMinute)}
+        </VersusHabit>
+      ),
       note: habits ? copy.facts.habit(formatDecimal(habits.csPerMinute)) : undefined,
     },
     {
       label: copy.facts.killParticipation,
-      value: formatPercent(facts.me.killParticipation),
+      value: (
+        <VersusHabit value={facts.me.killParticipation} habit={habits?.killParticipation}>
+          {formatPercent(facts.me.killParticipation)}
+        </VersusHabit>
+      ),
       note: habits ? copy.facts.habit(formatPercent(habits.killParticipation)) : undefined,
     },
     {
       label: copy.facts.visionPerMinute,
-      value: formatDecimal(facts.me.visionPerMinute),
+      value: (
+        <VersusHabit value={facts.me.visionPerMinute} habit={habits?.visionPerMinute}>
+          {formatDecimal(facts.me.visionPerMinute)}
+        </VersusHabit>
+      ),
       note: habits ? copy.facts.habit(formatDecimal(habits.visionPerMinute)) : undefined,
     },
   ];
@@ -175,18 +192,42 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
         {cells.map((cell) => (
           <div key={cell.label} className="flex flex-col gap-0.5 bg-raised px-3 py-2.5">
             <dt className="text-xs text-ink-faint">{cell.label}</dt>
-            <dd
-              className={cn(
-                "font-semibold tabular",
-                cell.tone === "win" ? "text-win" : cell.tone === "loss" ? "text-loss" : "text-ink",
-              )}
-            >
-              {cell.value}
-            </dd>
+            <dd className="font-semibold text-ink tabular">{cell.value}</dd>
             {cell.note ? <dd className="text-xs text-ink-muted">{cell.note}</dd> : null}
           </div>
         ))}
       </dl>
     </section>
+  );
+}
+
+/** Un écart avec le vis-à-vis : vert en avance, rouge en retard, neutre tant qu'il reste faible. */
+function Signed({ value, even, children }: { value: number; even: number; children: ReactNode }) {
+  return (
+    <span className={cn(value >= even ? "text-win" : value <= -even ? "text-loss" : "text-ink")}>
+      {children}
+    </span>
+  );
+}
+
+/** Une mesure comparée aux habitudes : colorée seulement à 10 % d'écart ou plus. */
+function VersusHabit({
+  value,
+  habit,
+  children,
+}: {
+  value: number;
+  habit: number | undefined;
+  children: ReactNode;
+}) {
+  const ratio = habit && habit > 0 ? value / habit : 1;
+  return (
+    <span
+      className={cn(
+        ratio >= 1 + HABIT_GAP ? "text-win" : ratio <= 1 - HABIT_GAP ? "text-loss" : "text-ink",
+      )}
+    >
+      {children}
+    </span>
   );
 }

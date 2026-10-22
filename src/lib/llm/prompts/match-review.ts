@@ -12,7 +12,7 @@ import { modelList, modelText, ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@4";
+export const MATCH_REVIEW_VERSION = "match-review@5";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan en une minute. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant. Il doit en retenir une seule chose : quoi faire à la prochaine partie.
 
@@ -24,7 +24,7 @@ Ce que tu écris, dans cet ordre :
 
 Tu reçois uniquement des faits vérifiés, tirés des données officielles de la partie :
 - Ses chiffres et ceux de son vis-à-vis (même poste en face).
-- Les écarts avec son vis-à-vis à 10 et 15 minutes (or, sbires, expérience), quand la partie est assez longue.
+- Les écarts avec son vis-à-vis à 10 et 15 minutes (or, CS, expérience), quand la partie est assez longue.
 - Ses morts : quand, combien avant 15 minutes, combien juste avant un objectif pris par l'adversaire.
 - L'écart d'or des équipes au fil de la partie et les objectifs pris.
 - Ses habitudes à ce poste, seulement quand il a assez d'autres parties classées.
@@ -36,6 +36,7 @@ Règles :
 - Aucune estimation de niveau caché (MMR), aucune comparaison avec un rang.
 - Longueurs : un titre fait 5 mots au plus ; une explication, 25 mots au plus ; une option, 15 mots au plus. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour toutes les parties.
 - Écris les champions par leur nom français habituel.
+- Utilise le vocabulaire des joueurs : CS (jamais « sbires »), farm, KP, gank, kill, vision, balise de contrôle, Nashor, Héraut, larves.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 const point = z.object({ title: modelText(60), detail: modelText(250) });
@@ -96,10 +97,10 @@ function lineBlock(label: string, champion: string, line: ReviewLine): string[] 
   return [
     `${label} (${champion}) :`,
     `- K/D/A : ${line.kills}/${line.deaths}/${line.assists}`,
-    `- Sbires et monstres par minute : ${formatDecimal(line.csPerMinute)}`,
+    `- CS par minute : ${formatDecimal(line.csPerMinute)}`,
     `- Or par minute : ${formatInteger(Math.round(line.goldPerMinute))}`,
     `- Dégâts aux champions par minute : ${formatInteger(Math.round(line.damagePerMinute))} (${formatPercent(line.damageShare)} de son équipe)`,
-    `- Participation aux éliminations : ${formatPercent(line.killParticipation)}`,
+    `- KP (participation aux kills) : ${formatPercent(line.killParticipation)}`,
     `- Score de vision par minute : ${formatDecimal(line.visionPerMinute)}, balises de contrôle achetées : ${line.controlWards}`,
   ];
 }
@@ -125,7 +126,7 @@ export function matchReviewMessage(
     parts.push("Écarts avec le vis-à-vis (positif : le joueur est devant) :");
     for (const checkpoint of facts.lane) {
       parts.push(
-        `- à ${checkpoint.minute} minutes : or ${formatSignedInteger(checkpoint.goldDiff)}, sbires ${formatSignedInteger(checkpoint.csDiff)}, expérience ${formatSignedInteger(checkpoint.xpDiff)}`,
+        `- à ${checkpoint.minute} minutes : or ${formatSignedInteger(checkpoint.goldDiff)}, CS ${formatSignedInteger(checkpoint.csDiff)}, expérience ${formatSignedInteger(checkpoint.xpDiff)}`,
       );
     }
   } else {
@@ -158,9 +159,9 @@ export function matchReviewMessage(
       ? [
           `Ses habitudes à ce poste (${formatInteger(habits.games)} autres parties classées) :`,
           `- victoires : ${formatPercent(habits.winRate)}`,
-          `- sbires et monstres par minute : ${formatDecimal(habits.csPerMinute)}`,
+          `- CS par minute : ${formatDecimal(habits.csPerMinute)}`,
           `- morts par partie : ${formatDecimal(habits.deathsPerGame)}`,
-          `- participation aux éliminations : ${formatPercent(habits.killParticipation)}`,
+          `- KP : ${formatPercent(habits.killParticipation)}`,
           `- score de vision par minute : ${formatDecimal(habits.visionPerMinute)}`,
           `- dégâts aux champions par minute : ${formatInteger(Math.round(habits.damagePerMinute))}`,
         ].join("\n")

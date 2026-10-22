@@ -37,7 +37,7 @@ export const reducedTimelineSchema = z.object({
       items: z.array(z.object({ seconds: z.number(), itemId: z.number().int() })),
       /** Compétence montée à chaque niveau : 1 = Q, 2 = W, 3 = E, 4 = R. */
       skills: z.array(z.number().int().min(1).max(4)),
-      /** Or, sbires et monstres tués, et expérience du joueur, à chaque minute (même index que `gold`). */
+      /** Or, CS (sbires et monstres tués), et expérience du joueur, à chaque minute (même index que `gold`). */
       frames: z.object({
         gold: z.array(z.number()),
         cs: z.array(z.number()),

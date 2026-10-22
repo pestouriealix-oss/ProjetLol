@@ -49,7 +49,7 @@ describe("matchReviewMessage", () => {
     expect(message).toContain("Victoire en 30 minutes.");
     expect(message).toContain("Le joueur jouait Lee Sin au poste jungle, contre Ivern.");
     expect(message).toContain("Or par minute : 400");
-    expect(message).toContain("à 10 minutes : or +200, sbires −4, expérience 0");
+    expect(message).toContain("à 10 minutes : or +200, CS −4, expérience 0");
     expect(message).toContain("Morts à 5:00, 14:00 : 2 avant 15 minutes, 1 dans la minute");
     expect(message).toContain("dragons 3/1");
   });

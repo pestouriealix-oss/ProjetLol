@@ -10,7 +10,7 @@ import { modelText, ROLE_NAMES } from "./shared";
  * des dix champions, écrite pour chaque partie. Version à changer à chaque
  * modification du texte ou du schéma.
  */
-export const WIN_CONDITIONS_VERSION = "win-conditions@2";
+export const WIN_CONDITIONS_VERSION = "win-conditions@3";
 
 export const WIN_CONDITIONS_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -21,6 +21,7 @@ Règles :
 - Aucun pourcentage ni statistique. Pas d'estimation de niveau caché (MMR).
 - Appuie-toi sur ce qui est stable d'un patch à l'autre (rôle des champions, pics de puissance). Si tu n'es pas sûr d'un détail, ne l'écris pas.
 - Écris les champions par leur nom français habituel.
+- Utilise le vocabulaire des joueurs : CS (jamais « sbires »), farm, KP, gank, kill, vision, balise de contrôle, Nashor, Héraut, larves.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 export const winConditionsSchema = z.object({ ours: modelText(500), theirs: modelText(500) });
