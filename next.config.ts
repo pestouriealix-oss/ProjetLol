@@ -1,3 +1,5 @@
+import { networkInterfaces } from "node:os";
+
 import type { NextConfig } from "next";
 
 /** En-têtes de sécurité envoyés avec chaque page. */
@@ -11,7 +13,22 @@ const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
 ];
 
+/**
+ * Adresses de cet ordinateur sur le réseau local (« 192.168.1.20 »). En
+ * développement, Next.js n'accepte que localhost : on y ajoute ces adresses
+ * pour ouvrir le site depuis un autre appareil de la maison (le PC de jeu, un
+ * téléphone) pendant que le serveur tourne ici.
+ */
+function localNetworkAddresses(): string[] {
+  return Object.values(networkInterfaces())
+    .flat()
+    .flatMap((address) =>
+      address && address.family === "IPv4" && !address.internal ? [address.address] : [],
+    );
+}
+
 const nextConfig: NextConfig = {
+  allowedDevOrigins: localNetworkAddresses(),
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },

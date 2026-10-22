@@ -59,6 +59,14 @@ gardées une minute en cache) :
 
 Sans clé, l'onglet explique qu'elle manque.
 
+### Depuis un autre appareil (PC de jeu, téléphone)
+
+`npm run dev` affiche une adresse « Network » (`http://192.168.x.x:3000`) :
+ouverte depuis un autre appareil du même réseau, elle donne le même site, avec
+la même base. Le serveur de développement accepte les adresses de l'ordinateur
+qui le fait tourner (`next.config.ts`). Sur Mac, autoriser Node.js si le
+pare-feu le demande.
+
 ### Clé Anthropic (coach de draft)
 
 La page « Nouvelle game » remplit la draft toute seule : dès l'écran de
