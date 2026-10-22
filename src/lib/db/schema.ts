@@ -250,6 +250,8 @@ export const matchReviews = pgTable("match_reviews", {
   improvements: jsonb("improvements").notNull(),
   planFollowed: planFollowedEnum("plan_followed"),
   summary: text("summary").notNull(),
+  /** L'objectif de la prochaine partie, en une phrase (absent des premiers bilans). */
+  focus: text("focus"),
   /** Les faits de la partie sur lesquels le bilan s'appuie (`src/lib/stats/review.ts`). */
   facts: jsonb("facts"),
   promptVersion: text("prompt_version").notNull(),

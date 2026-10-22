@@ -214,6 +214,7 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     });
     const review = {
       summary: "Bon début de partie.",
+      focus: "Moins de deux morts avant 15 minutes.",
       strengths: [],
       improvements: [],
       facts: {},

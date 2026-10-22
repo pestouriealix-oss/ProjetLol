@@ -451,7 +451,8 @@ export const fr = {
         `${count} bilan${count > 1 ? "s" : ""} restant${count > 1 ? "s" : ""} sur ${limit} (24 h)`,
       strengths: "Points forts",
       improvements: "À travailler",
-      options: "Pour la prochaine partie",
+      focus: "Objectif pour la prochaine partie",
+      options: "Deux façons d'y arriver",
       option: (index: number) => `Option ${index} : `,
       facts: {
         title: "Les chiffres de la partie",

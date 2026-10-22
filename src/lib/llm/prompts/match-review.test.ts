@@ -63,6 +63,7 @@ describe("matchReviewSchema", () => {
   it("exige plusieurs options pour chaque axe de progrès", () => {
     const review = {
       summary: "Résumé.",
+      focus: "Une seule mort avant 15 minutes.",
       strengths: [{ title: "Début", detail: "Avance de 200 or à 10 minutes." }],
       improvements: [
         { title: "Morts", detail: "Deux morts avant 15 minutes.", options: ["Une seule"] },

@@ -13,6 +13,7 @@ import { matchReviews, participations, riotAccounts } from "./schema";
 export type StoredMatchReview = {
   id: string;
   summary: string;
+  focus: string | null;
   strengths: unknown;
   improvements: unknown;
   facts: unknown;
@@ -23,6 +24,7 @@ export type StoredMatchReview = {
 const reviewColumns = {
   id: matchReviews.id,
   summary: matchReviews.summary,
+  focus: matchReviews.focus,
   strengths: matchReviews.strengths,
   improvements: matchReviews.improvements,
   facts: matchReviews.facts,
@@ -67,6 +69,7 @@ export async function saveMatchReview(
   matchId: string,
   review: {
     summary: string;
+    focus: string;
     strengths: unknown;
     improvements: unknown;
     facts: unknown;

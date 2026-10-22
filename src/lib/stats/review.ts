@@ -16,6 +16,8 @@ import type { ObjectiveType, ReducedTimeline } from "./timeline";
 export const LANE_MINUTES = [10, 15] as const;
 /** Une mort dans ce délai avant un objectif pris par l'adversaire lui a coûté l'objectif. */
 export const DEATH_BEFORE_OBJECTIVE_SECONDS = 60;
+/** En dessous de ce nombre d'autres parties, les « habitudes » ne veulent rien dire. */
+export const MIN_HABIT_GAMES = 5;
 /** Fin de la phase de voie, pour compter les morts précoces. */
 export const EARLY_GAME_SECONDS = 15 * 60;
 
@@ -151,7 +153,7 @@ export function habitsWithout(
   if (!totals) return null;
   const sub = game.counted ? 1 : 0;
   const games = totals.games - sub;
-  if (games <= 0) return null;
+  if (games < MIN_HABIT_GAMES) return null;
   const seconds = totals.seconds - (game.counted ? game.seconds : 0);
   const minutes = seconds / 60;
   const without = (total: number, value: number) => total - (game.counted ? value : 0);

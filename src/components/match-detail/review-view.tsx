@@ -21,6 +21,23 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
     <article className="flex flex-col gap-6" aria-busy={writing}>
       <Growing text={review.summary} writing={writing} className="text-lg text-ink" lines={2} />
 
+      {review.focus || writing ? (
+        <div className="flex gap-3 rounded-control border border-accent/40 bg-accent-soft px-4 py-3">
+          <Slash className="mt-[0.3em] h-[0.9em] text-accent" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold tracking-[0.04em] text-accent uppercase">
+              {copy.focus}
+            </p>
+            <Growing
+              text={review.focus}
+              writing={writing}
+              className="font-semibold text-ink"
+              lines={1}
+            />
+          </div>
+        </div>
+      ) : null}
+
       {review.facts ? <FactsStrip facts={review.facts} /> : writing ? <Lines count={2} /> : null}
 
       <div className="grid gap-6 md:grid-cols-2">

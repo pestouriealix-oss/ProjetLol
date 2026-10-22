@@ -47,4 +47,3 @@ export function Block({ label, children }: { label: string; children: ReactNode 
     </div>
   );
 }
-

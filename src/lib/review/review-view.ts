@@ -14,6 +14,7 @@ const point = z.object({ title: text, detail: text }).catch({});
 
 export const reviewViewSchema = z.object({
   summary: text,
+  focus: text,
   strengths: z.array(point).optional().catch(undefined),
   improvements: z
     .array(

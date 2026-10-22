@@ -74,7 +74,12 @@ export default async function MatchDetailPage({
   ]);
   const review = stored
     ? readReviewView(
-        { summary: stored.summary, strengths: stored.strengths, improvements: stored.improvements },
+        {
+          summary: stored.summary,
+          focus: stored.focus ?? undefined,
+          strengths: stored.strengths,
+          improvements: stored.improvements,
+        },
         stored.facts,
       )
     : null;

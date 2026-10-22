@@ -7,7 +7,12 @@ import { reduceTimeline, reducedTimelineSchema } from "./timeline";
 const frame = (minute: number, gold: [number, number], events: object[] = []) => ({
   timestamp: minute * 60_000 + (minute > 0 ? 120 : 0),
   participantFrames: {
-    "1": { totalGold: gold[0], minionsKilled: minute * 7, jungleMinionsKilled: minute, xp: minute * 280 },
+    "1": {
+      totalGold: gold[0],
+      minionsKilled: minute * 7,
+      jungleMinionsKilled: minute,
+      xp: minute * 280,
+    },
     "2": { totalGold: gold[1] },
   },
   events,
