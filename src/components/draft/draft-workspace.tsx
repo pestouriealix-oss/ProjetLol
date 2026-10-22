@@ -441,7 +441,14 @@ export function DraftWorkspace({
                     <Button variant="secondary" size="sm" onClick={() => void analyse()}>
                       {copy.analyse.again}
                     </Button>
-                  ) : null}
+                  ) : (
+                    <Link
+                      href="/premium"
+                      className="text-sm font-semibold text-ink underline underline-offset-4"
+                    >
+                      {t.premium.upsell}
+                    </Link>
+                  )}
                 </div>
               ) : null}
               {sheet.status === "done" ? (

@@ -37,6 +37,23 @@ const schema = z.object({
   PANDASCORE_BASE_URL: optional,
   /** Serveur de flux RSS de test (un fichier `<source>.xml` par site). Par défaut, les vrais sites. */
   NEWS_FEEDS_BASE_URL: optional,
+  /** Paddle (paiement de Premium) : « sandbox » pour les tests, « production » en ligne. */
+  PADDLE_ENV: z.enum(["sandbox", "production"]).optional().default("sandbox"),
+  /** Clé d'API Paddle (côté serveur uniquement). */
+  PADDLE_API_KEY: optional,
+  /** Jeton client Paddle (« test_… » ou « live_… ») : il est public, il ouvre le paiement dans la page. */
+  PADDLE_CLIENT_TOKEN: optional,
+  /** Clé secrète des notifications Paddle (« pdl_ntfset_… »), pour vérifier leur signature. */
+  PADDLE_WEBHOOK_SECRET: optional,
+  /** Prix de Premium chez Paddle (« pri_… »). */
+  PADDLE_PRICE_ID: optional,
+  /** Autre adresse pour l'API Paddle (tests). */
+  PADDLE_API_BASE_URL: optional,
+  /** Client Riot Sign On (« Se connecter avec Riot »), donné par Riot avec la clé de production. */
+  RIOT_RSO_CLIENT_ID: optional,
+  RIOT_RSO_CLIENT_SECRET: optional,
+  /** Autres adresses pour Riot Sign On (tests). */
+  RIOT_RSO_BASE_URL: optional,
 });
 
 const parsed = schema.safeParse(process.env);

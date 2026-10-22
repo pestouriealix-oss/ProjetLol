@@ -1,12 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { t } from "@/i18n/fr";
 import { signOut } from "@/lib/auth";
 import { limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
+import { cancelSubscriptionNow } from "@/lib/billing/paddle";
+import { findCurrentSubscription } from "@/lib/db/billing";
 import {
   addRiotAccount,
   DuplicateRiotAccountError,
@@ -128,6 +131,17 @@ export async function removeRiotAccountAction(accountId: string): Promise<void> 
 
 export async function deleteAccountAction(): Promise<void> {
   const user = await requireUser();
+  // Un abonnement en cours est résilié d'abord : supprimer le compte ne doit
+  // jamais laisser un prélèvement courir.
+  const subscription = await findCurrentSubscription(user.id);
+  if (subscription && subscription.status !== "canceled") {
+    try {
+      await cancelSubscriptionNow(subscription.id);
+    } catch (error) {
+      console.error("Résiliation impossible avant suppression du compte", error);
+      redirect(`${SETTINGS_PATH}?suppression=abonnement`);
+    }
+  }
   await deleteUser(user.id);
   await signOut({ redirectTo: "/login" });
 }

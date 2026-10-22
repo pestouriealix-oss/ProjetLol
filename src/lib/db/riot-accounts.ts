@@ -169,6 +169,61 @@ export async function markRiotAccountVerified(
   }
 }
 
+/**
+ * Lie un compte dont l'identité vient de Riot Sign On (le joueur s'est
+ * connecté chez Riot) : il est vérifié d'office. Un compte déjà lié au même
+ * joueur, ou au même Riot ID, est mis à jour plutôt que dupliqué. Renvoie le
+ * compte et s'il vient d'être créé.
+ */
+export async function linkVerifiedRiotAccount(
+  userId: string,
+  identity: { puuid: string; gameName: string; tagLine: string; platform: Platform },
+  options: { maxAccounts: number },
+): Promise<{ account: RiotAccount; created: boolean }> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
+
+    const sameRiotId = and(
+      eq(riotAccounts.platform, identity.platform),
+      sql`lower(${riotAccounts.gameName}) = lower(${identity.gameName})`,
+      sql`lower(${riotAccounts.tagLine}) = lower(${identity.tagLine})`,
+    );
+    const [existing] = await tx
+      .select({ id: riotAccounts.id })
+      .from(riotAccounts)
+      .where(
+        and(
+          eq(riotAccounts.userId, userId),
+          sql`(${riotAccounts.puuid} = ${identity.puuid} or (${sameRiotId}))`,
+        ),
+      )
+      .orderBy(sql`${riotAccounts.puuid} = ${identity.puuid} desc nulls last`)
+      .limit(1);
+
+    if (existing) {
+      const [updated] = await tx
+        .update(riotAccounts)
+        .set({ ...identity, verifiedAt: new Date() })
+        .where(owned(userId, existing.id))
+        .returning();
+      return { account: updated!, created: false };
+    }
+
+    const [row] = await tx
+      .select({ value: count() })
+      .from(riotAccounts)
+      .where(eq(riotAccounts.userId, userId));
+    const total = row?.value ?? 0;
+    if (total >= options.maxAccounts) throw new RiotAccountLimitError();
+
+    const [created] = await tx
+      .insert(riotAccounts)
+      .values({ userId, ...identity, roles: [], isPrimary: total === 0, verifiedAt: new Date() })
+      .returning();
+    return { account: created!, created: true };
+  });
+}
+
 /** Icône d'invocateur et niveau du compte, tels que Riot les donne. */
 export async function updateRiotAccountProfile(
   userId: string,

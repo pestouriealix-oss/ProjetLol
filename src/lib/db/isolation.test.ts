@@ -236,6 +236,78 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await reviews.countMatchReviewsSince(bob, since)).toBe(0);
   });
 
+  it("un abonnement ne concerne que son utilisateur et règle son offre", async () => {
+    const billing = await import("./billing");
+    const subscriptionId = `sub_test_${randomUUID()}`;
+    const customerId = `ctm_test_${randomUUID()}`;
+    await billing.saveBillingCustomer(alice, customerId);
+    expect(await billing.findUserIdByCustomer(customerId)).toBe(alice);
+    expect(await billing.findBillingCustomer(bob)).toBeNull();
+
+    const base = {
+      id: subscriptionId,
+      priceId: "pri_test",
+      currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000),
+      cancelAt: null,
+    };
+    const t0 = new Date();
+    expect(await billing.saveSubscription(alice, { ...base, status: "active", eventAt: t0 })).toBe(
+      "PREMIUM",
+    );
+    expect((await usersApi.findUserById(alice))?.plan).toBe("PREMIUM");
+    expect((await usersApi.findUserById(bob))?.plan).toBe("FREE");
+    expect(await billing.findCurrentSubscription(bob)).toBeNull();
+
+    // Bob ne peut pas s'approprier l'abonnement d'Alice.
+    await expect(
+      billing.saveSubscription(bob, { ...base, status: "active", eventAt: new Date() }),
+    ).rejects.toThrow();
+
+    // Une notification plus ancienne n'écrase pas l'état récent ; une plus récente, si.
+    const earlier = new Date(t0.getTime() - 60_000);
+    await billing.saveSubscription(alice, { ...base, status: "canceled", eventAt: earlier });
+    expect((await billing.findCurrentSubscription(alice))?.status).toBe("active");
+    const later = new Date(t0.getTime() + 60_000);
+    expect(
+      await billing.saveSubscription(alice, { ...base, status: "canceled", eventAt: later }),
+    ).toBe("FREE");
+    expect((await usersApi.findUserById(alice))?.plan).toBe("FREE");
+  });
+
+  it("Riot Sign On lie un compte vérifié, sans doublon, et seulement pour son utilisateur", async () => {
+    const identity = {
+      puuid: `rso-${randomUUID()}`,
+      gameName: "RsoPlayer",
+      tagLine: "RSO",
+      platform: "EUW1" as const,
+    };
+    const first = await api.linkVerifiedRiotAccount(bob, identity, { maxAccounts: 10 });
+    expect(first.created).toBe(true);
+    expect(first.account.verifiedAt).not.toBeNull();
+
+    // Même joueur, Riot ID changé : le compte est mis à jour, pas dupliqué.
+    const renamed = await api.linkVerifiedRiotAccount(
+      bob,
+      { ...identity, gameName: "Renamed" },
+      { maxAccounts: 10 },
+    );
+    expect(renamed).toMatchObject({ created: false, account: { id: first.account.id } });
+    expect((await api.findRiotAccount(bob, first.account.id))?.gameName).toBe("Renamed");
+
+    // Alice peut lier le même joueur de son côté, sans toucher au compte de Bob.
+    const alices = await api.linkVerifiedRiotAccount(alice, identity, { maxAccounts: 10 });
+    expect(alices.account.userId).toBe(alice);
+    expect(alices.account.id).not.toBe(first.account.id);
+
+    await expect(
+      api.linkVerifiedRiotAccount(
+        bob,
+        { ...identity, puuid: `rso-${randomUUID()}`, gameName: "Other" },
+        { maxAccounts: 1 },
+      ),
+    ).rejects.toBeInstanceOf(api.RiotAccountLimitError);
+  });
+
   it("refuse un second compte avec le même e-mail", async () => {
     const email = `test-dup-${randomUUID()}@example.test`;
     const first = await usersApi.createUserWithPassword({ email, name: null, passwordHash: "x" });

@@ -104,6 +104,42 @@ prix. Deux réglages facultatifs du `.env` :
 - `LLM_MONTHLY_BUDGET_USD` : au-delà de ce montant dépensé dans le mois, les
   fiches gratuites se mettent en pause jusqu'au mois suivant ; Premium continue.
 
+### Premium et paiement (Paddle)
+
+Premium coûte 2,99 € par mois (`src/lib/billing/plans.ts`) : 40 fiches et 40
+bilans par jour, 10 comptes Riot. Le paiement passe par Paddle, revendeur
+officiel (« merchant of record ») : il encaisse, facture et reverse la TVA de
+chaque pays ; le site ne voit jamais de carte. Frais : 5 % + 0,50 $ par
+paiement.
+
+1. Crée un compte de test sur <https://sandbox-vendors.paddle.com>.
+2. **Catalog → Products** : un produit « Kairos Premium » avec un prix
+   récurrent mensuel de 2,99 € ; copie son identifiant (`pri_…`) dans
+   `PADDLE_PRICE_ID`.
+3. **Developer tools → Authentication** : une clé d'API (`PADDLE_API_KEY`) et
+   un jeton client (`PADDLE_CLIENT_TOKEN`, il commence par `test_`).
+4. **Developer tools → Notifications** : une destination vers
+   `https://<ton site>/api/billing/paddle` avec les événements
+   `subscription.*` et `transaction.completed` ; sa clé secrète va dans
+   `PADDLE_WEBHOOK_SECRET`. En local, Paddle ne peut pas joindre `localhost` :
+   il faut un tunnel (par exemple `cloudflared tunnel --url http://localhost:3000`).
+5. Paye avec une carte de test Paddle (4242 4242 4242 4242, date future, CVC 100) depuis la page Premium.
+
+La notification de Paddle passe l'utilisateur en Premium
+(`subscriptions`, `users.plan`) ; une résiliation le repasse en gratuit à la
+fin de la période payée. « Gérer mon abonnement » ouvre le portail client de
+Paddle (factures, moyen de paiement, résiliation).
+
+### Riot Sign On
+
+« Se connecter avec Riot », dans Paramètres, lie un compte sans taper son
+Riot ID : le joueur se connecte chez Riot, qui confirme son identité ; le
+compte est vérifié d'office. Il faut un client RSO, que Riot n'accorde qu'aux
+produits dont la clé de production est approuvée (`RIOT_RSO_CLIENT_ID`,
+`RIOT_RSO_CLIENT_SECRET`, adresse de retour
+`https://<ton site>/api/riot/rso/callback`). Sans lui, le bouton n'apparaît
+pas et l'ajout par Riot ID reste le seul moyen.
+
 ### Bilan de partie
 
 Sur la page d'une partie, « Écrire mon bilan » fait écrire par le coach ce qui

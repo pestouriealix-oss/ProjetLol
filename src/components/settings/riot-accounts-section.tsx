@@ -141,9 +141,50 @@ function AccountRoles({ account, riotId }: { account: RiotAccountView; riotId: s
   );
 }
 
+export type RsoResult = keyof typeof copy.rso.results;
+
+/** Lier son compte en se connectant chez Riot : un formulaire GET vers la route d'aller. */
+function RsoButton() {
+  return (
+    <div className="flex flex-col gap-3 pb-5">
+      <form action="/api/riot/rso/start" method="get">
+        <Button type="submit" variant="secondary" className="w-full">
+          {copy.rso.action}
+        </Button>
+      </form>
+      <p className="text-sm text-ink-muted">{copy.rso.hint}</p>
+      <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.04em] text-ink-faint uppercase">
+        <span aria-hidden className="h-px flex-1 bg-line" />
+        {copy.rso.or}
+        <span aria-hidden className="h-px flex-1 bg-line" />
+      </p>
+    </div>
+  );
+}
+
+function RsoResultNotice({ result }: { result: RsoResult }) {
+  if (result === "linked") {
+    return (
+      <p
+        role="status"
+        className="mb-4 rounded-control border border-win/40 bg-win-soft px-3 py-2.5 text-sm text-ink"
+      >
+        {copy.rso.results.linked}
+      </p>
+    );
+  }
+  return (
+    <div className="mb-4">
+      <ErrorNotice>{copy.rso.results[result]}</ErrorNotice>
+    </div>
+  );
+}
+
 type RiotAccountsSectionProps = {
   accounts: RiotAccountView[];
   maxAccounts: number;
+  /** Riot Sign On : disponible ou non, et le résultat d'un retour de Riot à afficher. */
+  rso?: { enabled: boolean; result: RsoResult | null };
   /** Ce qui suit la section sur la page : glisse quand la liste change de hauteur. */
   children: ReactNode;
 };
@@ -163,7 +204,12 @@ type RiotAccountsSectionProps = {
  * rendu sans effet visible (une erreur de formulaire, la confirmation du
  * serveur), pendant laquelle les lignes ne répondent pas aux clics.
  */
-export function RiotAccountsSection({ accounts, maxAccounts, children }: RiotAccountsSectionProps) {
+export function RiotAccountsSection({
+  accounts,
+  maxAccounts,
+  rso,
+  children,
+}: RiotAccountsSectionProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
 
@@ -347,8 +393,12 @@ export function RiotAccountsSection({ accounts, maxAccounts, children }: RiotAcc
           <ViewTransition update={slide} default="none">
             <Panel className="p-5">
               <h3 className="pb-4 text-lg font-semibold text-ink">{copy.addTitle}</h3>
+              {rso?.result ? <RsoResultNotice result={rso.result} /> : null}
               {shown.length < maxAccounts ? (
-                <AddRiotAccountForm />
+                <>
+                  {rso?.enabled ? <RsoButton /> : null}
+                  <AddRiotAccountForm />
+                </>
               ) : (
                 <p className="text-ink-muted">{copy.errors.limitReached(maxAccounts)}</p>
               )}

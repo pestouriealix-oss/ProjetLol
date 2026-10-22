@@ -574,9 +574,60 @@ export const fr = {
     unreadableBody:
       "Les données de cette partie sont incomplètes. Relance une mise à jour depuis le tableau de bord.",
   },
+  premium: {
+    title: "Premium",
+    headline: "Plus de coach, pour le prix d'un café",
+    lede: "Tout Kairos reste gratuit. Premium lève les limites pour ceux qui enchaînent les parties.",
+    perMonth: "par mois",
+    noCommitment: "Sans engagement, résiliable en deux clics.",
+    compare: {
+      feature: "Ce qui change",
+      free: "Gratuit",
+      premium: "Premium",
+      sheets: "Fiches de draft par jour",
+      reviews: "Bilans de partie par jour",
+      accounts: "Comptes Riot liés",
+      everything: "Stats, parties, esport, actus",
+      included: "Inclus",
+    },
+    subscribe: "Passer Premium",
+    opening: "Ouverture du paiement…",
+    paymentBy:
+      "Paiement sécurisé par Paddle, notre revendeur officiel : il gère la carte et la TVA, Kairos ne voit jamais tes coordonnées bancaires.",
+    notReady:
+      "Le paiement n'est pas encore ouvert. Premium arrive bientôt : en attendant, profite de l'offre gratuite.",
+    loadError: "Le paiement n'a pas pu s'ouvrir. Vérifie ta connexion et réessaie.",
+    thanks:
+      "Merci ! Ton paiement est en cours de confirmation : Premium s'active dans quelques secondes.",
+    active: {
+      title: "Tu es Premium",
+      renews: (date: string) => `Prochain renouvellement le ${date}.`,
+      ends: (date: string) => `Résilié : Premium reste actif jusqu'au ${date}.`,
+      pastDue:
+        "Le dernier paiement a échoué : mets à jour ton moyen de paiement pour garder Premium.",
+      manage: "Gérer mon abonnement",
+      manageHint: "Factures, moyen de paiement ou résiliation, sur le portail de Paddle.",
+      manageError: "Le portail de paiement ne répond pas. Réessaie dans un instant.",
+    },
+    upsell: "Passer Premium",
+  },
   settings: {
     title: "Paramètres",
     riot: {
+      rso: {
+        action: "Se connecter avec Riot",
+        hint: "Le plus simple : tu te connectes chez Riot, ton compte est lié et vérifié, sans taper ton Riot ID.",
+        or: "ou avec ton Riot ID",
+        results: {
+          linked: "Compte lié et vérifié avec Riot.",
+          state: "La connexion à Riot a expiré. Réessaie.",
+          denied: "Connexion à Riot annulée.",
+          limit: "Tu as atteint la limite de comptes liés pour ton offre.",
+          platform: "Ton serveur n'est pas reconnu. Ajoute ton compte avec ton Riot ID.",
+          unavailable:
+            "Riot ne répond pas pour l'instant. Réessaie dans un instant, ou ajoute ton compte avec ton Riot ID.",
+        },
+      },
       title: "Comptes Riot",
       description:
         "Les comptes dont les parties seront suivies. Le compte principal est sélectionné par défaut dans l'application.",
@@ -617,18 +668,22 @@ export const fr = {
       },
     },
     account: {
+      upgrade: "Passer Premium",
+      managePlan: "Gérer mon abonnement",
       title: "Compte",
       email: "E-mail",
       plan: "Offre",
       signOut: "Se déconnecter",
       dangerTitle: "Supprimer mon compte",
       dangerBody:
-        "Supprime ton compte et toutes tes données : comptes Riot liés, analyses, bilans et notes. Cette action est définitive.",
+        "Supprime ton compte et toutes tes données : comptes Riot liés, analyses, bilans et notes. Un abonnement Premium en cours est résilié. Cette action est définitive.",
       delete: "Supprimer mon compte",
       deleteTitle: "Supprimer définitivement ton compte ?",
       deleteBody:
         "Toutes tes données seront effacées immédiatement et ne pourront pas être récupérées.",
       deleteConfirm: "Supprimer mon compte",
+      deleteBlocked:
+        "Ton abonnement Premium n'a pas pu être résilié : résilie-le depuis « Gérer mon abonnement », puis supprime ton compte.",
     },
   },
   news: {

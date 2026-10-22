@@ -14,7 +14,8 @@ Travailler une étape à la fois et attendre la validation entre chacune.
   ni `drizzle-orm`. Tout accès aux données passe par un module de `src/lib/db`.
   De même, l'API Riot vivra dans `src/lib/riot`, le modèle dans `src/lib/llm`,
   Data Dragon dans `src/lib/ddragon`, PandaScore (esport) dans `src/lib/esport`,
-  les flux d'articles (RSS) dans `src/lib/news`, les calculs dans `src/lib/stats`.
+  les flux d'articles (RSS) dans `src/lib/news`, les calculs dans `src/lib/stats`,
+  le paiement (Paddle) dans `src/lib/billing`.
 - **Articles.** Jamais le texte d'un article : titre, court extrait et lien vers
   le site qui l'a publié.
 - **Isolation.** Toute fonction de `src/lib/db` qui touche une donnée personnelle

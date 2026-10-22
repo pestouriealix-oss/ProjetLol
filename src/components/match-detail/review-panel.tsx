@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
 import { ErrorNotice } from "@/components/ui/notice";
 import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
@@ -146,6 +147,8 @@ export function ReviewPanel({
             <Button variant="secondary" onClick={() => void write()}>
               {copy.retry}
             </Button>
+          ) : state.error === "quota" || state.error === "budget" ? (
+            <UpsellLink />
           ) : null}
         </div>
       ) : null}
@@ -168,12 +171,27 @@ function Start({
 }) {
   if (!reviewable) return <p className="text-ink-muted">{copy.notReviewable}</p>;
   if (!coachReady) return <p className="text-ink-muted">{copy.noKey}</p>;
-  if (remaining <= 0) return <ErrorNotice>{copy.errors.quota}</ErrorNotice>;
+  if (remaining <= 0) {
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <ErrorNotice>{copy.errors.quota}</ErrorNotice>
+        <UpsellLink />
+      </div>
+    );
+  }
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <Button onClick={onStart}>{copy.action}</Button>
       <span className="text-sm text-ink-faint">{copy.remaining(remaining, limit)}</span>
     </div>
+  );
+}
+
+function UpsellLink() {
+  return (
+    <Link href="/premium" className="text-sm font-semibold text-ink underline underline-offset-4">
+      {t.premium.upsell}
+    </Link>
   );
 }
 

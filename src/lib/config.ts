@@ -39,5 +39,15 @@ export const DEFAULT_PLATFORM: Platform = "EUW1";
 export const PLANS = ["FREE", "PREMIUM"] as const;
 export type Plan = (typeof PLANS)[number];
 
+/** États d'un abonnement payant, tels que Paddle les nomme. */
+export const SUBSCRIPTION_STATUSES = [
+  "active",
+  "trialing",
+  "past_due",
+  "paused",
+  "canceled",
+] as const;
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
+
 /** Mention exigée par Riot, à afficher telle quelle (en anglais). */
 export const RIOT_DISCLAIMER = `${APP_NAME} isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.`;

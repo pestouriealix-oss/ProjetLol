@@ -20,7 +20,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { PLANS, PLATFORM_IDS, ROLES } from "@/lib/config";
+import { PLANS, PLATFORM_IDS, ROLES, SUBSCRIPTION_STATUSES } from "@/lib/config";
 
 const id = () =>
   text("id")
@@ -273,6 +273,44 @@ export const notes = pgTable(
     updatedAt: updatedAt(),
   },
   (table) => [uniqueIndex("notes_user_match_idx").on(table.userId, table.matchId)],
+);
+
+// ── Abonnements (Paddle) ────────────────────────────────────────────────────
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", SUBSCRIPTION_STATUSES);
+
+/** Client Paddle de chaque utilisateur (créé au premier paiement). */
+export const billingCustomers = pgTable("billing_customers", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  /** « ctm_… ». */
+  customerId: text("customer_id").notNull().unique(),
+  createdAt: createdAt(),
+});
+
+/**
+ * Abonnements Paddle, tels que leurs notifications les décrivent. L'offre de
+ * l'utilisateur (`users.plan`) en est déduite à chaque notification.
+ */
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    /** « sub_… ». */
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: subscriptionStatusEnum("status").notNull(),
+    priceId: text("price_id"),
+    /** Fin de la période payée ; `null` pour un abonnement en pause ou résilié. */
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    /** Résiliation programmée (fin de période), s'il y en a une. */
+    cancelAt: timestamp("cancel_at", { withTimezone: true }),
+    /** Moment de la notification qui a écrit cet état : une plus ancienne ne l'écrase pas. */
+    eventAt: timestamp("event_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("subscriptions_user_idx").on(table.userId)],
 );
 
 /** Journal de chaque appel au modèle : sert aux quotas et au suivi des coûts. */
