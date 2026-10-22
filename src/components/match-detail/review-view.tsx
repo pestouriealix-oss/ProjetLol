@@ -145,6 +145,39 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
         </>
       ),
     })),
+    ...(facts.impact && facts.impact.goldDiffEnd !== null
+      ? [
+          {
+            label: copy.facts.goldEnd,
+            value: (
+              <Signed value={facts.impact.goldDiffEnd} even={EVEN_GOLD}>
+                {copy.facts.gold(formatSignedInteger(facts.impact.goldDiffEnd))}
+              </Signed>
+            ),
+          },
+        ]
+      : []),
+    ...(facts.impact?.takedownsBefore15
+      ? [
+          {
+            label: copy.facts.takedowns,
+            value: (
+              <Signed
+                value={
+                  facts.impact.takedownsBefore15.me - (facts.impact.takedownsBefore15.opponent ?? 0)
+                }
+                even={facts.impact.takedownsBefore15.opponent === null ? Infinity : 2}
+              >
+                {facts.impact.takedownsBefore15.me}
+              </Signed>
+            ),
+            note:
+              facts.impact.takedownsBefore15.opponent !== null
+                ? copy.facts.versus(facts.impact.takedownsBefore15.opponent)
+                : undefined,
+          },
+        ]
+      : []),
     ...(facts.deaths.times.length > 0
       ? [
           {
@@ -154,6 +187,18 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
               facts.deaths.beforeEnemyObjective > 0
                 ? copy.facts.deathsObjective(facts.deaths.beforeEnemyObjective)
                 : undefined,
+          },
+        ]
+      : []),
+    ...(facts.me.objectiveTakedowns
+      ? [
+          {
+            label: copy.facts.objectives,
+            value: copy.facts.objectivesValue(
+              facts.me.objectiveTakedowns.dragons,
+              facts.me.objectiveTakedowns.barons,
+              facts.me.objectiveTakedowns.towers,
+            ),
           },
         ]
       : []),
@@ -189,8 +234,14 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
   return (
     <section aria-label={copy.facts.title}>
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-control border border-line bg-line sm:grid-cols-3">
-        {cells.map((cell) => (
-          <div key={cell.label} className="flex flex-col gap-0.5 bg-raised px-3 py-2.5">
+        {cells.map((cell, index) => (
+          <div
+            key={cell.label}
+            className={cn(
+              "flex flex-col gap-0.5 bg-raised px-3 py-2.5",
+              index === cells.length - 1 && lastCellSpan(cells.length),
+            )}
+          >
             <dt className="text-xs text-ink-faint">{cell.label}</dt>
             <dd className="font-semibold text-ink tabular">{cell.value}</dd>
             {cell.note ? <dd className="text-xs text-ink-muted">{cell.note}</dd> : null}
@@ -199,6 +250,14 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
       </dl>
     </section>
   );
+}
+
+/** La dernière case s'étire sur la fin de sa ligne : pas de trou dans la grille (2 puis 3 colonnes). */
+function lastCellSpan(count: number): string {
+  const mobile = count % 2 === 1 ? "col-span-2" : "col-span-1";
+  const wide =
+    count % 3 === 2 ? "sm:col-span-2" : count % 3 === 1 ? "sm:col-span-3" : "sm:col-span-1";
+  return `${mobile} ${wide}`;
 }
 
 /** Un écart avec le vis-à-vis : vert en avance, rouge en retard, neutre tant qu'il reste faible. */

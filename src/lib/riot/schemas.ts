@@ -190,6 +190,17 @@ export const matchDetailParticipantSchema = z.looseObject({
   item4: int,
   item5: int,
   item6: int,
+  /** Défis Riot : participation aux objectifs, kills en solo (absents des très vieilles parties). */
+  challenges: z
+    .looseObject({
+      dragonTakedowns: z.number().optional(),
+      baronTakedowns: z.number().optional(),
+      riftHeraldTakedowns: z.number().optional(),
+      voidMonsterKill: z.number().optional(),
+      turretTakedowns: z.number().optional(),
+      soloKills: z.number().optional(),
+    })
+    .optional(),
   summoner1Id: int,
   summoner2Id: int,
   perks: z

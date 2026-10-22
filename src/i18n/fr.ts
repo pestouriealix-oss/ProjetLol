@@ -460,6 +460,12 @@ export const fr = {
         lane: (minute: number) => `Face à ton vis-à-vis à ${minute} min`,
         gold: (value: string) => `${value} or`,
         cs: (value: string) => `${value} CS`,
+        goldEnd: "Or face à ton vis-à-vis en fin de partie",
+        takedowns: "Kills + assists avant 15 min",
+        versus: (value: number) => `vis-à-vis : ${value}`,
+        objectives: "Objectifs auxquels tu as participé",
+        objectivesValue: (dragons: number, barons: number, towers: number) =>
+          `${dragons} drake${dragons > 1 ? "s" : ""} · ${barons} nash · ${towers} tour${towers > 1 ? "s" : ""}`,
         deaths: "Morts avant 15 min",
         deathsObjective: (count: number) => `dont ${count} juste avant un objectif adverse`,
         csPerMinute: "CS par minute",

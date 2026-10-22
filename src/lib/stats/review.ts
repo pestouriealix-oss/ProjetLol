@@ -65,6 +65,18 @@ const reviewLineSchema = z.object({
   killParticipation: z.number(),
   visionPerMinute: z.number(),
   controlWards: z.number(),
+  /** Objectifs auxquels il a participé (défis Riot) ; `null` s'ils manquent. */
+  objectiveTakedowns: z
+    .object({
+      dragons: z.number(),
+      barons: z.number(),
+      heralds: z.number(),
+      grubs: z.number(),
+      towers: z.number(),
+    })
+    .nullable()
+    .default(null),
+  soloKills: z.number().nullable().default(null),
 });
 
 const laneCheckpointSchema = z.object({
@@ -118,6 +130,19 @@ export const reviewFactsSchema = z.object({
     .nullable(),
   objectives: z.object({ ours: objectiveCounts, theirs: objectiveCounts }),
   habits: reviewHabitsSchema.nullable(),
+  /**
+   * Ce que le joueur a apporté à la partie au-delà de son farm, face à son
+   * vis-à-vis : kills et assists avant 15 minutes, écart d'or en fin de partie.
+   */
+  impact: z
+    .object({
+      /** Kills et assists avant 15 minutes ; `null` sans chronologie. */
+      takedownsBefore15: z.object({ me: z.number(), opponent: z.number().nullable() }).nullable(),
+      /** Or du joueur moins celui de son vis-à-vis, en fin de partie. */
+      goldDiffEnd: z.number().nullable(),
+    })
+    .nullable()
+    .default(null),
 });
 
 export type ReviewFacts = z.infer<typeof reviewFactsSchema>;
@@ -139,6 +164,8 @@ function line(player: DetailPlayer, minutes: number): ReviewLine {
     killParticipation: player.killParticipation,
     visionPerMinute: perMinute(player.vision),
     controlWards: player.controlWardsBought,
+    objectiveTakedowns: player.objectiveTakedowns,
+    soloKills: player.soloKills,
   };
 }
 
@@ -262,6 +289,19 @@ export function buildReviewFacts(
     },
     teamGold: timeline ? teamGold(timeline, ours.teamId) : null,
     objectives: { ours: counts(ours), theirs: counts(theirs) },
+    impact: {
+      takedownsBefore15: myTimeline
+        ? {
+            me: myTimeline.takedowns.filter((seconds) => seconds < EARLY_GAME_SECONDS).length,
+            opponent: opponent
+              ? (timeline?.players[opponent.puuid]?.takedowns ?? []).filter(
+                  (seconds) => seconds < EARLY_GAME_SECONDS,
+                ).length
+              : null,
+          }
+        : null,
+      goldDiffEnd: opponent ? me.gold - opponent.gold : null,
+    },
     habits: habitsWithout(roleTotals, {
       counted: countedInTotals,
       win: ours.win,

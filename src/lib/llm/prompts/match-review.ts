@@ -12,7 +12,7 @@ import { modelList, modelText, ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@6";
+export const MATCH_REVIEW_VERSION = "match-review@7";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan en une minute. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant. Il doit en retenir une seule chose : quoi faire à la prochaine partie.
 
@@ -32,6 +32,10 @@ Tu reçois uniquement des faits vérifiés, tirés des données officielles de l
 Règles :
 - Chaque point s'appuie sur un fait reçu. Ne cite que des chiffres présents dans les faits, arrondis comme eux. N'invente rien sur ce qui ne figure pas dans les faits (placement, combats précis, communication).
 - Compare d'abord le joueur à ses habitudes quand tu les as, sinon à son vis-à-vis. Un écart de moins de 10 % n'est ni un point fort ni un point faible.
+
+Lis la partie comme un coach, pas comme une liste de chiffres :
+- Pèse les compromis. Un retard de CS n'est pas une faute si le joueur a eu plus d'impact que son vis-à-vis : plus de KP, plus de kills et d'assists avant 15 minutes, plus d'objectifs, plus d'or en fin de partie. Dis-le comme un point fort, et l'axe de progrès devient de garder cet impact en perdant moins de farm (farmer entre deux actions, ne pas laisser de camps ou de vagues). À l'inverse, beaucoup de CS avec peu d'impact (KP et objectifs bas) est de l'overfarming : signale-le.
+- Tiens compte du poste. En jungle, ganks, drakes, grubs et héraut comptent autant que le farm. En support, ignore les CS : regarde la vision, les pinks et la KP. Sur les autres postes, le farm et l'or restent la base, mais un roam qui rapporte des kills vaut plus que quelques CS.
 - Parle de ce qu'il contrôle. Ne blâme jamais ses coéquipiers.
 - Aucune estimation de niveau caché (MMR), aucune comparaison avec un rang.
 - Longueurs : un titre fait 5 mots au plus ; une explication, 25 mots au plus ; une option, 15 mots au plus. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour toutes les parties.
@@ -102,6 +106,12 @@ function lineBlock(label: string, champion: string, line: ReviewLine): string[] 
     `- Dégâts aux champions par minute : ${formatInteger(Math.round(line.damagePerMinute))} (${formatPercent(line.damageShare)} de son équipe)`,
     `- KP (participation aux kills) : ${formatPercent(line.killParticipation)}`,
     `- Score de vision par minute : ${formatDecimal(line.visionPerMinute)}, pinks achetées : ${line.controlWards}`,
+    ...(line.soloKills !== null ? [`- Kills en solo : ${line.soloKills}`] : []),
+    ...(line.objectiveTakedowns
+      ? [
+          `- Participation aux objectifs : drakes ${line.objectiveTakedowns.dragons}, nash ${line.objectiveTakedowns.barons}, héraut ${line.objectiveTakedowns.heralds}, grubs ${line.objectiveTakedowns.grubs}, tours ${line.objectiveTakedowns.towers}`,
+        ]
+      : []),
   ];
 }
 
@@ -131,6 +141,18 @@ export function matchReviewMessage(
     }
   } else {
     parts.push("Écarts avec le vis-à-vis en phase de voie : indisponibles.");
+  }
+  const impact = facts.impact;
+  if (impact?.takedownsBefore15) {
+    const { me, opponent } = impact.takedownsBefore15;
+    parts.push(
+      `Kills et assists avant 15 minutes : ${me} pour le joueur${opponent !== null ? `, ${opponent} pour son vis-à-vis` : ""}.`,
+    );
+  }
+  if (impact && impact.goldDiffEnd !== null) {
+    parts.push(
+      `Or en fin de partie : ${formatSignedInteger(impact.goldDiffEnd)} pour le joueur face à son vis-à-vis.`,
+    );
   }
   parts.push("");
 

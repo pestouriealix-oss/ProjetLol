@@ -16,6 +16,8 @@ const line = {
   killParticipation: 0.6,
   visionPerMinute: 1,
   controlWards: 3,
+  objectiveTakedowns: { dragons: 2, barons: 1, heralds: 0, grubs: 3, towers: 2 },
+  soloKills: 1,
 };
 
 const facts: ReviewFacts = {
@@ -40,6 +42,7 @@ const facts: ReviewFacts = {
     theirs: { dragons: 1, grubs: 0, heralds: 0, barons: 0, towers: 2 },
   },
   habits: null,
+  impact: { takedownsBefore15: { me: 8, opponent: 3 }, goldDiffEnd: 4175 },
 };
 
 describe("matchReviewMessage", () => {
@@ -52,6 +55,11 @@ describe("matchReviewMessage", () => {
     expect(message).toContain("à 10 minutes : or +200, CS −4, expérience 0");
     expect(message).toContain("Morts à 5:00, 14:00 : 2 avant 15 minutes, 1 dans la minute");
     expect(message).toContain("drakes 3/1");
+    expect(message).toContain(
+      "Kills et assists avant 15 minutes : 8 pour le joueur, 3 pour son vis-à-vis.",
+    );
+    expect(message).toContain("Or en fin de partie : +4\u202f175 pour le joueur");
+    expect(message).toContain("Participation aux objectifs : drakes 2, nash 1");
   });
 
   it("dit quand les habitudes manquent", () => {

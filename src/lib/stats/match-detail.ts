@@ -40,6 +40,16 @@ export type DetailPlayer = {
   controlWards: number;
   /** Pinks achetées. */
   controlWardsBought: number;
+  /** Objectifs auxquels le joueur a participé ; `null` si Riot ne les donne pas. */
+  objectiveTakedowns: {
+    dragons: number;
+    barons: number;
+    heralds: number;
+    grubs: number;
+    towers: number;
+  } | null;
+  /** Kills en un contre un ; `null` si Riot ne le donne pas. */
+  soloKills: number | null;
   /** Les six emplacements d'objets, dans l'ordre (0 pour un emplacement vide). */
   items: number[];
   /** Le bijou (emplacement 7), 0 s'il n'y en a pas. */
@@ -125,6 +135,16 @@ function player(
     wardsPlaced: p.wardsPlaced,
     controlWards: p.detectorWardsPlaced,
     controlWardsBought: p.visionWardsBoughtInGame,
+    objectiveTakedowns: p.challenges
+      ? {
+          dragons: p.challenges.dragonTakedowns ?? 0,
+          barons: p.challenges.baronTakedowns ?? 0,
+          heralds: p.challenges.riftHeraldTakedowns ?? 0,
+          grubs: p.challenges.voidMonsterKill ?? 0,
+          towers: p.challenges.turretTakedowns ?? 0,
+        }
+      : null,
+    soloKills: p.challenges?.soloKills ?? null,
     items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5],
     trinket: p.item6,
     spells: [p.summoner1Id, p.summoner2Id],

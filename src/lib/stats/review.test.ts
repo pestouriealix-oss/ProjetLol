@@ -33,6 +33,8 @@ function player(
     wardsPlaced: 10,
     controlWards: 3,
     controlWardsBought: 4,
+    objectiveTakedowns: { dragons: 2, barons: 1, heralds: 0, grubs: 3, towers: 2 },
+    soloKills: 1,
     items: [],
     trinket: 0,
     spells: [4, 11],
@@ -96,7 +98,7 @@ const timeline: ReducedTimeline = {
         xp: minutes.map((minute) => minute * 500),
       },
       deaths: [300, 840, 1500],
-      takedowns: [],
+      takedowns: [240, 600, 1000],
     },
     lui: {
       items: [],
@@ -136,6 +138,20 @@ describe("buildReviewFacts", () => {
       { minute: 10, goldDiff: 200, csDiff: 10, xpDiff: 200 },
       { minute: 15, goldDiff: 300, csDiff: 15, xpDiff: 300 },
     ]);
+  });
+
+  it("mesure l'impact au-delà du farm : kills et assists avant 15 minutes, or en fin de partie", () => {
+    expect(facts.impact).toEqual({
+      takedownsBefore15: { me: 2, opponent: 0 },
+      goldDiffEnd: 0,
+    });
+    expect(facts.me.objectiveTakedowns).toEqual({
+      dragons: 2,
+      barons: 1,
+      heralds: 0,
+      grubs: 3,
+      towers: 2,
+    });
   });
 
   it("repère les morts précoces et celles qui précèdent un objectif adverse", () => {
