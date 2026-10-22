@@ -8,7 +8,7 @@ import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
 import { readReviewView, type ReviewView as Review } from "@/lib/review/review-view";
 
-import { ReviewView } from "./review-view";
+import { FactsStrip, ReviewView } from "./review-view";
 
 const copy = t.matchDetail.review;
 
@@ -135,6 +135,12 @@ export function ReviewPanel({
 
       {state.status === "error" ? (
         <div className="flex flex-col items-start gap-3">
+          {/* Les chiffres de la partie restent utiles même si le texte a échoué. */}
+          {state.review.facts ? (
+            <div className="w-full">
+              <FactsStrip facts={state.review.facts} />
+            </div>
+          ) : null}
           <ErrorNotice>{copy.errors[state.error]}</ErrorNotice>
           {!FINAL_ERRORS.has(state.error) ? (
             <Button variant="secondary" onClick={() => void write()}>

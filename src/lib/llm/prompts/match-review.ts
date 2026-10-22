@@ -4,7 +4,7 @@ import { formatDecimal, formatInteger, formatPercent, formatSignedInteger } from
 import type { ReviewFacts, ReviewLine } from "@/lib/stats/review";
 
 import type { ToolSpec } from "../client";
-import { ROLE_NAMES } from "./shared";
+import { modelList, modelText, ROLE_NAMES } from "./shared";
 
 /**
  * Bilan d'une partie jouée : ce qui a marché, ce qui a coûté, et des façons
@@ -12,7 +12,7 @@ import { ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@1";
+export const MATCH_REVIEW_VERSION = "match-review@2";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant.
 
@@ -34,20 +34,16 @@ Règles :
 - Parle de ce qu'il contrôle. Ne blâme jamais ses coéquipiers. Une défaite peut contenir de vrais points forts, une victoire de vrais axes de progrès.
 - Aucune estimation de niveau caché (MMR), aucune comparaison avec un rang.
 - Court et concret. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour toutes les parties.
+- Longueurs : un titre fait 6 mots au plus ; une explication ou une option tient en une phrase de 30 mots au plus ; le résumé, en deux phrases.
 - Écris les champions par leur nom français habituel.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
-
-const point = z.object({ title: text(60), detail: text(300) });
+const point = z.object({ title: modelText(80), detail: modelText(400) });
 
 export const matchReviewSchema = z.object({
-  summary: text(400),
-  strengths: z.array(point).min(1).max(3),
-  improvements: z
-    .array(point.extend({ options: z.array(text(200)).min(2).max(3) }))
-    .min(1)
-    .max(3),
+  summary: modelText(500),
+  strengths: modelList(point, 0, 3),
+  improvements: modelList(point.extend({ options: modelList(modelText(250), 2, 3) }), 1, 3),
 });
 
 export type MatchReview = z.infer<typeof matchReviewSchema>;

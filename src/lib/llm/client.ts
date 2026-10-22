@@ -26,6 +26,8 @@ export type ToolCall<T> = {
   maxTokens: number;
   /** Reçoit les tokens consommés par l'appel (pour le suivi des coûts). */
   onUsage?: (usage: LlmUsage) => void;
+  /** Nouveaux essais quand la réponse est hors format (1 par défaut). */
+  retries?: number;
 };
 
 export type LlmClientOptions = {
@@ -102,10 +104,14 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
     /** Un appel complet : la réponse validée, d'un bloc. */
     async callTool<T>(call: ToolCall<T>): Promise<T> {
       const { client, params } = request(call);
-      try {
-        return finish(await client.messages.create(params), call);
-      } catch (error) {
-        throw toLlmError(error);
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          return finish(await client.messages.create(params), call);
+        } catch (error) {
+          const failure = toLlmError(error);
+          if (!retryable(failure, attempt, call)) throw failure;
+          console.warn("Réponse hors format, nouvel essai", failure.message);
+        }
       }
     },
 
@@ -120,15 +126,26 @@ export function createLlm({ apiKey, baseURL, timeoutMs = 60_000 }: LlmClientOpti
       signal?: AbortSignal,
     ): Promise<T> {
       const { client, params } = request(call);
-      try {
-        const stream = client.messages.stream(params, { signal });
-        stream.on("inputJson", (_delta, snapshot) => onPartial(snapshot));
-        return finish(await stream.finalMessage(), call);
-      } catch (error) {
-        throw toLlmError(error);
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          const stream = client.messages.stream(params, { signal });
+          stream.on("inputJson", (_delta, snapshot) => onPartial(snapshot));
+          return finish(await stream.finalMessage(), call);
+        } catch (error) {
+          const failure = toLlmError(error);
+          if (signal?.aborted || !retryable(failure, attempt, call)) throw failure;
+          console.warn("Réponse hors format, nouvel essai", failure.message);
+          // Le nouvel essai repart de zéro : la page efface ce qui était écrit.
+          onPartial({});
+        }
       }
     },
   };
+}
+
+/** Une réponse hors format mérite un nouvel essai : le modèle répond rarement deux fois de travers. */
+function retryable(error: LlmError, attempt: number, call: { retries?: number }): boolean {
+  return error.kind === "invalid_output" && attempt < (call.retries ?? 1);
 }
 
 /** Traduit les erreurs du SDK en erreurs que la page sait expliquer. */

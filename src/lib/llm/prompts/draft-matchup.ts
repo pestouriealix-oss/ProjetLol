@@ -4,7 +4,7 @@ import type { Role } from "@/lib/config";
 import { formatInteger, formatPercent } from "@/lib/format";
 
 import type { ToolSpec } from "../client";
-import { ROLE_NAMES, type ChampionSheet, type GameRecord } from "./shared";
+import { ROLE_NAMES, type ChampionSheet, type GameRecord, modelList, modelText } from "./shared";
 
 /**
  * Duel contre le vis-à-vis : ne dépend que des deux champions (et du duo en
@@ -12,7 +12,7 @@ import { ROLE_NAMES, type ChampionSheet, type GameRecord } from "./shared";
  * resservi à tous ceux qui jouent ce duel sur le même patch. Version à changer
  * à chaque modification du texte ou du schéma : elle fait partie de la clé.
  */
-export const DRAFT_MATCHUP_VERSION = "draft-matchup@1";
+export const DRAFT_MATCHUP_VERSION = "draft-matchup@2";
 
 export const DRAFT_MATCHUP_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -31,22 +31,18 @@ Tu reçois des données vérifiées, à respecter :
 
 Règles :
 - Court et concret. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour tous les duels.
+- Longueurs : un titre fait 6 mots au plus ; le résumé, chaque option et la chose à surveiller tiennent en une phrase de 30 mots au plus ; les moments clés, en deux phrases.
 - Aucun pourcentage ni statistique dans ton texte : les seuls chiffres permis sont les délais et les niveaux de la fiche technique. Pas d'estimation de niveau caché (MMR).
 - Pour le reste (style de jeu, pics de puissance), appuie-toi sur ce qui est stable d'un patch à l'autre. Si tu n'es pas sûr d'un détail, ne l'écris pas.
 - Écris les champions par leur nom français habituel.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
-
 export const matchupSchema = z.object({
   verdict: z.enum(["favorable", "even", "unfavorable"]),
-  summary: text(300),
-  keyMoments: text(400),
-  options: z
-    .array(z.object({ title: text(60), detail: text(300) }))
-    .min(2)
-    .max(3),
-  watchOut: text(300),
+  summary: modelText(400),
+  keyMoments: modelText(500),
+  options: modelList(z.object({ title: modelText(80), detail: modelText(400) }), 2, 3),
+  watchOut: modelText(400),
 });
 
 export type Matchup = z.infer<typeof matchupSchema>;

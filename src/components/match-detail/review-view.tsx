@@ -24,28 +24,33 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
       {review.facts ? <FactsStrip facts={review.facts} /> : writing ? <Lines count={2} /> : null}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Block label={copy.strengths}>
-          {strengths.length > 0 ? (
-            <ul className="flex flex-col gap-3">
-              {strengths.map((point, index) => (
-                <li key={index} className="flex gap-2.5">
-                  <span aria-hidden className="mt-[0.55em] size-1.5 shrink-0 rounded-full bg-win" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-ink">{point.title ?? ""}</p>
-                    <Growing
-                      text={point.detail}
-                      writing={writing}
-                      className="text-ink-muted"
-                      lines={1}
+        {strengths.length > 0 || writing ? (
+          <Block label={copy.strengths}>
+            {strengths.length > 0 ? (
+              <ul className="flex flex-col gap-3">
+                {strengths.map((point, index) => (
+                  <li key={index} className="flex gap-2.5">
+                    <span
+                      aria-hidden
+                      className="mt-[0.55em] size-1.5 shrink-0 rounded-full bg-win"
                     />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : writing ? (
-            <Lines count={3} />
-          ) : null}
-        </Block>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink">{point.title ?? ""}</p>
+                      <Growing
+                        text={point.detail}
+                        writing={writing}
+                        className="text-ink-muted"
+                        lines={1}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : writing ? (
+              <Lines count={3} />
+            ) : null}
+          </Block>
+        ) : null}
 
         <Block label={copy.improvements}>
           {improvements.length > 0 ? (
@@ -98,7 +103,7 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
 }
 
 /** Les chiffres clés de la partie, comparés au vis-à-vis et aux habitudes du joueur. */
-function FactsStrip({ facts }: { facts: ReviewFacts }) {
+export function FactsStrip({ facts }: { facts: ReviewFacts }) {
   const { habits } = facts;
   const cells: { label: string; value: string; note?: string; tone?: "win" | "loss" }[] = [
     ...facts.lane.map((checkpoint) => ({

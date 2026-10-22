@@ -3,14 +3,14 @@ import { z } from "zod";
 import type { Role } from "@/lib/config";
 
 import type { ToolSpec } from "../client";
-import { ROLE_NAMES } from "./shared";
+import { modelText, ROLE_NAMES } from "./shared";
 
 /**
  * Conditions de victoire des deux équipes : la partie de la fiche qui dépend
  * des dix champions, écrite pour chaque partie. Version à changer à chaque
  * modification du texte ou du schéma.
  */
-export const WIN_CONDITIONS_VERSION = "win-conditions@1";
+export const WIN_CONDITIONS_VERSION = "win-conditions@2";
 
 export const WIN_CONDITIONS_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -23,9 +23,7 @@ Règles :
 - Écris les champions par leur nom français habituel.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
-
-export const winConditionsSchema = z.object({ ours: text(400), theirs: text(400) });
+export const winConditionsSchema = z.object({ ours: modelText(500), theirs: modelText(500) });
 
 export type WinConditions = z.infer<typeof winConditionsSchema>;
 

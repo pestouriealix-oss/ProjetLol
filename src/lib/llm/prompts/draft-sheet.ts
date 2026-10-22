@@ -12,7 +12,7 @@ import { matchupSchema } from "./draft-matchup";
  * Version à changer à chaque modification d'un des deux prompts ou du schéma
  * (elle est enregistrée avec chaque fiche).
  */
-export const DRAFT_SHEET_VERSION = "draft-sheet@3";
+export const DRAFT_SHEET_VERSION = "draft-sheet@4";
 
 export const draftSheetSchema = z.object({
   winConditions: winConditionsSchema,
