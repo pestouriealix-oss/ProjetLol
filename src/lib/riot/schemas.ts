@@ -179,7 +179,10 @@ export const matchDetailParticipantSchema = z.looseObject({
   totalDamageTaken: int,
   visionScore: int,
   wardsPlaced: int,
-  controlWardsPlaced: int,
+  /** Pinks posées (le champ « controlWardsPlaced » n'existe pas chez Riot). */
+  detectorWardsPlaced: int,
+  /** Pinks achetées. */
+  visionWardsBoughtInGame: int,
   item0: int,
   item1: int,
   item2: int,

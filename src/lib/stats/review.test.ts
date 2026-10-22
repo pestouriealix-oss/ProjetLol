@@ -32,6 +32,7 @@ function player(
     vision: 30,
     wardsPlaced: 10,
     controlWards: 3,
+    controlWardsBought: 4,
     items: [],
     trinket: 0,
     spells: [4, 11],

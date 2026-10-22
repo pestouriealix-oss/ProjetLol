@@ -36,7 +36,10 @@ export type DetailPlayer = {
   damageTaken: number;
   vision: number;
   wardsPlaced: number;
+  /** Pinks posées. */
   controlWards: number;
+  /** Pinks achetées. */
+  controlWardsBought: number;
   /** Les six emplacements d'objets, dans l'ordre (0 pour un emplacement vide). */
   items: number[];
   /** Le bijou (emplacement 7), 0 s'il n'y en a pas. */
@@ -120,7 +123,8 @@ function player(
     damageTaken: p.totalDamageTaken,
     vision: p.visionScore,
     wardsPlaced: p.wardsPlaced,
-    controlWards: p.controlWardsPlaced,
+    controlWards: p.detectorWardsPlaced,
+    controlWardsBought: p.visionWardsBoughtInGame,
     items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5],
     trinket: p.item6,
     spells: [p.summoner1Id, p.summoner2Id],

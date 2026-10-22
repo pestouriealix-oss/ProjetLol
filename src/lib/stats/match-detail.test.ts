@@ -28,6 +28,8 @@ describe("buildMatchDetail", () => {
 
     // 7 + 9 participations sur 7 + 4 × 3 éliminations d'équipe.
     expect(me.killParticipation).toBeCloseTo(16 / 19);
+    // Pinks : posées (detectorWardsPlaced) et achetées (visionWardsBoughtInGame).
+    expect(me).toMatchObject({ controlWards: 2, controlWardsBought: 3 });
     expect(me.damageShare).toBeCloseTo(1 / 5);
     expect(me.csPerMinute).toBeCloseTo(180 / (1754 / 60));
     expect(me.items).toEqual([6692, 3111, 0, 3071, 0, 0]);

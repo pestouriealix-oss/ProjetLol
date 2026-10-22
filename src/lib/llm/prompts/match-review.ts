@@ -12,7 +12,7 @@ import { modelList, modelText, ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@5";
+export const MATCH_REVIEW_VERSION = "match-review@6";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan en une minute. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant. Il doit en retenir une seule chose : quoi faire à la prochaine partie.
 
@@ -25,7 +25,7 @@ Ce que tu écris, dans cet ordre :
 Tu reçois uniquement des faits vérifiés, tirés des données officielles de la partie :
 - Ses chiffres et ceux de son vis-à-vis (même poste en face).
 - Les écarts avec son vis-à-vis à 10 et 15 minutes (or, CS, expérience), quand la partie est assez longue.
-- Ses morts : quand, combien avant 15 minutes, combien juste avant un objectif pris par l'adversaire.
+- Ses morts : quand, combien avant 15 minutes, combien juste avant un objectif neutre (drake, nash, héraut, grubs) pris par l'adversaire.
 - L'écart d'or des équipes au fil de la partie et les objectifs pris.
 - Ses habitudes à ce poste, seulement quand il a assez d'autres parties classées.
 
@@ -36,7 +36,7 @@ Règles :
 - Aucune estimation de niveau caché (MMR), aucune comparaison avec un rang.
 - Longueurs : un titre fait 5 mots au plus ; une explication, 25 mots au plus ; une option, 15 mots au plus. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour toutes les parties.
 - Écris les champions par leur nom français habituel.
-- Utilise le vocabulaire des joueurs : CS (jamais « sbires »), farm, KP, gank, kill, vision, balise de contrôle, Nashor, Héraut, larves.
+- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), farm, KP, kill, gank, roam, back, push, trade, lead, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 const point = z.object({ title: modelText(60), detail: modelText(250) });
@@ -101,7 +101,7 @@ function lineBlock(label: string, champion: string, line: ReviewLine): string[] 
     `- Or par minute : ${formatInteger(Math.round(line.goldPerMinute))}`,
     `- Dégâts aux champions par minute : ${formatInteger(Math.round(line.damagePerMinute))} (${formatPercent(line.damageShare)} de son équipe)`,
     `- KP (participation aux kills) : ${formatPercent(line.killParticipation)}`,
-    `- Score de vision par minute : ${formatDecimal(line.visionPerMinute)}, balises de contrôle achetées : ${line.controlWards}`,
+    `- Score de vision par minute : ${formatDecimal(line.visionPerMinute)}, pinks achetées : ${line.controlWards}`,
   ];
 }
 
@@ -149,7 +149,7 @@ export function matchReviewMessage(
   }
   const { ours, theirs } = facts.objectives;
   parts.push(
-    `Objectifs (son équipe / adversaires) : dragons ${ours.dragons}/${theirs.dragons}, larves ${ours.grubs}/${theirs.grubs}, héraut ${ours.heralds}/${theirs.heralds}, nashor ${ours.barons}/${theirs.barons}, tours ${ours.towers}/${theirs.towers}.`,
+    `Objectifs (son équipe / adversaires) : drakes ${ours.dragons}/${theirs.dragons}, grubs ${ours.grubs}/${theirs.grubs}, héraut ${ours.heralds}/${theirs.heralds}, nash ${ours.barons}/${theirs.barons}, tours ${ours.towers}/${theirs.towers}.`,
     "",
   );
 

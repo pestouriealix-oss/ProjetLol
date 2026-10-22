@@ -138,7 +138,7 @@ function line(player: DetailPlayer, minutes: number): ReviewLine {
     damageShare: player.damageShare,
     killParticipation: player.killParticipation,
     visionPerMinute: perMinute(player.vision),
-    controlWards: player.controlWards,
+    controlWards: player.controlWardsBought,
   };
 }
 

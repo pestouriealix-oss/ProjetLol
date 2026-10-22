@@ -424,7 +424,8 @@ export const fr = {
     kp: (percent: string) => `${percent} KP`,
     perMinute: (value: string) => `${value}/min`,
     damageShare: (percent: string) => `${percent} de l'équipe`,
-    wards: (placed: number, control: number) => `${placed} balises, ${control} de contrôle`,
+    wards: (placed: number, control: number) =>
+      `${placed} ward${placed > 1 ? "s" : ""}, ${control} pink${control > 1 ? "s" : ""}`,
     emptySlot: "Emplacement vide",
     trinket: "Bijou",
     spells: "Sorts d'invocateur",

@@ -63,7 +63,8 @@ export function matchFixture({
       riotIdTagline: "EUW",
       totalDamageTaken: 21000,
       wardsPlaced: 9,
-      controlWardsPlaced: 2,
+      detectorWardsPlaced: 2,
+      visionWardsBoughtInGame: 3,
       summoner1Id: 4,
       summoner2Id: index === 1 ? 11 : 14,
       perks: {

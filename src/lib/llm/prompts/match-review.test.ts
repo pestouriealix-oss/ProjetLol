@@ -51,7 +51,7 @@ describe("matchReviewMessage", () => {
     expect(message).toContain("Or par minute : 400");
     expect(message).toContain("à 10 minutes : or +200, CS −4, expérience 0");
     expect(message).toContain("Morts à 5:00, 14:00 : 2 avant 15 minutes, 1 dans la minute");
-    expect(message).toContain("dragons 3/1");
+    expect(message).toContain("drakes 3/1");
   });
 
   it("dit quand les habitudes manquent", () => {

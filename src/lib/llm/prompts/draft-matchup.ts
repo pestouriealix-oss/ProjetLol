@@ -12,7 +12,7 @@ import { ROLE_NAMES, type ChampionSheet, type GameRecord, modelList, modelText }
  * resservi à tous ceux qui jouent ce duel sur le même patch. Version à changer
  * à chaque modification du texte ou du schéma : elle fait partie de la clé.
  */
-export const DRAFT_MATCHUP_VERSION = "draft-matchup@3";
+export const DRAFT_MATCHUP_VERSION = "draft-matchup@4";
 
 export const DRAFT_MATCHUP_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -35,7 +35,7 @@ Règles :
 - Aucun pourcentage ni statistique dans ton texte : les seuls chiffres permis sont les délais et les niveaux de la fiche technique. Pas d'estimation de niveau caché (MMR).
 - Pour le reste (style de jeu, pics de puissance), appuie-toi sur ce qui est stable d'un patch à l'autre. Si tu n'es pas sûr d'un détail, ne l'écris pas.
 - Écris les champions par leur nom français habituel.
-- Utilise le vocabulaire des joueurs : CS (jamais « sbires »), farm, KP, gank, kill, vision, balise de contrôle, Nashor, Héraut, larves.
+- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), farm, KP, kill, gank, roam, back, push, trade, lead, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 export const matchupSchema = z.object({
