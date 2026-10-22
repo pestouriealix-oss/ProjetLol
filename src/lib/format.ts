@@ -105,5 +105,11 @@ export function formatDayHeading(
  * des guillemets, pour qu'un signe ne se retrouve jamais seul en début de ligne.
  */
 export function frenchSpacing(value: string): string {
-  return value.replace(/ ([:;!?»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+  return (
+    value
+      .replace(/ ([:;!?»])/g, "\u00a0$1")
+      .replace(/« /g, "«\u00a0")
+      // « 7 557 » ne se coupe pas en fin de ligne : espace fine insécable entre les milliers.
+      .replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u202f")
+  );
 }

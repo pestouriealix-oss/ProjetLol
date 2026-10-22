@@ -8,6 +8,9 @@ import type { ReviewFacts } from "@/lib/stats/review";
 
 const copy = t.matchDetail.review;
 
+/** En dessous de cet écart d'or avec le vis-à-vis, la voie est à égalité. */
+const EVEN_GOLD = 250;
+
 /**
  * Le bilan d'une partie : un résumé, les chiffres sur lesquels il s'appuie,
  * puis les points forts et les axes de progrès, chacun avec plusieurs façons
@@ -129,10 +132,11 @@ export function FactsStrip({ facts }: { facts: ReviewFacts }) {
         formatSignedInteger(checkpoint.goldDiff),
         formatSignedInteger(checkpoint.csDiff),
       ),
+      // Quelques centaines d'or d'écart, c'est l'égalité : pas de couleur.
       tone:
-        checkpoint.goldDiff > 0
+        checkpoint.goldDiff >= EVEN_GOLD
           ? ("win" as const)
-          : checkpoint.goldDiff < 0
+          : checkpoint.goldDiff <= -EVEN_GOLD
             ? ("loss" as const)
             : undefined,
     })),

@@ -9,6 +9,7 @@ import {
   formatRelative,
   formatShortDate,
   formatTime,
+  frenchSpacing,
 } from "./format";
 
 describe("mise en forme", () => {
@@ -49,5 +50,16 @@ describe("dates de l'esport", () => {
     expect(formatDayHeading("2026-10-16", now, words)).toBe("Demain");
     expect(formatDayHeading("2026-10-14", now, words)).toBe("Hier");
     expect(formatDayHeading("2026-10-23", now, words)).toBe("Vendredi 23 octobre");
+  });
+});
+
+describe("frenchSpacing", () => {
+  it("rend insécables les espaces de la ponctuation et des milliers", () => {
+    expect(frenchSpacing("Avance : 7 557 or, puis 1 234 567 ?")).toBe(
+      "Avance\u00a0: 7\u202f557 or, puis 1\u202f234\u202f567\u00a0?",
+    );
+    expect(frenchSpacing("Tu as fait 2 morts à 10 minutes")).toBe(
+      "Tu as fait 2 morts à 10 minutes",
+    );
   });
 });
