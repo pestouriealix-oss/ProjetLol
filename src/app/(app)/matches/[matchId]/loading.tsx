@@ -1,4 +1,5 @@
 import { PageShell } from "@/components/layout/page-shell";
+import { Panel } from "@/components/ui/panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { t } from "@/i18n/fr";
 
@@ -27,6 +28,13 @@ export default function MatchDetailLoading() {
       <span className="sr-only" role="status">
         {t.common.loading}
       </span>
+      <Panel aria-hidden className="flex flex-col gap-5 p-5 sm:p-6">
+        <div>
+          <p className="display text-2xl text-ink">{copy.review.title}</p>
+          <Skeleton className="mt-2.5 h-4 w-96 max-w-full" />
+        </div>
+        <Skeleton className="h-10 w-48" />
+      </Panel>
       {[copy.ourTeam, copy.theirTeam].map((title) => (
         <section key={title} aria-hidden className="flex flex-col gap-3">
           <p className="display text-2xl text-ink">{title}</p>

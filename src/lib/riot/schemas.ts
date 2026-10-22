@@ -117,6 +117,9 @@ const timelineEventSchema = z.looseObject({
   monsterType: z.string().optional(),
   monsterSubType: z.string().optional(),
   buildingType: z.string().optional(),
+  killerId: z.number().int().optional(),
+  victimId: z.number().int().optional(),
+  assistingParticipantIds: z.array(z.number().int()).optional(),
 });
 
 export const timelineSchema = z.looseObject({
@@ -126,7 +129,15 @@ export const timelineSchema = z.looseObject({
     frames: z.array(
       z.looseObject({
         timestamp: z.number(),
-        participantFrames: z.record(z.string(), z.looseObject({ totalGold: z.number() })),
+        participantFrames: z.record(
+          z.string(),
+          z.looseObject({
+            totalGold: z.number(),
+            minionsKilled: z.number().optional().default(0),
+            jungleMinionsKilled: z.number().optional().default(0),
+            xp: z.number().optional().default(0),
+          }),
+        ),
         events: z.array(timelineEventSchema).optional().default([]),
       }),
     ),

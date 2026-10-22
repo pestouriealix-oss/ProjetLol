@@ -440,6 +440,53 @@ export const fr = {
     },
     score: (kills: number, deaths: number, assists: number) => `${kills} / ${deaths} / ${assists}`,
     gold: (value: string) => `${value} or`,
+    review: {
+      title: "Bilan du coach",
+      intro:
+        "Ce qui a marché, ce qui t'a coûté, et comment progresser, d'après les chiffres officiels de la partie.",
+      action: "Écrire mon bilan",
+      writing: "Écriture…",
+      retry: "Réessayer",
+      remaining: (count: number, limit: number) =>
+        `${count} bilan${count > 1 ? "s" : ""} restant${count > 1 ? "s" : ""} sur ${limit} (24 h)`,
+      strengths: "Points forts",
+      improvements: "À travailler",
+      options: "Pour la prochaine partie",
+      option: (index: number) => `Option ${index} : `,
+      facts: {
+        title: "Les chiffres de la partie",
+        lane: (minute: number) => `Face à ton vis-à-vis à ${minute} min`,
+        laneValue: (gold: string, cs: string) => `${gold} or · ${cs} sbires`,
+        deaths: "Morts avant 15 min",
+        deathsObjective: (count: number) => `dont ${count} juste avant un objectif adverse`,
+        csPerMinute: "Sbires par minute",
+        killParticipation: "Participation aux éliminations",
+        visionPerMinute: "Vision par minute",
+        habit: (value: string) => `habitude : ${value}`,
+      },
+      sources: (games: number) =>
+        games > 0
+          ? `D'après les données officielles de la partie (Riot) et tes ${games} autres parties classées à ce poste. Bilan écrit par le coach (Claude).`
+          : "D'après les données officielles de la partie (Riot). Bilan écrit par le coach (Claude).",
+      notReviewable:
+        "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+      noKey:
+        "Le coach n'est pas branché : la clé de l'API Anthropic manque sur le serveur (ANTHROPIC_API_KEY).",
+      errors: {
+        quota: "Tu as atteint ta limite de bilans pour les dernières 24 heures.",
+        budget:
+          "Les bilans gratuits sont en pause jusqu'au mois prochain : le coach a atteint son budget mensuel.",
+        match_not_found: "Cette partie est introuvable.",
+        not_reviewable:
+          "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+        missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
+        invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",
+        rate_limited: "Le coach est très demandé. Réessaie dans une minute.",
+        unavailable: "Le bilan n'a pas pu être écrit. Réessaie.",
+        refused: "Le coach n'a pas pu répondre pour cette partie.",
+        invalid_output: "Le bilan reçu était incomplet. Réessaie.",
+      },
+    },
     duel: {
       title: "Face à ton vis-à-vis",
       body: (champion: string) => `Toi contre ${champion}, au même poste.`,

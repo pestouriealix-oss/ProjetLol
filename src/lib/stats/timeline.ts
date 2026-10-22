@@ -20,8 +20,14 @@ export const objectiveTypes = [
 ] as const;
 export type ObjectiveType = (typeof objectiveTypes)[number];
 
+/**
+ * Version de la forme réduite. Une chronologie enregistrée dans une version
+ * plus ancienne ne passe plus le schéma : elle est redemandée à Riot.
+ */
+export const REDUCED_TIMELINE_VERSION = 2;
+
 export const reducedTimelineSchema = z.object({
-  version: z.literal(1),
+  version: z.literal(REDUCED_TIMELINE_VERSION),
   /** Or total de chaque équipe à chaque minute. */
   gold: z.array(z.object({ minute: z.number(), blue: z.number(), red: z.number() })),
   /** Achats et ordre des compétences, par joueur (clé : puuid). */
@@ -31,6 +37,16 @@ export const reducedTimelineSchema = z.object({
       items: z.array(z.object({ seconds: z.number(), itemId: z.number().int() })),
       /** Compétence montée à chaque niveau : 1 = Q, 2 = W, 3 = E, 4 = R. */
       skills: z.array(z.number().int().min(1).max(4)),
+      /** Or, sbires et monstres tués, et expérience du joueur, à chaque minute (même index que `gold`). */
+      frames: z.object({
+        gold: z.array(z.number()),
+        cs: z.array(z.number()),
+        xp: z.array(z.number()),
+      }),
+      /** Moments (en secondes) où le joueur est mort. */
+      deaths: z.array(z.number()),
+      /** Moments où il a tué ou aidé à tuer un adversaire. */
+      takedowns: z.array(z.number()),
     }),
   ),
   objectives: z.array(
@@ -80,7 +96,24 @@ export function reduceTimeline(
   });
 
   const players: ReducedTimeline["players"] = {};
-  for (const puuid of puuidOf.values()) players[puuid] = { items: [], skills: [] };
+  for (const puuid of puuidOf.values()) {
+    players[puuid] = {
+      items: [],
+      skills: [],
+      frames: { gold: [], cs: [], xp: [] },
+      deaths: [],
+      takedowns: [],
+    };
+  }
+  for (const frame of info.frames) {
+    for (const [id, puuid] of puuidOf) {
+      const participant = frame.participantFrames[String(id)];
+      const frames = players[puuid]!.frames;
+      frames.gold.push(participant?.totalGold ?? 0);
+      frames.cs.push((participant?.minionsKilled ?? 0) + (participant?.jungleMinionsKilled ?? 0));
+      frames.xp.push(participant?.xp ?? 0);
+    }
+  }
 
   const objectives: ReducedTimeline["objectives"] = [];
   for (const event of info.frames.flatMap((frame) => frame.events)) {
@@ -97,6 +130,15 @@ export function reduceTimeline(
         if (!player || !event.beforeId) break;
         const index = player.items.findLastIndex((item) => item.itemId === event.beforeId);
         if (index !== -1) player.items.splice(index, 1);
+        break;
+      }
+      case "CHAMPION_KILL": {
+        const victim = event.victimId !== undefined ? puuidOf.get(event.victimId) : undefined;
+        if (victim) players[victim]!.deaths.push(seconds);
+        for (const id of [event.killerId, ...(event.assistingParticipantIds ?? [])]) {
+          const takedown = id !== undefined ? puuidOf.get(id) : undefined;
+          if (takedown) players[takedown]!.takedowns.push(seconds);
+        }
         break;
       }
       case "SKILL_LEVEL_UP":
@@ -136,5 +178,5 @@ export function reduceTimeline(
     }
   }
 
-  return { version: 1, gold, players, objectives };
+  return { version: REDUCED_TIMELINE_VERSION, gold, players, objectives };
 }

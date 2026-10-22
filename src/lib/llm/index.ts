@@ -14,6 +14,8 @@ export const llm = createLlm({ apiKey: env.ANTHROPIC_API_KEY, baseURL: env.ANTHR
 export const MODELS = {
   readDraft: "claude-haiku-5-5",
   draftSheet: env.DRAFT_SHEET_MODEL ?? "claude-sonnet-5-5",
+  /** Le bilan suit le même réglage que la fiche, pour comparer les modèles d'un coup. */
+  matchReview: env.DRAFT_SHEET_MODEL ?? "claude-sonnet-5-5",
 } as const;
 
 export { LlmError, type LlmErrorKind } from "./errors";

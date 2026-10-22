@@ -250,6 +250,8 @@ export const matchReviews = pgTable("match_reviews", {
   improvements: jsonb("improvements").notNull(),
   planFollowed: planFollowedEnum("plan_followed"),
   summary: text("summary").notNull(),
+  /** Les faits de la partie sur lesquels le bilan s'appuie (`src/lib/stats/review.ts`). */
+  facts: jsonb("facts"),
   promptVersion: text("prompt_version").notNull(),
   createdAt: createdAt(),
 });

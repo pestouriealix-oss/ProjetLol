@@ -7,7 +7,7 @@ import { reduceTimeline, reducedTimelineSchema } from "./timeline";
 const frame = (minute: number, gold: [number, number], events: object[] = []) => ({
   timestamp: minute * 60_000 + (minute > 0 ? 120 : 0),
   participantFrames: {
-    "1": { totalGold: gold[0] },
+    "1": { totalGold: gold[0], minionsKilled: minute * 7, jungleMinionsKilled: minute, xp: minute * 280 },
     "2": { totalGold: gold[1] },
   },
   events,
@@ -79,7 +79,17 @@ describe("reduceTimeline", () => {
   });
 
   it("garde les achats sans ceux annulés, et l'ordre des compétences", () => {
-    expect(reduced.players.bleu).toEqual({ items: [{ seconds: 2, itemId: 1055 }], skills: [1, 3] });
+    expect(reduced.players.bleu).toMatchObject({
+      items: [{ seconds: 2, itemId: 1055 }],
+      skills: [1, 3],
+    });
+  });
+
+  it("suit l'or, les CS et l'expérience de chaque joueur, ses morts et ses éliminations", () => {
+    expect(reduced.players.bleu?.frames).toEqual({ gold: [500, 900], cs: [0, 8], xp: [0, 280] });
+    expect(reduced.players.bleu?.takedowns).toEqual([71]);
+    expect(reduced.players.rouge?.deaths).toEqual([71]);
+    expect(reduced.players.rouge?.frames.cs).toEqual([0, 0]);
   });
 
   it("attribue chaque objectif à l'équipe qui l'a pris", () => {

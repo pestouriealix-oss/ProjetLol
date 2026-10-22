@@ -13,6 +13,13 @@ export const formatDecimal = (value: number) => decimal.format(value);
 /** « 12 400 » */
 export const formatInteger = (value: number) => integer.format(value);
 
+/** Écart arrondi avec son signe : « +1 250 », « −340 », « 0 ». */
+export const formatSignedInteger = (value: number) => {
+  const rounded = Math.round(value);
+  const sign = rounded > 0 ? "+" : rounded < 0 ? "−" : "";
+  return `${sign}${integer.format(Math.abs(rounded))}`;
+};
+
 /** Part de 0 à 1 vers « 53 % » (avec l'espace insécable d'usage). */
 export const formatPercent = (ratio: number) => `${Math.round(ratio * 100)} %`;
 

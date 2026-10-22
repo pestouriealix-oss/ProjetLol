@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { PageShell } from "@/components/layout/page-shell";
 import { Duel } from "@/components/match-detail/duel";
+import { ReviewPanel } from "@/components/match-detail/review-panel";
 import {
   TeamTable,
   type AssetResolver,
@@ -20,9 +21,13 @@ import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
 import { getChampionAssets } from "@/lib/ddragon/champions";
 import { getGameAssets } from "@/lib/ddragon/game-assets";
+import { remainingReviews } from "@/lib/coach/review";
+import { findMatchReview } from "@/lib/db/match-reviews";
 import { findPlayedMatch } from "@/lib/db/matches";
 import { formatDuration, formatRelative } from "@/lib/format";
 import type { Platform } from "@/lib/config";
+import { llm } from "@/lib/llm";
+import { readReviewView } from "@/lib/review/review-view";
 import { loadPlayerRanks } from "@/lib/riot";
 import { rankQueueFor } from "@/lib/stats/live-game";
 import { buildMatchDetail, type DetailTeam } from "@/lib/stats/match-detail";
@@ -61,7 +66,18 @@ export default async function MatchDetailPage({
     );
   }
 
-  const [champions, game] = await Promise.all([getChampionAssets(), getGameAssets()]);
+  const [champions, game, stored, quota] = await Promise.all([
+    getChampionAssets(),
+    getGameAssets(),
+    findMatchReview(user.id, matchId),
+    remainingReviews(user.id, user.plan),
+  ]);
+  const review = stored
+    ? readReviewView(
+        { summary: stored.summary, strengths: stored.strengths, improvements: stored.improvements },
+        stored.facts,
+      )
+    : null;
   const assets: AssetResolver = {
     champion: (championName) => ({
       name: champions?.name(championName) ?? championName,
@@ -130,6 +146,14 @@ export default async function MatchDetailPage({
         </header>
       }
     >
+      <ReviewPanel
+        matchId={matchId}
+        initial={review}
+        reviewable={me.role !== null}
+        coachReady={llm.isConfigured}
+        remaining={quota.remaining}
+        limit={quota.limit}
+      />
       {/* Les tableaux s'affichent tout de suite ; les rangs (dix appels à Riot)
           arrivent ensuite, à la même place. */}
       <Suspense fallback={<Teams {...tables} />}>

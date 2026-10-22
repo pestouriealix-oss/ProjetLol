@@ -179,6 +179,62 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await usages.siteLlmSpendSince(since)).toBeGreaterThanOrEqual(3 * 16050);
   });
 
+  it("chaque utilisateur ne lit, ne compte et n'écrit que ses bilans de partie", async () => {
+    const matchesApi = await import("./matches");
+    const reviews = await import("./match-reviews");
+    const [aliceAccount] = await api.listRiotAccounts(alice);
+    if (!aliceAccount) throw new Error("compte d'Alice introuvable");
+    const matchId = `TEST_${randomUUID()}`;
+    await matchesApi.saveMatchForAccount(alice, aliceAccount.id, {
+      platform: "EUW1",
+      summary: {
+        id: matchId,
+        patch: "16.20",
+        queueId: 420,
+        startedAt: new Date(),
+        durationSeconds: 1800,
+      },
+      details: {},
+      participation: {
+        championId: 64,
+        championName: "LeeSin",
+        role: "JUNGLE",
+        side: "BLUE",
+        win: true,
+        kills: 5,
+        deaths: 2,
+        assists: 9,
+        cs: 180,
+        gold: 11_000,
+        damageToChampions: 15_000,
+        visionScore: 30,
+        killParticipation: 0.6,
+        stats: { level: 15, teamKills: 23, items: [], opponentChampion: "Ivern" },
+      },
+    });
+    const review = {
+      summary: "Bon début de partie.",
+      strengths: [],
+      improvements: [],
+      facts: {},
+      promptVersion: "test@1",
+    };
+
+    // Bob n'a pas joué cette partie : il ne peut ni y écrire un bilan, ni lire celui d'Alice.
+    expect(await reviews.saveMatchReview(bob, matchId, review)).toBeNull();
+    const id = await reviews.saveMatchReview(alice, matchId, review);
+    expect(id).not.toBeNull();
+    expect((await reviews.findMatchReview(alice, matchId))?.id).toBe(id);
+    expect(await reviews.findMatchReview(bob, matchId)).toBeNull();
+
+    // Réécrire le bilan le remplace au lieu d'en ajouter un.
+    await reviews.saveMatchReview(alice, matchId, { ...review, summary: "Relu." });
+    expect((await reviews.findMatchReview(alice, matchId))?.summary).toBe("Relu.");
+    const since = new Date(Date.now() - 60_000);
+    expect(await reviews.countMatchReviewsSince(alice, since)).toBe(1);
+    expect(await reviews.countMatchReviewsSince(bob, since)).toBe(0);
+  });
+
   it("refuse un second compte avec le même e-mail", async () => {
     const email = `test-dup-${randomUUID()}@example.test`;
     const first = await usersApi.createUserWithPassword({ email, name: null, passwordHash: "x" });

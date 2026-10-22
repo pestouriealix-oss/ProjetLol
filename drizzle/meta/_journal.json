@@ -43,6 +43,13 @@
       "when": 1792422053344,
       "tag": "0005_lush_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792682461849,
+      "tag": "0006_young_legion",
+      "breakpoints": true
     }
   ]
 }

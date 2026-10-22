@@ -8,17 +8,17 @@ Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
 
 ## État d'avancement
 
-| Étape  | Contenu                                                          | État    |
-| ------ | ---------------------------------------------------------------- | ------- |
-| 1      | Socle, base de données, connexion, système de design, Paramètres | Fait    |
-| 2      | API Riot, Data Dragon, synchronisation des parties               | Fait    |
-| 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)      | Fait    |
-| Esport | Calendrier, résultats, arbres et classements (PandaScore)        | Fait    |
-| Actus  | Articles en français et en anglais (flux RSS), patchs            | Fait    |
-| 3      | Coach de draft (capture, extraction, fiche en streaming)         | Fait    |
-| 4b     | Bilan d'une partie                                               | À faire |
-| 5      | Tableau de bord global                                           | À faire |
-| 6      | Finitions, pages légales définitives                             | À faire |
+| Étape  | Contenu                                                            | État    |
+| ------ | ------------------------------------------------------------------ | ------- |
+| 1      | Socle, base de données, connexion, système de design, Paramètres   | Fait    |
+| 2      | API Riot, Data Dragon, synchronisation des parties                 | Fait    |
+| 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)        | Fait    |
+| Esport | Calendrier, résultats, arbres et classements (PandaScore)          | Fait    |
+| Actus  | Articles en français et en anglais (flux RSS), patchs              | Fait    |
+| 3      | Coach de draft (capture, extraction, fiche en streaming)           | Fait    |
+| 4b     | Bilan d'une partie (faits vérifiés, points forts, axes de progrès) | Fait    |
+| 5      | Tableau de bord global                                             | À faire |
+| 6      | Finitions, pages légales définitives                               | À faire |
 
 L'ordre suit les priorités du moment : le détail des parties et l'onglet
 Esport (pendant les Worlds) passent avant le coach de draft.
@@ -103,6 +103,21 @@ prix. Deux réglages facultatifs du `.env` :
   `claude-haiku-5-5` pour comparer).
 - `LLM_MONTHLY_BUDGET_USD` : au-delà de ce montant dépensé dans le mois, les
   fiches gratuites se mettent en pause jusqu'au mois suivant ; Premium continue.
+
+### Bilan de partie
+
+Sur la page d'une partie, « Écrire mon bilan » fait écrire par le coach ce qui
+a marché, ce qui a coûté, et deux ou trois façons de progresser pour chaque
+axe. Le modèle ne reçoit que des faits calculés (`src/lib/stats/review.ts`) :
+écarts d'or, de sbires et d'expérience avec le vis-à-vis à 10 et 15 minutes,
+moments des morts (dont celles juste avant un objectif adverse), écart d'or des
+équipes, objectifs, et les habitudes du joueur à ce poste sur ses autres
+parties classées. Ces chiffres sont affichés avec le bilan, enregistré
+(`match_reviews`) et relu aux visites suivantes. Quota : 3 bilans par jour en
+gratuit, 40 en Premium ; même modèle que la fiche (`DRAFT_SHEET_MODEL`).
+
+Les chronologies enregistrées avant ce bilan (version 1) sont redemandées une
+fois à Riot à la première visite.
 
 ### Statistiques de matchups (fiche de draft)
 
