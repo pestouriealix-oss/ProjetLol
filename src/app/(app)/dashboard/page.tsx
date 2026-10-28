@@ -67,7 +67,7 @@ export default async function DashboardPage({
                     aria-hidden
                     className={
                       index === 0
-                        ? "display text-4xl text-accent tabular"
+                        ? "display text-4xl text-ink tabular"
                         : "display text-4xl text-ink-faint tabular"
                     }
                   >

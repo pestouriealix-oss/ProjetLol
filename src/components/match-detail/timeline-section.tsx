@@ -8,7 +8,7 @@ import type { ReducedTimeline } from "@/lib/stats/timeline";
 import { loadMatchTimeline } from "@/lib/sync/match-timeline";
 
 import { BuildOrder, SkillOrder } from "./build-order";
-import { GoldChart, type ObjectiveMark } from "./gold-chart";
+import { GoldChart, type ObjectiveLegend, type ObjectiveMark } from "./gold-chart";
 import type { AssetResolver } from "./team-table";
 
 const copy = t.matchDetail.timeline;
@@ -87,6 +87,13 @@ function TimelineContent({
       ),
     };
   });
+  // Légende : les lettres présentes, dans l'ordre de la copie (drake, elder, nash…).
+  const present = new Set(timeline.objectives.map((objective) => objective.type));
+  const legend: ObjectiveLegend[] = (
+    Object.keys(copy.objectiveShort) as (keyof typeof copy.objectiveShort)[]
+  )
+    .filter((type) => present.has(type))
+    .map((type) => ({ short: copy.objectiveShort[type], name: copy.objectives[type] }));
   const mine = timeline.players[detail.me.puuid];
 
   return (
@@ -99,6 +106,7 @@ function TimelineContent({
         <GoldChart
           points={points}
           objectives={objectives}
+          legend={legend}
           durationSeconds={detail.durationSeconds}
         />
       </div>

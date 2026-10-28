@@ -1,12 +1,13 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { RoleGlyph } from "@/components/map/role-glyph";
 import { Panel } from "@/components/ui/panel";
+import { Winrate } from "@/components/stats/winrate";
 import { t } from "@/i18n/fr";
-import { cn } from "@/lib/cn";
 import type { ChampionAssets } from "@/lib/ddragon/champions";
 import type { PerformanceTotals } from "@/lib/db/matches";
 import { formatDecimal, formatInteger, formatPercent } from "@/lib/format";
 import { kdaRatio } from "@/lib/stats/participation";
+import { showsWinrate } from "@/lib/stats/sample";
 import type { Role } from "@/lib/config";
 
 const copy = t.stats;
@@ -26,21 +27,6 @@ export function averages(row: PerformanceTotals) {
     vision: row.vision / games,
     killParticipation: row.killParticipation,
   };
-}
-
-/** Taux de victoire : le chiffre, et une barre fine. Jamais la couleur seule. */
-function Winrate({ ratio }: { ratio: number }) {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className="w-10 text-right tabular">{formatPercent(ratio)}</span>
-      <span aria-hidden className="h-1.5 w-12 overflow-hidden rounded-pill bg-field max-sm:hidden">
-        <span
-          className={cn("block h-full rounded-pill", ratio >= 0.5 ? "bg-win" : "bg-loss")}
-          style={{ width: `${Math.round(ratio * 100)}%` }}
-        />
-      </span>
-    </span>
-  );
 }
 
 export function RoleStats({ rows }: { rows: (PerformanceTotals & { role: Role | null })[] }) {
@@ -68,7 +54,7 @@ export function RoleStats({ rows }: { rows: (PerformanceTotals & { role: Role | 
                     {copy.games(row.games)} · {t.matches.kda(formatDecimal(stats.kda))}
                   </p>
                 </div>
-                <Winrate ratio={stats.winrate} />
+                <Winrate wins={row.wins} games={row.games} />
               </Panel>
             </li>
           );
@@ -139,7 +125,7 @@ export function ChampionStatsTable({
                   </td>
                   <td className="py-2 pr-3 text-right text-ink tabular">{row.games}</td>
                   <td className="py-2 pr-3 text-right text-ink">
-                    <Winrate ratio={stats.winrate} />
+                    <Winrate wins={row.wins} games={row.games} />
                   </td>
                   <td className="py-2 pr-3 text-right whitespace-nowrap tabular">
                     <span className="text-ink">{formatDecimal(stats.kda)}</span>
@@ -212,10 +198,12 @@ export function Matchups({
                 className="size-7"
               />
               <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{name}</span>
-              <span className="text-xs text-ink-muted tabular">
-                {m.record(row.wins, row.games)}
-              </span>
-              <Winrate ratio={rate(row)} />
+              {showsWinrate(row.games) ? (
+                <span className="text-xs text-ink-muted tabular">
+                  {m.record(row.wins, row.games)}
+                </span>
+              ) : null}
+              <Winrate wins={row.wins} games={row.games} />
             </li>
           );
         })}

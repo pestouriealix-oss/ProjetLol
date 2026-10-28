@@ -49,7 +49,8 @@ export function ProfileHeader({
             level={account.level}
           />
           <div className="min-w-0">
-            <p className="display text-base tracking-[0.06em] text-ink-muted">{copy.title}</p>
+            {/* Le nom suffit à situer la page ; le titre reste pour les lecteurs d'écran. */}
+            <p className="sr-only">{copy.title}</p>
             <h1 className="display-name text-3xl break-words text-ink sm:text-4xl">
               {account.gameName}
               <span className="text-ink-faint">#{account.tagLine}</span>
@@ -58,7 +59,7 @@ export function ProfileHeader({
               <Badge>{PLATFORMS[account.platform].short}</Badge>
               {account.roles.length > 0 ? (
                 account.roles.map((role) => (
-                  <Badge key={role} tone="accent">
+                  <Badge key={role} tone="strong">
                     <RoleGlyph role={role} className="size-3.5" />
                     {t.roles[role]}
                   </Badge>

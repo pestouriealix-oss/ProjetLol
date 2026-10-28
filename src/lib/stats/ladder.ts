@@ -39,6 +39,20 @@ export function tierFloors(): { tier: string; points: number }[] {
   ];
 }
 
+/**
+ * Début des divisions III, II et I de chaque palier, pour des repères plus fins
+ * que les paliers (la division IV commence avec le palier).
+ */
+export function divisionFloors(): { tier: string; division: string; points: number }[] {
+  return TIERS.flatMap((tier, tierIndex) =>
+    DIVISIONS.slice(1).map((division, index) => ({
+      tier,
+      division,
+      points: tierIndex * 400 + (index + 1) * 100,
+    })),
+  );
+}
+
 export type RankPoint = {
   at: Date;
   tier: string;

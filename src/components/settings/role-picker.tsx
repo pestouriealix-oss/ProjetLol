@@ -72,9 +72,10 @@ export function RolePicker({
                   "[transition:scale_var(--duration-slow)_var(--ease-spring),color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),background-color_var(--duration-fast)_var(--ease-out),opacity_var(--duration-base)_var(--ease-out)]",
                   "active:scale-[0.94] active:[transition-duration:var(--duration-press)]",
                   // L'état coché est posé ici plutôt qu'avec `peer-checked` : au
-                  // survol, les styles de survol l'emporteraient sur le corail.
+                  // survol, les styles de survol l'emporteraient sur lui. Craie,
+                  // pas corail : c'est un choix du joueur, pas un conseil du coach.
                   checked
-                    ? "border-accent bg-accent-soft text-accent"
+                    ? "border-ink bg-ink/10 text-ink"
                     : "border-line-strong text-ink-muted hover:border-ink-faint hover:text-ink",
                   "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent",
                   "peer-disabled:cursor-not-allowed peer-disabled:opacity-40 peer-disabled:hover:border-line-strong peer-disabled:hover:text-ink-muted peer-disabled:active:scale-100",

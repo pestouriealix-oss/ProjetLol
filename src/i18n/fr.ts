@@ -33,7 +33,7 @@ export const fr = {
   auth: {
     headline: "Ton plan de jeu, avant la fin du chargement.",
     pitch:
-      "Envoie ta draft, reçois une fiche qui se lit en dix secondes. Après la partie, vois ce qui a marché et ce qui revient trop souvent.",
+      "Ta draft arrive toute seule, ta fiche se lit en dix secondes. Après la partie, le coach te dit ce qui a marché et quoi travailler à la suivante.",
     loginTitle: "Connexion",
     registerTitle: "Créer un compte",
     email: "E-mail",
@@ -65,24 +65,27 @@ export const fr = {
       title: "Comment ça marche",
       steps: [
         {
-          when: "Avant la partie",
-          title: "Envoie ta draft",
-          body: "Une capture de la sélection des champions suffit, rien à recopier.",
+          when: "Écran de chargement",
+          title: "Ta draft se remplit seule",
+          body: `${APP_NAME} récupère les dix champions dès le chargement. En sélection, une capture d'écran suffit : rien à recopier.`,
         },
         {
-          when: "Pendant le chargement",
+          when: "Avant la première minute",
           title: "Lis ta fiche",
-          body: "Comment ton équipe gagne, où aller et quand forcer. Plusieurs options : c'est toi qui choisis.",
+          body: "Ton duel, comment ton équipe gagne, quand forcer. Plusieurs options : c'est toi qui choisis.",
         },
         {
           when: "Après la partie",
-          title: "Vois ce qui revient",
-          body: "Tes parties classées se synchronisent : ce qui marche, et ce qui te coûte des parties.",
+          title: "Reçois ton bilan",
+          body: "Tes chiffres face à ton vis-à-vis, ce qui a marché, et un seul objectif à vérifier dès la game suivante.",
         },
       ],
       you: "Toi",
       options: ["Envahir", "Protéger", "Pousser"],
+      focus: "Objectif",
     },
+    pricing: (sheets: number, reviews: number, price: string) =>
+      `Gratuit pour commencer : ${sheets} fiches et ${reviews} bilans par jour. Premium à ${price} par mois, sans engagement.`,
   },
   sheet: {
     demoLabel: "Exemple de fiche",
@@ -156,7 +159,7 @@ export const fr = {
           : count === 1
             ? "1 nouvelle partie."
             : `${count} nouvelles parties.`,
-      partial: "Riot limite le nombre d'appels : relance dans une minute pour la suite.",
+      partial: "Riot limite le nombre d'appels : relance dans une minute pour la suite.",
       errors: {
         missing_key:
           "La synchronisation n'est pas configurée sur ce serveur (clé de l'API Riot absente).",
@@ -218,7 +221,7 @@ export const fr = {
     recent: {
       title: "Dernières parties",
       all: "Tout l'historique",
-      empty: "Clique sur « Mettre à jour » : tes parties classées récentes s'afficheront ici.",
+      empty: "Clique sur « Mettre à jour » : tes parties classées récentes s'afficheront ici.",
     },
   },
   draft: {
@@ -383,14 +386,14 @@ export const fr = {
     title: "Parties",
     emptyTitle: "Aucune partie pour l'instant",
     emptyBody:
-      "Mets ton compte à jour depuis le tableau de bord : tes parties classées s'afficheront ici, de la plus récente à la plus ancienne.",
+      "Mets ton compte à jour depuis le tableau de bord : tes parties classées s'afficheront ici, de la plus récente à la plus ancienne.",
     toDashboard: "Aller au tableau de bord",
     win: "Victoire",
     loss: "Défaite",
     queues: { SOLO: "Solo/Duo", FLEX: "Flex", OTHER: "Autre file" },
     kda: (ratio: string) => `${ratio} KDA`,
     cs: (cs: number, perMinute: string) => `${cs} CS (${perMinute}/min)`,
-    killParticipation: (percent: string) => `${percent} des éliminations`,
+    killParticipation: (percent: string) => `${percent} KP`,
     count: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
     noAccountBody: "Lie d'abord ton compte Riot pour que tes parties puissent être suivies.",
     noAccountAction: "Lier un compte Riot",
@@ -432,11 +435,11 @@ export const fr = {
     runes: "Runes",
     objectives: {
       towers: "Tours",
-      inhibitors: "Inhibiteurs",
-      dragons: "Dragons",
-      barons: "Barons",
+      inhibitors: "Inhibs",
+      dragons: "Drakes",
+      barons: "Nash",
       heralds: "Hérauts",
-      grubs: "Larves",
+      grubs: "Grubs",
       atakhan: "Atakhan",
     },
     score: (kills: number, deaths: number, assists: number) => `${kills} / ${deaths} / ${assists}`,
@@ -519,25 +522,26 @@ export const fr = {
         table: "Voir les objectifs",
       },
       objectives: {
-        dragon: "Dragon",
-        elder: "Dragon ancestral",
-        baron: "Baron Nashor",
+        dragon: "Drake",
+        elder: "Elder",
+        baron: "Nash",
         herald: "Héraut",
-        grubs: "Larves du Néant",
+        grubs: "Grubs",
         atakhan: "Atakhan",
         tower: "Tour",
-        inhibitor: "Inhibiteur",
+        inhibitor: "Inhib",
       },
       objectiveShort: {
         dragon: "D",
-        elder: "A",
-        baron: "B",
+        elder: "E",
+        baron: "N",
         herald: "H",
-        grubs: "L",
-        atakhan: "K",
+        grubs: "G",
+        atakhan: "A",
         tower: "T",
         inhibitor: "I",
       },
+      legend: "Légende des objectifs",
       dragons: {
         FIRE_DRAGON: "infernal",
         WATER_DRAGON: "océanique",
@@ -549,6 +553,8 @@ export const fr = {
       objectiveAt: (name: string, team: string, time: string) => `${name}, ${team}, à ${time}`,
       ours: "ton équipe",
       theirs: "équipe adverse",
+      oursLabel: "Ton équipe",
+      theirsLabel: "Équipe adverse",
       build: {
         title: "Ordre d'achat",
         empty: "Aucun achat enregistré.",
@@ -623,6 +629,8 @@ export const fr = {
           state: "La connexion à Riot a expiré. Réessaie.",
           denied: "Connexion à Riot annulée.",
           limit: "Tu as atteint la limite de comptes liés pour ton offre.",
+          taken:
+            "Ce Riot ID est déjà dans ta liste, rattaché à un autre joueur (un pseudo peut changer de propriétaire). Supprime l'ancienne ligne ci-dessous, puis reconnecte-toi avec Riot.",
           platform: "Ton serveur n'est pas reconnu. Ajoute ton compte avec ton Riot ID.",
           unavailable:
             "Riot ne répond pas pour l'instant. Réessaie dans un instant, ou ajoute ton compte avec ton Riot ID.",
@@ -761,6 +769,8 @@ export const fr = {
       date: "Date",
       rank: "Rang",
       keyboard: "Flèches gauche et droite pour parcourir les relevés.",
+      change: (value: string) => `${value} LP`,
+      changeLabel: (value: string, since: string) => `${value} LP depuis le ${since}`,
     },
     roles: {
       title: "Par rôle",
@@ -788,6 +798,10 @@ export const fr = {
       record: (wins: number, games: number) => `${wins} V sur ${games}`,
     },
     games: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
+    /** Bilan brut, montré à la place du pourcentage tant qu'il y a trop peu de parties. */
+    record: (wins: number, losses: number) => `${wins} V – ${losses} D`,
+    smallSample: (wins: number, losses: number) =>
+      `${wins} victoire${wins > 1 ? "s" : ""}, ${losses} défaite${losses > 1 ? "s" : ""} : trop peu de parties pour un pourcentage`,
     emptyTitle: "Pas encore de statistiques",
     emptyBody:
       "Mets ton compte à jour depuis le tableau de bord : tes statistiques se calculent à partir de tes parties classées.",
@@ -802,6 +816,15 @@ export const fr = {
     notInGameTitle: "Pas de partie en cours",
     notInGameBody: (riotId: string) =>
       `${riotId} n'est pas en partie pour l'instant. Lance une game, puis reviens ici dès l'écran de chargement.`,
+    notInGamePreview: "Ce que tu verras ici :",
+    notInGameItems: [
+      "les dix joueurs, avec leur rang officiel et leur bilan de la saison ;",
+      "leurs sorts d'invocateur et leurs runes ;",
+      "les bannissements, et la durée de la partie en direct.",
+    ],
+    notInGameDraft:
+      "Pour ta fiche, ouvre plutôt Nouvelle game avant de lancer : la draft s'y remplit toute seule au chargement.",
+    toDraft: "Préparer ma fiche",
     refresh: "Vérifier à nouveau",
     unverifiedTitle: "Compte pas encore vérifié",
     unverifiedBody:

@@ -6,6 +6,7 @@ import { TeamMark } from "@/components/draft/team-mark";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 import { formatDuration, formatInteger } from "@/lib/format";
+import { minuteTicks } from "@/lib/stats/ticks";
 
 const copy = t.matchDetail.timeline;
 
@@ -19,6 +20,9 @@ export type ObjectiveMark = {
   label: string;
 };
 
+/** Une lettre de la frise et ce qu'elle désigne (« D » : Drake). */
+export type ObjectiveLegend = { short: string; name: string };
+
 const WIDTH = 1000;
 const HEIGHT = 240;
 const PAD_X = 12;
@@ -28,15 +32,19 @@ const PAD_X = 12;
  * en dessous, l'adversaire. L'aire porte la couleur (victoire / défaite), le
  * trait et la bulle portent le chiffre, et le sens est écrit en toutes
  * lettres. Sous le graphique, la frise des objectifs, chacun marqué de la
- * forme de son équipe (rond pour toi, losange pour eux).
+ * forme de son équipe (rond pour toi, losange pour eux), l'axe des minutes,
+ * puis la légende des lettres présentes.
  */
 export function GoldChart({
   points,
   objectives,
+  legend,
   durationSeconds,
 }: {
   points: GoldPoint[];
   objectives: ObjectiveMark[];
+  /** Les lettres de la frise présentes dans cette partie. */
+  legend: ObjectiveLegend[];
   durationSeconds: number;
 }) {
   const [active, setActive] = useState<number | null>(null);
@@ -50,6 +58,7 @@ export function GoldChart({
   const x = (minute: number) => PAD_X + (minute / lastMinute) * (WIDTH - 2 * PAD_X);
   const y = (diff: number) => HEIGHT / 2 - (diff / extent) * (HEIGHT / 2);
   const zero = y(0);
+  const ticks = minuteTicks(lastMinute);
 
   const line = points
     .map((point, index) => `${index === 0 ? "M" : "L"}${x(point.minute)},${y(point.diff)}`)
@@ -122,6 +131,19 @@ export function GoldChart({
               <rect x={0} y={zero} width={WIDTH} height={HEIGHT - zero} />
             </clipPath>
           </defs>
+          {ticks.map((minute) => (
+            <line
+              key={minute}
+              x1={x(minute)}
+              x2={x(minute)}
+              y1={0}
+              y2={HEIGHT}
+              className="stroke-line"
+              strokeWidth={1}
+              strokeDasharray="2 6"
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
           <path d={area} clipPath={`url(#${clipAbove})`} className="fill-win/25" />
           <path d={area} clipPath={`url(#${clipBelow})`} className="fill-loss/25" />
           <line
@@ -215,10 +237,41 @@ export function GoldChart({
           })}
         </div>
       ) : null}
-      <p className="flex justify-between text-xs text-ink-faint tabular" aria-hidden>
-        <span>0:00</span>
-        <span>{formatDuration(durationSeconds)}</span>
+      <p className="relative h-4 text-xs text-ink-faint tabular" aria-hidden>
+        <span className="absolute left-0">0:00</span>
+        {ticks.map((minute, index) => (
+          <span
+            key={minute}
+            className="absolute -translate-x-1/2 whitespace-nowrap"
+            style={{ left: left(x(minute)) }}
+          >
+            {index === 0 ? copy.gold.minute(minute) : minute}
+          </span>
+        ))}
+        <span className="absolute right-0">{formatDuration(durationSeconds)}</span>
       </p>
+
+      {legend.length > 0 ? (
+        <ul
+          aria-label={copy.legend}
+          className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-ink-muted"
+        >
+          <li className="flex items-center gap-1.5">
+            <TeamMark side="ours" className="size-2" />
+            {copy.oursLabel}
+          </li>
+          <li className="flex items-center gap-1.5">
+            <TeamMark side="theirs" className="size-2" />
+            {copy.theirsLabel}
+          </li>
+          {legend.map((entry) => (
+            <li key={entry.short} className="flex items-center gap-1.5">
+              <span className="font-bold text-ink">{entry.short}</span>
+              {entry.name}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }

@@ -21,7 +21,7 @@ export function SlotMeter({ used, total, label, className }: SlotMeterProps) {
             key={index}
             className={cn(
               "h-4 w-1.5 -skew-x-[14deg] rounded-[1px] transition-[background-color,scale] duration-(--duration-slow) ease-(--ease-spring-bouncy)",
-              index < used ? "bg-accent" : "scale-y-75 bg-line-strong/60",
+              index < used ? "bg-ink" : "scale-y-75 bg-line-strong/60",
             )}
           />
         ))}

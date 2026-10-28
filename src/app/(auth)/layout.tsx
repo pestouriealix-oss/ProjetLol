@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { HowItWorks } from "@/components/auth/how-it-works";
+import { PricingNote } from "@/components/auth/pricing-note";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Entrance } from "@/components/layout/entrance";
 import { LegalFooter } from "@/components/layout/legal-footer";
@@ -20,8 +21,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <p className="mt-5 max-w-[42ch] text-lg text-ink-muted">{t.auth.pitch}</p>
           <div className="mt-10">{children}</div>
         </main>
-        <aside className="flex justify-center lg:sticky lg:top-10 lg:justify-end">
+        <aside className="flex flex-col items-center gap-4 lg:sticky lg:top-10 lg:items-end">
           <HowItWorks />
+          <PricingNote />
         </aside>
       </div>
       <LegalFooter />

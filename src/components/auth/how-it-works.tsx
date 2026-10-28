@@ -14,8 +14,8 @@ const delay = (ms: number) => ({ "--intro-delay": `${ms}ms` }) as CSSProperties;
 const STEP_GAP = 140;
 
 /**
- * Le parcours en trois temps, à côté des formulaires de connexion : avant la
- * partie, pendant le chargement, après. Chaque étape a un petit schéma de
+ * Le parcours en trois temps, à côté des formulaires de connexion : le
+ * chargement, le début de partie, l'après-partie. Chaque étape a un petit schéma de
  * l'écran correspondant, volontairement générique : aucun champion, aucun
  * pseudo, aucun chiffre qui ressemblerait à de vraies données.
  */
@@ -23,7 +23,7 @@ export function HowItWorks() {
   const illustrations: ReactNode[] = [
     <DraftSketch key="draft" />,
     <SheetSketch key="sheet" />,
-    <ProgressSketch key="progress" />,
+    <ReviewSketch key="review" />,
   ];
 
   return (
@@ -138,20 +138,31 @@ function SheetSketch() {
 }
 
 /**
- * Les parties qui s'enchaînent : une barre par partie, haute pour une victoire,
- * basse pour une défaite. La forme porte le sens, pas la couleur seule.
+ * Le bilan : trois chiffres face au vis-à-vis (en avance, en retard, à égalité ;
+ * la longueur porte le sens autant que la couleur), puis l'objectif que le coach
+ * donne pour la partie suivante, en corail puisque c'est lui qui le dit.
  */
-const PROGRESS = [0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1] as const;
+const REVIEW_FACTS = [
+  { tone: "bg-win/60", width: "w-3/5" },
+  { tone: "bg-loss/55", width: "w-2/5" },
+  { tone: "bg-line-strong", width: "w-1/2" },
+] as const;
 
-function ProgressSketch() {
+function ReviewSketch() {
   return (
-    <div className="flex h-9 max-w-sm items-end gap-1">
-      {PROGRESS.map((win, index) => (
-        <span
-          key={index}
-          className={cn("flex-1 rounded-[2px]", win ? "h-full bg-win/50" : "h-1/3 bg-loss/45")}
-        />
-      ))}
+    <div className="flex max-w-sm flex-col gap-3 rounded-panel border border-line bg-raised p-3.5">
+      <div className="grid grid-cols-3 gap-2">
+        {REVIEW_FACTS.map((fact, index) => (
+          <div key={index} className="flex flex-col gap-1.5 rounded-control border border-line p-2">
+            <span className="h-1.5 w-4/5 rounded-pill bg-line-strong/70" />
+            <span className={cn("h-2.5 rounded-pill", fact.tone, fact.width)} />
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2.5 rounded-control border border-accent/50 bg-accent-soft px-2.5 py-2">
+        <span className="text-xs font-semibold text-accent">{copy.focus}</span>
+        <span className="h-1.5 flex-1 rounded-pill bg-accent/35" />
+      </div>
     </div>
   );
 }

@@ -292,6 +292,18 @@ fond reste discret : la couleur vient des visuels du jeu et des résultats.
 - **Carte.** La mini-carte (`src/components/map`) est un schéma dessiné pour le
   projet, pas une image du jeu : alliés en ronds pleins, adversaires en losanges
   creux, trajets conseillés en corail. Les pictogrammes des rôles en sont tirés.
+- **Boutons.** Quatre niveaux (`src/components/ui/button.tsx`) : `coach` (corail,
+  seulement pour faire travailler le coach : Nouvelle game, Écrire ma fiche,
+  Écrire mon bilan), `solid` (craie pleine, l'action principale de tout le
+  reste, par défaut), `secondary` (contour) et `ghost`, plus `danger`. Un choix
+  du joueur (rôle sélectionné, badge « Principal ») est en craie, jamais en
+  corail : `Badge tone="strong"`.
+- **Chiffres.** Sous 5 parties, pas de pourcentage de victoires mais le bilan
+  brut (« 2 V – 0 D », `src/components/stats/winrate.tsx`). Les écarts se lisent
+  au signe et à la couleur (vert en avance, rouge en retard, neutre à égalité),
+  et les graphiques portent leurs repères : divisions et progression nette sur
+  la courbe des LP, minutes et légende des objectifs sur l'écart d'or.
+- **Vocabulaire.** Celui des joueurs : CS, KP, pink, drake, nash, grubs, inhib.
 
 ### Mouvement
 

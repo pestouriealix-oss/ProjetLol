@@ -1,10 +1,11 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
+import { Winrate } from "@/components/stats/winrate";
 import { t } from "@/i18n/fr";
 import type { ChampionAssets } from "@/lib/ddragon/champions";
 import type { ChampionRecord } from "@/lib/db/matches";
-import { formatDecimal, formatPercent } from "@/lib/format";
+import { formatDecimal } from "@/lib/format";
 import { kdaRatio } from "@/lib/stats/participation";
 
 const copy = t.dashboard.champions;
@@ -56,9 +57,7 @@ export function ChampionRecords({
                     {copy.kda(formatDecimal(kdaRatio(record.kills, record.deaths, record.assists)))}
                   </p>
                 </div>
-                <p className="display text-xl text-ink tabular">
-                  {formatPercent(record.wins / record.games)}
-                </p>
+                <Winrate wins={record.wins} games={record.games} size="lg" />
               </li>
             );
           })}

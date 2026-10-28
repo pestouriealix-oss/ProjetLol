@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 import { formatPercent } from "@/lib/format";
+import { showsWinrate } from "@/lib/stats/sample";
 import type { LivePlayer, LiveTeam } from "@/lib/stats/live-game";
 
 const copy = t.live;
@@ -126,7 +127,9 @@ function PlayerRow({ player, assets }: { player: LivePlayer; assets: LiveAssets 
             </p>
             {games > 0 ? (
               <p className="text-xs text-ink-muted tabular">
-                {copy.record(formatPercent(rank.wins / games), games)}
+                {showsWinrate(games)
+                  ? copy.record(formatPercent(rank.wins / games), games)
+                  : t.stats.record(rank.wins, games - rank.wins)}
               </p>
             ) : null}
           </>

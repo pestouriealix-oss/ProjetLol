@@ -31,7 +31,7 @@ export function PatchList({ patches }: { patches: Patch[] | null }) {
     <>
       <Panel className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5 p-6">
         <div>
-          <Badge tone="accent">{copy.current}</Badge>
+          <Badge tone="strong">{copy.current}</Badge>
           <h2 className="pt-3 display text-6xl text-ink tabular">{current.id}</h2>
         </div>
         <Button asChild size="lg">

@@ -299,6 +299,16 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(alices.account.userId).toBe(alice);
     expect(alices.account.id).not.toBe(first.account.id);
 
+    // Le même Riot ID, mais un autre joueur (le pseudo a changé de main) : rien n'est écrasé.
+    await expect(
+      api.linkVerifiedRiotAccount(
+        bob,
+        { ...identity, gameName: "Renamed", puuid: `rso-${randomUUID()}` },
+        { maxAccounts: 10 },
+      ),
+    ).rejects.toBeInstanceOf(api.RiotIdTakenError);
+    expect((await api.findRiotAccount(bob, first.account.id))?.puuid).toBe(identity.puuid);
+
     await expect(
       api.linkVerifiedRiotAccount(
         bob,

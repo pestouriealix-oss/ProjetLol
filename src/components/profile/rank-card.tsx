@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import { t } from "@/i18n/fr";
 import type { RankSnapshot } from "@/lib/db/schema";
 import { formatPercent } from "@/lib/format";
+import { showsWinrate } from "@/lib/stats/sample";
 
 const copy = t.dashboard.rank;
 
@@ -43,7 +44,7 @@ export function RankCard({ ranks, synced }: { ranks: RankSnapshot[]; synced: boo
                   </p>
                   <p className="text-sm text-ink-muted tabular">
                     {copy.lp(rank.lp)} · {copy.record(rank.wins, rank.losses)}
-                    {games > 0 ? ` · ${formatPercent(rank.wins / games)}` : ""}
+                    {showsWinrate(games) ? ` · ${formatPercent(rank.wins / games)}` : ""}
                   </p>
                 </dd>
               ) : (

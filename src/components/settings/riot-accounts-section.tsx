@@ -148,7 +148,7 @@ function RsoButton() {
   return (
     <div className="flex flex-col gap-3 pb-5">
       <form action="/api/riot/rso/start" method="get">
-        <Button type="submit" variant="secondary" className="w-full">
+        <Button type="submit" className="w-full">
           {copy.rso.action}
         </Button>
       </form>
@@ -335,7 +335,7 @@ export function RiotAccountsSection({
                         <span className="text-ink-faint">#{account.tagLine}</span>
                       </p>
                       <Badge>{PLATFORMS[account.platform].short}</Badge>
-                      {account.isPrimary ? <Badge tone="accent">{copy.primary}</Badge> : null}
+                      {account.isPrimary ? <Badge tone="strong">{copy.primary}</Badge> : null}
                       {account.verified ? null : (
                         <Badge tone="warn" title={copy.unverifiedHint}>
                           {copy.unverified}
@@ -397,7 +397,7 @@ export function RiotAccountsSection({
               {shown.length < maxAccounts ? (
                 <>
                   {rso?.enabled ? <RsoButton /> : null}
-                  <AddRiotAccountForm />
+                  <AddRiotAccountForm secondary={rso?.enabled ?? false} />
                 </>
               ) : (
                 <p className="text-ink-muted">{copy.errors.limitReached(maxAccounts)}</p>

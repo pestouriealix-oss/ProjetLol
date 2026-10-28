@@ -56,8 +56,11 @@ export function MatchList({
                   </span>
                   <span aria-hidden>·</span>
                   {match.role ? <RoleGlyph role={match.role} className="size-3.5" /> : null}
+                  {/* Sur téléphone, l'icône suffit pour le poste : la file reste lisible. */}
                   <span className="truncate">
-                    {match.role ? `${t.roles[match.role]} · ` : ""}
+                    {match.role ? (
+                      <span className="max-sm:hidden">{`${t.roles[match.role]} · `}</span>
+                    ) : null}
                     {copy.queues[queue]}
                   </span>
                 </p>

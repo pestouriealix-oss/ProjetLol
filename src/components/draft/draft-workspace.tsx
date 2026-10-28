@@ -397,6 +397,7 @@ export function DraftWorkspace({
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Button
+            variant="coach"
             size="lg"
             onClick={() => void analyse()}
             disabled={!ready || writing || remaining <= 0 || !coachReady}

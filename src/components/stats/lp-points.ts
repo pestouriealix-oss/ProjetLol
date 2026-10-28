@@ -1,7 +1,7 @@
 import { t } from "@/i18n/fr";
 import type { RankSnapshot } from "@/lib/db/schema";
 import { formatShortDate } from "@/lib/format";
-import { rankHistory, tierFloors } from "@/lib/stats/ladder";
+import { divisionFloors, rankHistory, tierFloors } from "@/lib/stats/ladder";
 
 import { rankText } from "@/components/rank/rank-badge";
 
@@ -20,10 +20,18 @@ export function lpChartPoints(snapshots: RankSnapshot[]): ChartPoint[] {
   }));
 }
 
-/** Les paliers (Fer, Bronze…) tracés en repère derrière la courbe. */
+/** Les paliers (Fer, Bronze…) et leurs divisions, tracés en repère derrière la courbe. */
 export function lpChartFloors(): ChartFloor[] {
-  return tierFloors().map((floor) => ({
-    label: tiers[floor.tier] ?? floor.tier,
-    points: floor.points,
-  }));
+  return [
+    ...tierFloors().map((floor) => ({
+      kind: "tier" as const,
+      label: tiers[floor.tier] ?? floor.tier,
+      points: floor.points,
+    })),
+    ...divisionFloors().map((floor) => ({
+      kind: "division" as const,
+      label: rankText({ tier: floor.tier, division: floor.division }),
+      points: floor.points,
+    })),
+  ];
 }

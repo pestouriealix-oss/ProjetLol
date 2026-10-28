@@ -12,17 +12,32 @@ const buttonVariants = cva(
     // La couleur change vite ; l'échelle revient comme un ressort après la pression.
     "[transition:scale_var(--duration-slow)_var(--ease-spring),background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),opacity_var(--duration-fast)_var(--ease-out)]",
     "active:scale-[0.96] active:[transition-duration:var(--duration-press)]",
-    "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-60",
+    "disabled:pointer-events-none aria-disabled:pointer-events-none aria-disabled:opacity-60",
     "[&_svg]:size-4 [&_svg]:shrink-0",
   ],
   {
     variants: {
+      /**
+       * Quatre niveaux, du plus fort au plus discret :
+       * - `coach` : le corail, réservé à ce que le coach fait faire (nouvelle
+       *   game, écrire la fiche, écrire le bilan). Jamais ailleurs.
+       * - `solid` : la craie pleine, l'action principale d'une page qui n'est
+       *   pas le coach (se connecter, lier son compte, passer Premium).
+       * - `secondary` : le contour, une action à côté de la principale.
+       * - `ghost` : le texte seul, une action discrète.
+       * Désactivé, un bouton plein devient une surface neutre : un corail
+       * ou une craie éteints se liraient comme une erreur.
+       */
       variant: {
-        primary: "bg-accent text-on-accent shadow-key hover:bg-accent-hover",
+        coach:
+          "bg-accent text-on-accent shadow-key hover:bg-accent-hover disabled:bg-raised disabled:text-ink-faint disabled:shadow-none",
+        solid:
+          "bg-ink text-canvas shadow-key hover:bg-ink-muted disabled:bg-raised disabled:text-ink-faint disabled:shadow-none",
         secondary:
-          "border border-line-strong bg-raised text-ink hover:border-ink-faint hover:bg-line",
-        ghost: "text-ink-muted hover:bg-raised hover:text-ink",
-        danger: "border border-loss/50 text-loss hover:border-loss hover:bg-loss-soft",
+          "border border-line-strong bg-raised text-ink hover:border-ink-faint hover:bg-line disabled:border-line disabled:text-ink-faint",
+        ghost: "text-ink-muted hover:bg-raised hover:text-ink disabled:text-ink-faint",
+        danger:
+          "border border-loss/50 text-loss hover:border-loss hover:bg-loss-soft disabled:opacity-50",
       },
       size: {
         sm: "h-8 px-3 text-base tracking-[0.045em]",
@@ -31,7 +46,7 @@ const buttonVariants = cva(
         icon: "size-9",
       },
     },
-    defaultVariants: { variant: "primary", size: "md" },
+    defaultVariants: { variant: "solid", size: "md" },
   },
 );
 

@@ -55,7 +55,7 @@ export function CheckoutButton({
 
   return (
     <div className="flex flex-col items-start gap-3">
-      <Button size="lg" variant="secondary" pending={opening} onClick={() => void open()}>
+      <Button size="lg" pending={opening} onClick={() => void open()}>
         {opening ? copy.opening : copy.subscribe}
       </Button>
       {failed > 0 ? <ErrorNotice attempt={failed}>{copy.loadError}</ErrorNotice> : null}

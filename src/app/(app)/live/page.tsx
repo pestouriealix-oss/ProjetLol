@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { GameClock } from "@/components/live/game-clock";
 import { LiveTeamSection, type LiveAssets } from "@/components/live/live-team";
 import { RefreshButton } from "@/components/live/refresh-button";
+import { NEW_GAME } from "@/components/layout/nav-items";
 import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
@@ -84,11 +85,33 @@ export default async function LivePage({ searchParams }: { searchParams: Account
   if (!game) {
     return (
       <PageShell route="live" title={copy.title}>
-        <Message
-          title={copy.notInGameTitle}
-          body={copy.notInGameBody(riotId)}
-          action={<RefreshButton label={copy.refresh} />}
-        />
+        <Panel className="flex max-w-2xl flex-col items-start gap-4 p-6">
+          <div>
+            <h2 className="flex items-center gap-2.5 display text-2xl text-ink">
+              <span aria-hidden className="size-2 rounded-full bg-ink-faint" />
+              {copy.notInGameTitle}
+            </h2>
+            <p className="mt-1 text-ink-muted">{copy.notInGameBody(riotId)}</p>
+          </div>
+          <div className="w-full border-t border-line pt-4">
+            <p className="text-sm font-semibold text-ink">{copy.notInGamePreview}</p>
+            <ul className="mt-2 flex flex-col gap-1.5 text-sm text-ink-muted">
+              {copy.notInGameItems.map((item) => (
+                <li key={item} className="flex gap-2.5">
+                  <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-ink-faint" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="text-sm text-ink-muted">{copy.notInGameDraft}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="coach">
+              <Link href={NEW_GAME.href}>{copy.toDraft}</Link>
+            </Button>
+            <RefreshButton label={copy.refresh} />
+          </div>
+        </Panel>
       </PageShell>
     );
   }

@@ -16,19 +16,28 @@ const initialState: AddRiotAccountState = { successCount: 0, attempt: 0 };
 
 const isRole = (value: string): value is Role => (ROLES as readonly string[]).includes(value);
 
-export function AddRiotAccountForm() {
+export function AddRiotAccountForm({
+  secondary = false,
+}: {
+  /** Vrai quand « Se connecter avec Riot » est proposé au-dessus : l'ajout par Riot ID passe au second plan. */
+  secondary?: boolean;
+}) {
   const [state, formAction] = useActionState(addRiotAccountAction, initialState);
 
   // Après un ajout réussi, la clé change : les champs repartent de zéro.
-  return <Fields key={state.successCount} state={state} formAction={formAction} />;
+  return (
+    <Fields key={state.successCount} state={state} formAction={formAction} secondary={secondary} />
+  );
 }
 
 function Fields({
   state,
   formAction,
+  secondary,
 }: {
   state: AddRiotAccountState;
   formAction: (formData: FormData) => void;
+  secondary: boolean;
 }) {
   const [roles, setRoles] = useState<Role[]>(() => (state.values?.roles ?? []).filter(isRole));
 
@@ -85,7 +94,9 @@ function Fields({
         value={roles}
         onChange={setRoles}
       />
-      <SubmitButton className="mt-1 self-start">{copy.add}</SubmitButton>
+      <SubmitButton variant={secondary ? "secondary" : "solid"} className="mt-1 self-start">
+        {copy.add}
+      </SubmitButton>
     </form>
   );
 }

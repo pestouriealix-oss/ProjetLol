@@ -181,7 +181,9 @@ function Start({
   }
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <Button onClick={onStart}>{copy.action}</Button>
+      <Button variant="coach" onClick={onStart}>
+        {copy.action}
+      </Button>
       <span className="text-sm text-ink-faint">{copy.remaining(remaining, limit)}</span>
     </div>
   );

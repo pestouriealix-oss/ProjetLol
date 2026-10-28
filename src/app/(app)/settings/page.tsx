@@ -68,7 +68,7 @@ export default async function SettingsPage({
               <div>
                 <dt className="text-sm text-ink-muted">{copy.plan}</dt>
                 <dd className="flex items-center gap-3 pt-1.5">
-                  <Badge tone={isPaidPlan(user.plan) ? "accent" : "neutral"}>
+                  <Badge tone={isPaidPlan(user.plan) ? "strong" : "neutral"}>
                     {t.plans[user.plan]}
                   </Badge>
                   <Link

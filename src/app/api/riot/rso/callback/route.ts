@@ -5,13 +5,17 @@ import { redirect } from "next/navigation";
 
 import { limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
-import { linkVerifiedRiotAccount, RiotAccountLimitError } from "@/lib/db/riot-accounts";
+import {
+  linkVerifiedRiotAccount,
+  RiotAccountLimitError,
+  RiotIdTakenError,
+} from "@/lib/db/riot-accounts";
 import { rsoIdentity } from "@/lib/riot/rso";
 
 import { RSO_STATE_COOKIE, rsoRedirectUri } from "../shared";
 
 /** Résultats possibles, expliqués par la page Paramètres (`?riot=…`). */
-type Outcome = "linked" | "state" | "denied" | "limit" | "platform" | "unavailable";
+type Outcome = "linked" | "state" | "denied" | "limit" | "taken" | "platform" | "unavailable";
 
 const back = (outcome: Outcome): never => redirect(`/settings?riot=${outcome}`);
 
@@ -51,6 +55,7 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     if (error instanceof RiotAccountLimitError) return back("limit");
+    if (error instanceof RiotIdTakenError) return back("taken");
     throw error;
   }
   return back("linked");

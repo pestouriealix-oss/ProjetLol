@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, or, sql } from "drizzle-orm";
 
 import type { Platform, Role } from "@/lib/config";
 
@@ -23,6 +23,19 @@ export class RiotAccountLimitError extends Error {
   constructor() {
     super("riot_account_limit");
     this.name = "RiotAccountLimitError";
+  }
+}
+
+/**
+ * Riot Sign On : le Riot ID est déjà dans la liste, mais rattaché à un autre
+ * joueur (un pseudo peut changer de propriétaire) ou en double du même joueur.
+ * On ne mélange pas les parties de deux joueurs : le joueur supprime l'ancienne
+ * ligne, puis recommence.
+ */
+export class RiotIdTakenError extends Error {
+  constructor() {
+    super("riot_id_taken");
+    this.name = "RiotIdTakenError";
   }
 }
 
@@ -171,9 +184,11 @@ export async function markRiotAccountVerified(
 
 /**
  * Lie un compte dont l'identité vient de Riot Sign On (le joueur s'est
- * connecté chez Riot) : il est vérifié d'office. Un compte déjà lié au même
- * joueur, ou au même Riot ID, est mis à jour plutôt que dupliqué. Renvoie le
- * compte et s'il vient d'être créé.
+ * connecté chez Riot) : il est vérifié d'office. Le compte déjà lié au même
+ * joueur est mis à jour (son Riot ID a pu changer) ; une ligne au même Riot ID
+ * jamais rattachée à un joueur est vérifiée. Une ligne au même Riot ID mais
+ * rattachée à un autre joueur n'est jamais écrasée (`RiotIdTakenError`).
+ * Renvoie le compte et s'il vient d'être créé.
  */
 export async function linkVerifiedRiotAccount(
   userId: string,
@@ -188,18 +203,22 @@ export async function linkVerifiedRiotAccount(
       sql`lower(${riotAccounts.gameName}) = lower(${identity.gameName})`,
       sql`lower(${riotAccounts.tagLine}) = lower(${identity.tagLine})`,
     );
-    const [existing] = await tx
-      .select({ id: riotAccounts.id })
+    const matches = await tx
+      .select({ id: riotAccounts.id, puuid: riotAccounts.puuid })
       .from(riotAccounts)
       .where(
         and(
           eq(riotAccounts.userId, userId),
-          sql`(${riotAccounts.puuid} = ${identity.puuid} or (${sameRiotId}))`,
+          or(eq(riotAccounts.puuid, identity.puuid), sameRiotId),
         ),
-      )
-      .orderBy(sql`${riotAccounts.puuid} = ${identity.puuid} desc nulls last`)
-      .limit(1);
+      );
+    const samePlayer = matches.find((row) => row.puuid === identity.puuid);
+    // Le Riot ID est unique par utilisateur : au plus une autre ligne le porte.
+    const sameName = matches.find((row) => row !== samePlayer);
 
+    if (sameName && (sameName.puuid !== null || samePlayer)) throw new RiotIdTakenError();
+
+    const existing = samePlayer ?? sameName;
     if (existing) {
       const [updated] = await tx
         .update(riotAccounts)

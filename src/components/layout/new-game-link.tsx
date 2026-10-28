@@ -17,6 +17,7 @@ export function NewGameLink() {
   return (
     <Button
       asChild
+      variant="coach"
       size="sm"
       className="hidden outline-offset-[3px] outline-accent/45 aria-[current=page]:outline-2 md:inline-flex"
     >

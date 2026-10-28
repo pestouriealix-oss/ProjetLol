@@ -4,6 +4,7 @@ import { useId, useRef, useState, type KeyboardEvent, type PointerEvent } from "
 
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
+import { formatSignedInteger } from "@/lib/format";
 
 const copy = t.stats.lp;
 
@@ -19,17 +20,20 @@ export type ChartPoint = {
   time: number;
 };
 
-export type ChartFloor = { label: string; points: number };
+/** Un repère horizontal : début d'un palier (Argent) ou d'une division (Argent II). */
+export type ChartFloor = { kind: "tier" | "division"; label: string; points: number };
 
 const WIDTH = 1000;
 const HEIGHT = 280;
 const PAD = { top: 16, right: 16, bottom: 16, left: 16 };
 
 /**
- * Courbe du classement : une seule série, un trait de 2 px, les paliers en
- * repères horizontaux discrets. Le survol (ou les flèches du clavier) montre
- * le relevé le plus proche, avec une ligne verticale et une bulle ; le même
- * contenu existe en tableau pour qui ne voit pas le graphique.
+ * Courbe du classement : une seule série, un trait de 2 px, les paliers et les
+ * divisions en repères horizontaux discrets. Le dernier rang est écrit au bout
+ * de la courbe, et la progression nette sous le graphique, entre la date du
+ * premier et du dernier relevé. Le survol (ou les flèches du clavier) montre le
+ * relevé le plus proche ; le même contenu existe en tableau pour qui ne voit
+ * pas le graphique.
  */
 export function LpChart({
   points,
@@ -65,6 +69,14 @@ export function LpChart({
     .map((point, index) => `${index === 0 ? "M" : "L"}${x(point.time)},${y(point.points)}`)
     .join(" ");
   const visibleFloors = floors.filter((floor) => floor.points > min && floor.points < max);
+  // Les noms de division n'apparaissent que si la courbe est assez zoomée pour qu'ils respirent.
+  const labelDivisions =
+    visibleFloors.filter((floor) => floor.kind === "division").length <= (compact ? 3 : 6);
+  const labeledFloors = visibleFloors.filter((floor) => floor.kind === "tier" || labelDivisions);
+
+  const start = points[0];
+  const end = points.at(-1);
+  const change = start && end ? end.points - start.points : 0;
 
   const pick = (event: PointerEvent<HTMLDivElement>) => {
     const frame = frameRef.current;
@@ -124,9 +136,9 @@ export function LpChart({
               x2={WIDTH}
               y1={y(floor.points)}
               y2={y(floor.points)}
-              className="stroke-line"
+              className={floor.kind === "tier" ? "stroke-line-strong" : "stroke-line"}
               strokeWidth={1}
-              strokeDasharray="4 6"
+              strokeDasharray={floor.kind === "tier" ? "4 6" : "2 6"}
               vectorEffect="non-scaling-stroke"
             />
           ))}
@@ -153,16 +165,33 @@ export function LpChart({
         </svg>
 
         {/* Noms des paliers, en HTML pour rester nets quelle que soit la largeur. */}
-        {visibleFloors.map((floor) => (
+        {labeledFloors.map((floor) => (
           <span
             key={floor.label}
             aria-hidden
-            className="absolute left-3 -translate-y-full pb-0.5 text-[0.6875rem] font-semibold text-ink-faint"
+            className={cn(
+              "absolute left-3 -translate-y-full pb-0.5 text-[0.6875rem] text-ink-faint",
+              floor.kind === "tier" && "font-semibold",
+            )}
             style={{ top: topPercent(y(floor.points)) }}
           >
             {floor.label}
           </span>
         ))}
+
+        {/* Le rang actuel, dans le coin opposé au bout de la courbe pour ne jamais la
+            couvrir, tant qu'aucun relevé n'est survolé. */}
+        {end && !shown ? (
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute right-3 rounded-control bg-surface/90 px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap text-ink tabular",
+              y(end.points) < HEIGHT / 2 ? "bottom-2" : "top-2",
+            )}
+          >
+            {end.rank} · {end.lp} LP
+          </span>
+        ) : null}
 
         {/* Dernier relevé toujours marqué ; le relevé survolé, en plus gros. */}
         {[
@@ -200,6 +229,24 @@ export function LpChart({
           </div>
         ) : null}
       </div>
+      {start && end ? (
+        <div className="flex items-baseline justify-between gap-3 text-xs text-ink-faint tabular">
+          <span>{start.date}</span>
+          <span
+            title={copy.changeLabel(formatSignedInteger(change), start.date)}
+            className={cn(
+              "text-sm font-semibold",
+              change > 0 ? "text-win" : change < 0 ? "text-loss" : "text-ink-muted",
+            )}
+          >
+            <span aria-hidden>{copy.change(formatSignedInteger(change))}</span>
+            <span className="sr-only">
+              {copy.changeLabel(formatSignedInteger(change), start.date)}
+            </span>
+          </span>
+          <span>{end.date}</span>
+        </div>
+      ) : null}
       <p id={hintId} className="sr-only">
         {copy.keyboard}
       </p>
