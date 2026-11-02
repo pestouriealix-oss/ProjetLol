@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { ChampionBackdrop } from "@/components/champion/champion-backdrop";
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { PageShell } from "@/components/layout/page-shell";
 import { Duel } from "@/components/match-detail/duel";
@@ -19,7 +20,7 @@ import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
-import { getChampionAssets } from "@/lib/ddragon/champions";
+import { championSplashUrl, getChampionAssets } from "@/lib/ddragon/champions";
 import { getGameAssets } from "@/lib/ddragon/game-assets";
 import { remainingReviews } from "@/lib/coach/review";
 import { findMatchReview } from "@/lib/db/match-reviews";
@@ -112,9 +113,13 @@ export default async function MatchDetailPage({
       route="match"
       title={champion.name}
       header={
-        <header className="flex flex-col gap-5">
+        <header className="relative isolate flex flex-col gap-6 pb-2 sm:pb-6">
+          <ChampionBackdrop
+            src={championSplashUrl(me.championName)}
+            className="-top-10 bottom-0 left-1/2 w-screen -translate-x-1/2 sm:-top-14"
+          />
           <BackLink href={backHref} />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pt-2 sm:pt-6">
             <span
               aria-hidden
               className={cn(
@@ -124,7 +129,7 @@ export default async function MatchDetailPage({
             />
             <ChampionIcon name={champion.name} src={champion.iconUrl} className="size-16" />
             <div className="min-w-0">
-              <h1 className="truncate display text-3xl text-ink sm:text-4xl">{champion.name}</h1>
+              <h1 className="truncate display text-4xl text-ink sm:text-6xl">{champion.name}</h1>
               <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-ink-muted">
                 <span className={cn("font-semibold", ours.win ? "text-win" : "text-loss")}>
                   {ours.win ? t.matches.win : t.matches.loss}

@@ -23,6 +23,31 @@ const championsSchema = z.object({
 /** Match-V5 écrit quelques identifiants autrement que Data Dragon. */
 const ID_FIXES: Record<string, string> = { FiddleSticks: "Fiddlesticks" };
 
+/** Champions mis en avant sur l'accueil, un par jour. */
+const FEATURED = [
+  "Ahri",
+  "LeeSin",
+  "Jinx",
+  "Thresh",
+  "Lux",
+  "Ekko",
+  "Kaisa",
+  "Yasuo",
+  "Viego",
+  "Akali",
+];
+
+/** Le champion de l'accueil aujourd'hui (le même toute la journée, pour tout le monde). */
+export function featuredChampion(now = new Date()): string {
+  const day = Math.floor(now.getTime() / 86_400_000);
+  return FEATURED[day % FEATURED.length] ?? "Ahri";
+}
+
+/** Art officiel du champion (« splash », 1215 × 717), servi par Data Dragon, sans version. */
+export function championSplashUrl(championId: string): string {
+  return `${BASE_URL}/cdn/img/champion/splash/${ID_FIXES[championId] ?? championId}_0.jpg`;
+}
+
 export type ChampionAssets = {
   /** Version de Data Dragon (« 16.20.1 ») : le patch en cours. */
   version: string;

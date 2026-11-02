@@ -1,15 +1,23 @@
 import type { ReactNode } from "react";
 
 import { HowItWorks } from "@/components/auth/how-it-works";
+import { ChampionBackdrop } from "@/components/champion/champion-backdrop";
 import { PricingNote } from "@/components/auth/pricing-note";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Entrance } from "@/components/layout/entrance";
 import { LegalFooter } from "@/components/layout/legal-footer";
 import { t } from "@/i18n/fr";
+import { championSplashUrl, featuredChampion } from "@/lib/ddragon/champions";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <Entrance className="flex min-h-dvh flex-col">
+    <Entrance className="relative isolate flex min-h-dvh flex-col overflow-x-clip">
+      {/* L'art d'un champion, un par jour, vu dans un cercle de vision. */}
+      <ChampionBackdrop
+        src={championSplashUrl(featuredChampion())}
+        focus="64% 38%"
+        className="inset-x-0 top-0 h-[44rem]"
+      />
       {/* Entre 1024 et 1280 px, la colonne de gauche se resserre pour laisser au
           parcours sa pleine largeur. */}
       <div className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-x-12 gap-y-14 px-4 pt-8 pb-16 group-data-entering/shell:shell-rise sm:px-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:pt-12 xl:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] xl:gap-x-24">

@@ -2,10 +2,13 @@ import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-/** Surface posée sur le terrain : une bordure fine, pas d'ombre. */
+/** Surface posée sur le terrain : une bordure fine, une arête claire en haut, une ombre courte. */
 export function Panel({ className, ...props }: ComponentProps<"div">) {
   return (
-    <div className={cn("rounded-panel border border-line bg-surface", className)} {...props} />
+    <div
+      className={cn("rounded-panel border border-line bg-surface shadow-panel", className)}
+      {...props}
+    />
   );
 }
 

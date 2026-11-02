@@ -14,7 +14,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
 
   return (
-    <Entrance className="flex min-h-dvh flex-col">
+    <Entrance className="flex min-h-dvh flex-col overflow-x-clip">
       <AppHeader user={user} signOutAction={signOutAction} />
       <main
         id="contenu"

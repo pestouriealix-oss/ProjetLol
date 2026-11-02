@@ -1,5 +1,6 @@
 import { Radio, Settings } from "lucide-react";
 
+import { ChampionBackdrop } from "@/components/champion/champion-backdrop";
 import { RoleGlyph } from "@/components/map/role-glyph";
 import { AccountSwitcher } from "@/components/profile/account-switcher";
 import { ProfileAvatar } from "@/components/profile/profile-avatar";
@@ -28,19 +29,28 @@ export type ProfileAccount = {
  * En-tête du tableau de bord : qui est affiché. Même logique que les pages de
  * profil des sites de statistiques : l'identité à gauche, la mise à jour et le
  * choix du compte à droite, et tout ce qui suit concerne ce compte-là.
+ *
+ * Derrière, l'art du champion le plus joué, vu dans un cercle de vision.
  */
 export function ProfileHeader({
   account,
   accounts,
   lastSynced,
+  backdrop,
 }: {
   account: ProfileAccount;
   accounts: ProfileAccount[];
   /** « Mis à jour il y a 3 minutes », déjà mis en forme. */
   lastSynced: string;
+  /** Art du champion le plus joué (Data Dragon), ou `null`. */
+  backdrop: string | null;
 }) {
   return (
-    <header className="flex flex-col gap-5">
+    <header className="relative isolate flex flex-col gap-6 pt-4 pb-2 sm:pt-8 sm:pb-4">
+      <ChampionBackdrop
+        src={backdrop}
+        className="-top-10 bottom-0 left-1/2 w-screen -translate-x-1/2 sm:-top-14"
+      />
       <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
         <div className="flex min-w-0 items-center gap-4 sm:gap-5">
           <ProfileAvatar
@@ -51,7 +61,7 @@ export function ProfileHeader({
           <div className="min-w-0">
             {/* Le nom suffit à situer la page ; le titre reste pour les lecteurs d'écran. */}
             <p className="sr-only">{copy.title}</p>
-            <h1 className="display-name text-3xl break-words text-ink sm:text-4xl">
+            <h1 className="display-name text-4xl break-words text-ink sm:text-6xl">
               {account.gameName}
               <span className="text-ink-faint">#{account.tagLine}</span>
             </h1>

@@ -7,7 +7,7 @@ import { Link } from "@/components/ui/link";
 
 export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
-    <Entrance className="flex min-h-dvh flex-col">
+    <Entrance className="flex min-h-dvh flex-col overflow-x-clip">
       <header className="border-b border-line/70">
         <div className="mx-auto flex h-15 max-w-6xl items-center px-4 sm:px-6">
           <Link href="/" className="rounded-control">

@@ -14,7 +14,7 @@ import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
 import { requireUser } from "@/lib/auth/session";
-import { getChampionAssets } from "@/lib/ddragon/champions";
+import { championSplashUrl, getChampionAssets } from "@/lib/ddragon/champions";
 import { listChampionRecords, listPlayedMatches } from "@/lib/db/matches";
 import { listLatestRanks, listRankHistory } from "@/lib/db/ranks";
 import { formatRelative } from "@/lib/format";
@@ -107,6 +107,7 @@ export default async function DashboardPage({
           account={account}
           accounts={accounts}
           lastSynced={lastSyncedAt ? copy.sync.last(formatRelative(lastSyncedAt)) : copy.sync.never}
+          backdrop={records[0] ? championSplashUrl(records[0].championName) : null}
         />
       }
     >

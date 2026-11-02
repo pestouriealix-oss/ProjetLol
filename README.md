@@ -314,6 +314,13 @@ fond reste discret : la couleur vient des visuels du jeu et des résultats.
   au signe et à la couleur (vert en avance, rouge en retard, neutre à égalité),
   et les graphiques portent leurs repères : divisions et progression nette sur
   la courbe des LP, minutes et légende des objectifs sur l'écart d'or.
+- **Art des champions.** En tête du tableau de bord (champion le plus joué), du
+  détail d'une partie et de l'accueil (un champion par jour), l'art officiel de
+  Data Dragon apparaît dans un cercle de vision, comme une ward dans le
+  brouillard (`vision-mask`, `ChampionBackdrop`). Le reste reste calme : un grain
+  très fin sur le terrain, des panneaux posés (`shadow-panel`).
+- **Logo.** Le G-œil : un G dont le creux est l'œil d'un hibou, pupille en
+  corail (`src/components/brand/mark.tsx`), seul, sans le nom écrit.
 - **Vocabulaire.** Celui des joueurs : CS, KP, pink, drake, nash, grubs, inhib.
 
 ### Mouvement

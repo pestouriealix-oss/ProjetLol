@@ -133,6 +133,10 @@
 
   --shadow-lift: 0 28px 60px -28px oklch(0 0 0 / 0.65);
   --shadow-key: inset 0 1px 0 oklch(1 0 0 / 0.22);
+  /* Un panneau posé : une arête claire en haut, une ombre courte dessous. */
+  --shadow-panel:
+    inset 0 1px 0 oklch(1 0 0 / 0.05), 0 1px 0 oklch(0 0 0 / 0.35),
+    0 18px 40px -30px oklch(0 0 0 / 0.8);
 
   /* ── Mouvement ───────────────────────────────────────────────────────────
      Les courbes « ressort » sont la réponse d'un ressort amorti, échantillonnée
@@ -305,6 +309,18 @@
       oklch(0.34 0.02 55 / 0.5),
       transparent 72%
     );
+  }
+
+  /* Le grain du terrain : un brouillard très fin, comme la craie sur l'ardoise. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   h1,
@@ -643,4 +659,17 @@
     animation-duration: 0s !important;
     animation-delay: 0s !important;
   }
+}
+
+/* ── Vision ────────────────────────────────────────────────────────────────
+   L'art du champion n'apparaît que dans un cercle de vision, comme une ward
+   qui perce le brouillard de guerre : net au centre, perdu dans le terrain
+   sur les bords. */
+@utility vision-mask {
+  mask-image: radial-gradient(
+    ellipse 58% 78% at var(--vision-x, 72%) var(--vision-y, 42%),
+    #000 38%,
+    oklch(0 0 0 / 0.55) 62%,
+    transparent 100%
+  );
 }

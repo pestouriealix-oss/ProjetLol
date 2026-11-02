@@ -29,7 +29,7 @@ export function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-title"
-      className="w-full max-w-xl rounded-sheet border border-line bg-surface p-6 sm:p-8"
+      className="w-full max-w-xl rounded-sheet border border-line bg-surface/80 p-6 shadow-panel backdrop-blur-md sm:p-8"
     >
       <h2 id="how-it-works-title" className="display text-sm tracking-[0.08em] text-ink-faint">
         {copy.title}

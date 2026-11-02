@@ -34,7 +34,12 @@ export function MatchList({
             <Link
               href={`/matches/${match.matchId}`}
               aria-label={copy.openDetail(name, match.win ? copy.win : copy.loss)}
-              className="flex items-center gap-3 rounded-panel border border-line bg-surface px-3 py-3 transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:bg-raised sm:gap-4 sm:px-4"
+              className={cn(
+                // Le résultat teinte le bord gauche de la ligne, comme une lueur : on parcourt
+                // l'historique d'un coup d'œil, sans que la couleur porte seule le sens.
+                "flex items-center gap-3 rounded-panel border border-line bg-linear-to-r via-surface via-35% to-surface px-3 py-3 shadow-panel transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:via-raised hover:to-raised sm:gap-4 sm:px-4",
+                match.win ? "from-win-soft" : "from-loss-soft",
+              )}
             >
               <span
                 aria-hidden
