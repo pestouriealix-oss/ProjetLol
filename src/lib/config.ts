@@ -16,7 +16,7 @@ export const PUBLISHER: {
   status: string | null;
   /** Adresse de contact, aussi pour les demandes sur les données personnelles. */
   email: string | null;
-} = { name: null, status: null, email: null };
+} = { name: "Alix-Pierre Pestourie", status: "Particulier", email: "pestouriealix@gmail.com" };
 
 /** Date de la version en ligne des conditions et de la politique de confidentialité. */
 export const LEGAL_UPDATED_AT = "2026-11-02";
