@@ -2,15 +2,27 @@
 
 import { AuthError } from "next-auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { t } from "@/i18n/fr";
 import { signIn } from "@/lib/auth";
+import {
+  confirmEmail,
+  resetPassword,
+  sendPasswordReset,
+  sendVerificationEmail,
+} from "@/lib/auth/email-flows";
 import { hashPassword } from "@/lib/auth/password";
 import { attemptKey, clearAttempts, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
 import { createUserWithPassword, EmailTakenError } from "@/lib/db/users";
 import { isDiscordEnabled } from "@/lib/env";
-import { loginSchema, registerSchema } from "@/lib/validation/auth";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "@/lib/validation/auth";
 
 const AFTER_LOGIN = "/dashboard";
 /** Un nouveau compte arrive directement là où lier son compte Riot. */
@@ -35,6 +47,8 @@ const LIMITS = {
   loginPerEmail: { max: 5, windowSeconds: 15 * 60 },
   loginPerIp: { max: 30, windowSeconds: 15 * 60 },
   registerPerIp: { max: 10, windowSeconds: 60 * 60 },
+  forgotPerEmail: { max: 3, windowSeconds: 60 * 60 },
+  forgotPerIp: { max: 10, windowSeconds: 60 * 60 },
 } as const;
 
 /** Adresse du visiteur, telle que transmise par l'hébergeur (première de la liste). */
@@ -134,11 +148,14 @@ export async function registerAction(
   if (blocked) return refuse({ error: t.auth.errors.tooManyAttempts });
 
   try {
-    await createUserWithPassword({
+    const user = await createUserWithPassword({
       email: parsed.data.email,
       name: parsed.data.name,
       passwordHash: await hashPassword(parsed.data.password),
     });
+    // Le lien de confirmation part tout de suite ; s'il échoue, le bandeau de
+    // l'application permet de le renvoyer : l'inscription ne doit pas en dépendre.
+    await safely(() => sendVerificationEmail(user), undefined);
   } catch (error) {
     if (error instanceof EmailTakenError) {
       return refuse({ fieldErrors: { email: t.auth.errors.emailTaken } });
@@ -166,4 +183,99 @@ export async function registerAction(
 export async function discordSignInAction(): Promise<void> {
   if (!isDiscordEnabled) return;
   await signIn("discord", { redirectTo: AFTER_LOGIN });
+}
+
+export type ForgotPasswordState = {
+  attempt: number;
+  sent?: boolean;
+  error?: string;
+  email?: string;
+};
+
+/**
+ * Lien « nouveau mot de passe ». La réponse est la même que le compte existe
+ * ou non : la page ne doit pas servir à vérifier qui est inscrit.
+ */
+export async function forgotPasswordAction(
+  previous: ForgotPasswordState,
+  formData: FormData,
+): Promise<ForgotPasswordState> {
+  const email = text(formData, "email");
+  const refuse = (error: string): ForgotPasswordState => ({
+    attempt: previous.attempt + 1,
+    error,
+    email,
+  });
+
+  const parsed = forgotPasswordSchema.safeParse({ email });
+  if (!parsed.success) return refuse(t.auth.errors.emailInvalid);
+
+  const emailKey = attemptKey("forgot", parsed.data.email);
+  const ipKey = attemptKey("forgot-ip", await clientIp());
+  const blocked = await safely(
+    async () =>
+      (await isRateLimited(emailKey, LIMITS.forgotPerEmail.max)) ||
+      (await isRateLimited(ipKey, LIMITS.forgotPerIp.max)),
+    false,
+  );
+  if (blocked) return refuse(t.auth.errors.tooManyAttempts);
+  await safely(async () => {
+    await recordAttempt(emailKey, LIMITS.forgotPerEmail.windowSeconds);
+    await recordAttempt(ipKey, LIMITS.forgotPerIp.windowSeconds);
+  }, undefined);
+
+  try {
+    await sendPasswordReset(parsed.data.email);
+  } catch (error) {
+    console.error("Lien de mot de passe impossible :", error);
+    return refuse(t.auth.errors.unavailable);
+  }
+  return { attempt: previous.attempt + 1, sent: true, email };
+}
+
+export type ResetPasswordState = {
+  attempt: number;
+  error?: string;
+  fieldError?: string;
+  /** Le lien ne vaut plus : la page propose d'en demander un autre. */
+  expired?: boolean;
+};
+
+export async function resetPasswordAction(
+  previous: ResetPasswordState,
+  formData: FormData,
+): Promise<ResetPasswordState> {
+  const parsed = resetPasswordSchema.safeParse({
+    token: text(formData, "token"),
+    password: text(formData, "password"),
+  });
+  if (!parsed.success) {
+    const { fieldErrors } = z.flattenError(parsed.error);
+    if (fieldErrors.token) return { attempt: previous.attempt + 1, expired: true };
+    return { attempt: previous.attempt + 1, fieldError: fieldErrors.password?.[0] };
+  }
+
+  let changed: boolean;
+  try {
+    changed = await resetPassword(parsed.data.token, parsed.data.password);
+  } catch (error) {
+    console.error("Changement de mot de passe impossible :", error);
+    return { attempt: previous.attempt + 1, error: t.auth.errors.unavailable };
+  }
+  if (!changed) return { attempt: previous.attempt + 1, expired: true };
+  redirect("/login?reset=done");
+}
+
+export type ConfirmEmailState = { status: "idle" | "done" | "invalid" | "error" };
+
+export async function confirmEmailAction(
+  _previous: ConfirmEmailState,
+  formData: FormData,
+): Promise<ConfirmEmailState> {
+  try {
+    return { status: (await confirmEmail(text(formData, "token"))) ? "done" : "invalid" };
+  } catch (error) {
+    console.error("Confirmation d'adresse impossible :", error);
+    return { status: "error" };
+  }
 }

@@ -10,7 +10,9 @@ export type CoachErrorKind =
   /** Draft incomplète ou incohérente (champion inconnu, en double…). */
   | "invalid_draft"
   /** Limite quotidienne de fiches de l'offre atteinte. */
-  | "quota";
+  | "quota"
+  /** Adresse e-mail pas encore confirmée : le coach attend la confirmation. */
+  | "email_unverified";
 
 export class CoachError extends Error {
   constructor(

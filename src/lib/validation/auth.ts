@@ -29,5 +29,17 @@ export const registerSchema = z.object({
   password,
 });
 
+export const forgotPasswordSchema = z.object({ email });
+
+export const resetPasswordSchema = z.object({
+  /** Jeton du lien : 32 octets en base64url. */
+  token: z
+    .string()
+    .min(20)
+    .max(100)
+    .regex(/^[\w-]+$/),
+  password,
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -64,6 +64,13 @@
       "when": 1792691415091,
       "tag": "0008_spotty_magneto",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793633497820,
+      "tag": "0009_brave_beyonder",
+      "breakpoints": true
     }
   ]
 }

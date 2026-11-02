@@ -1,0 +1,48 @@
+# Collecte quotidienne des parties classées (Émeraude et plus) pour les
+# statistiques de matchups de la fiche de draft. Elle tourne sur les machines de
+# GitHub, pas sur Vercel : une fonction Vercel est trop courte pour ce travail.
+#
+# Secrets à créer dans le dépôt (Settings → Secrets and variables → Actions) :
+#   DATABASE_URL  l'adresse de la base de production (Neon)
+#   RIOT_API_KEY  la clé Riot du site (personnelle ou de production)
+#
+# Une tâche planifiée ne tourne que depuis la branche principale du dépôt.
+name: Collecte des matchups
+
+on:
+  schedule:
+    # Tous les jours à 2 h 17 UTC (3 h 17 à Paris en hiver), quand le site est calme.
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "Durée de la collecte, en minutes"
+        default: "40"
+        required: false
+
+concurrency:
+  group: collect-matchups
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Collecter
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+          # Exigé par la configuration du site, mais la collecte ne s'en sert pas.
+          AUTH_SECRET: collecte-sans-session
+          MINUTES: ${{ inputs.minutes || '40' }}
+        run: node --conditions=react-server --import tsx scripts/collect-matchups.ts --minutes "$MINUTES"

@@ -42,7 +42,7 @@ const portalSessionSchema = z.object({
 
 const apiBase = () => env.PADDLE_API_BASE_URL ?? API_BASE_URL[env.PADDLE_ENV];
 
-/** Résilie un abonnement tout de suite (suppression du compte Kairos). */
+/** Résilie un abonnement tout de suite (suppression du compte). */
 export async function cancelSubscriptionNow(subscriptionId: string): Promise<void> {
   if (!env.PADDLE_API_KEY) throw new Error("PADDLE_API_KEY n'est pas définie.");
   if (!/^sub_[a-z0-9_]+$/i.test(subscriptionId)) throw new Error("Abonnement Paddle invalide.");

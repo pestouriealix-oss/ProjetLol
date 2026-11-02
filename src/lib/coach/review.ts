@@ -35,7 +35,9 @@ export type ReviewErrorKind =
   /** Partie introuvable pour cet utilisateur, ou illisible. */
   | "match_not_found"
   /** Partie sans poste attribué (ARAM, modes spéciaux). */
-  | "not_reviewable";
+  | "not_reviewable"
+  /** Adresse e-mail pas encore confirmée : le coach attend la confirmation. */
+  | "email_unverified";
 
 export class ReviewError extends Error {
   constructor(

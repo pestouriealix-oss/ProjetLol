@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { canUseCoach } from "@/lib/auth/email-flows";
 import { requireUser } from "@/lib/auth/session";
 import { CoachError, type CoachErrorKind } from "@/lib/coach/errors";
 import { loadLiveDraft } from "@/lib/coach/live-draft";
@@ -39,6 +40,7 @@ export async function readScreenshot(formData: FormData): Promise<ReadScreenshot
     myRole: formData.get("myRole"),
   });
   if (!parsed.success) return { ok: false, error: "bad_image" };
+  if (!canUseCoach(user)) return { ok: false, error: "email_unverified" };
   const { capture, myRole } = parsed.data;
 
   const key = attemptKey("draft-read", user.id);

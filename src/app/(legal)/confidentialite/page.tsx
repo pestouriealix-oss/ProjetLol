@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
 
-import { Badge } from "@/components/ui/badge";
+import { LegalHeader, LegalSections, PublisherValue } from "@/components/legal/legal-sections";
 import { t } from "@/i18n/fr";
+import { PUBLISHER } from "@/lib/config";
 
 export const metadata: Metadata = { title: t.legal.privacy };
+
+const notice = t.legal.noticeSections;
 
 export default function Page() {
   return (
     <>
-      <h1 className="display text-4xl text-ink sm:text-5xl">{t.legal.privacy}</h1>
-      <div>
-        <Badge tone="warn" className="h-auto min-h-6 py-1 whitespace-normal">
-          {t.legal.draftNotice}
-        </Badge>
-      </div>
-      <p className="text-lg text-ink-muted">{t.legal.privacyBody}</p>
+      <LegalHeader title={t.legal.privacy} />
+      <section className="flex flex-col gap-3">
+        <h2 className="display text-xl text-ink">{notice.publisher}</h2>
+        <p className="leading-relaxed text-ink-muted">
+          <PublisherValue value={PUBLISHER.name} />
+        </p>
+        <p className="leading-relaxed text-ink-muted">
+          {notice.contactLabel} <PublisherValue value={PUBLISHER.email} />
+        </p>
+      </section>
+      <LegalSections sections={t.legal.privacySections} />
     </>
   );
 }

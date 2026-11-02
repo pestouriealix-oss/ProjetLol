@@ -49,6 +49,40 @@ export const fr = {
     hasAccount: "Déjà un compte ?",
     goToRegister: "Créer un compte",
     goToLogin: "Se connecter",
+    forgotLink: "Mot de passe oublié ?",
+    forgot: {
+      title: "Mot de passe oublié",
+      intro:
+        "Donne l'adresse de ton compte : on t'envoie un lien pour choisir un nouveau mot de passe.",
+      submit: "Recevoir le lien",
+      sent: "Si un compte utilise cette adresse, un e-mail vient de partir. Pense à regarder dans les indésirables.",
+      back: "Revenir à la connexion",
+    },
+    reset: {
+      title: "Nouveau mot de passe",
+      password: "Nouveau mot de passe",
+      submit: "Enregistrer le mot de passe",
+      invalid: "Ce lien a expiré ou a déjà servi. Demande-en un nouveau.",
+      again: "Demander un nouveau lien",
+      done: "Mot de passe changé. Connecte-toi avec le nouveau.",
+    },
+    verify: {
+      title: "Confirme ton adresse",
+      intro: "Un clic, et le coach est débloqué.",
+      submit: "Confirmer mon adresse",
+      done: "Adresse confirmée. Le coach est à toi.",
+      invalid:
+        "Ce lien a expiré ou a déjà servi. Tu peux en recevoir un nouveau depuis le bandeau de l'application.",
+      toDashboard: "Aller au tableau de bord",
+    },
+    verifyBanner: {
+      body: (email: string) =>
+        `Confirme ton adresse : on a envoyé un lien à ${email}. Sans ça, le coach reste fermé.`,
+      resend: "Renvoyer l'e-mail",
+      resent: "E-mail renvoyé.",
+      tooMany: "Déjà renvoyé plusieurs fois. Réessaie dans une heure.",
+      failed: "L'e-mail n'a pas pu partir. Réessaie dans un instant.",
+    },
     errors: {
       invalidCredentials: "E-mail ou mot de passe incorrect.",
       emailTaken: "Un compte existe déjà avec cet e-mail. Connecte-toi à la place.",
@@ -254,6 +288,8 @@ export const fr = {
           "La liste des champions ne répond pas pour l'instant. Réessaie dans un instant.",
         invalid_draft: "La draft est incomplète.",
         quota: "Limite atteinte pour aujourd'hui.",
+        email_unverified:
+          "Confirme d'abord ton adresse e-mail (lien dans le bandeau en haut de la page) pour utiliser le coach.",
       },
     },
     live: {
@@ -326,6 +362,8 @@ export const fr = {
         champions_unavailable:
           "La liste des champions ne répond pas pour l'instant. Réessaie dans un instant.",
         not_a_draft: "La draft est incomplète.",
+        email_unverified:
+          "Confirme d'abord ton adresse e-mail (lien dans le bandeau en haut de la page) pour utiliser le coach.",
       },
     },
     noKey: {
@@ -497,6 +535,8 @@ export const fr = {
         unavailable: "Le bilan n'a pas pu être écrit. Réessaie.",
         refused: "Le coach n'a pas pu répondre pour cette partie.",
         invalid_output: "Le bilan reçu était incomplet. Réessaie.",
+        email_unverified:
+          "Confirme d'abord ton adresse e-mail (lien dans le bandeau en haut de la page) pour utiliser le coach.",
       },
     },
     duel: {
@@ -583,7 +623,7 @@ export const fr = {
   premium: {
     title: "Premium",
     headline: "Plus de coach, pour le prix d'un café",
-    lede: "Tout Kairos reste gratuit. Premium lève les limites pour ceux qui enchaînent les parties.",
+    lede: `Tout ${APP_NAME} reste gratuit. Premium lève les limites pour ceux qui enchaînent les parties.`,
     perMonth: "par mois",
     noCommitment: "Sans engagement, résiliable en deux clics.",
     compare: {
@@ -598,8 +638,7 @@ export const fr = {
     },
     subscribe: "Passer Premium",
     opening: "Ouverture du paiement…",
-    paymentBy:
-      "Paiement sécurisé par Paddle, notre revendeur officiel : il gère la carte et la TVA, Kairos ne voit jamais tes coordonnées bancaires.",
+    paymentBy: `Paiement sécurisé par Paddle, notre revendeur officiel : il gère la carte et la TVA, ${APP_NAME} ne voit jamais tes coordonnées bancaires.`,
     notReady:
       "Le paiement n'est pas encore ouvert. Premium arrive bientôt : en attendant, profite de l'offre gratuite.",
     loadError: "Le paiement n'a pas pu s'ouvrir. Vérifie ta connexion et réessaie.",
@@ -827,8 +866,7 @@ export const fr = {
     toDraft: "Préparer ma fiche",
     refresh: "Vérifier à nouveau",
     unverifiedTitle: "Compte pas encore vérifié",
-    unverifiedBody:
-      "Mets d'abord ton compte à jour depuis le tableau de bord : Kairos a besoin de l'identifiant Riot du joueur.",
+    unverifiedBody: `Mets d'abord ton compte à jour depuis le tableau de bord : ${APP_NAME} a besoin de l'identifiant Riot du joueur.`,
     toDashboard: "Aller au tableau de bord",
     noAccountBody: "Lie d'abord ton compte Riot pour suivre tes parties en direct.",
     elapsed: "Durée",
@@ -955,13 +993,179 @@ export const fr = {
     backHome: "Revenir au tableau de bord",
     skipToContent: "Aller au contenu",
   },
+  emails: {
+    greeting: (name: string | null) => (name ? `Salut ${name},` : "Salut,"),
+    linkFallback: "Si le bouton ne marche pas, copie ce lien dans ton navigateur :",
+    footer: `Tu reçois cet e-mail parce qu'un compte ${APP_NAME} utilise cette adresse. Si ce n'est pas toi, ignore-le : rien ne se passera.`,
+    verify: {
+      subject: `Confirme ton adresse ${APP_NAME}`,
+      body: "Un clic pour confirmer ton adresse e-mail et débloquer le coach : fiches de draft et bilans de partie.",
+      action: "Confirmer mon adresse",
+      expiry: "Le lien est valable 48 heures.",
+    },
+    reset: {
+      subject: `Ton nouveau mot de passe ${APP_NAME}`,
+      body: "Tu as demandé un nouveau mot de passe. Choisis-le ici :",
+      action: "Choisir un nouveau mot de passe",
+      expiry:
+        "Le lien est valable 30 minutes. Si tu n'as rien demandé, ignore cet e-mail : ton mot de passe ne change pas.",
+    },
+  },
   legal: {
     navLabel: "Informations légales",
     terms: "Conditions d'utilisation",
     privacy: "Confidentialité",
-    draftNotice: "Version provisoire. Ce texte sera rédigé avant l'ouverture au public.",
-    termsBody: `${APP_NAME} est en cours de développement et n'est pas encore ouvert au public. Les conditions d'utilisation définitives seront publiées ici.`,
-    privacyBody: `${APP_NAME} enregistre ton adresse e-mail, les comptes Riot que tu lies, et les données de tes parties fournies par l'API de Riot Games. Tu peux supprimer ton compte et toutes tes données à tout moment depuis les paramètres.`,
+    notice: "Mentions légales",
+    updated: (date: string) => `Dernière mise à jour : ${date}`,
+    missing: "À compléter avant l'ouverture",
+    contactLine: (email: string) => `Pour toute question : ${email}.`,
+    termsSections: (offer: { sheets: number; reviews: number; price: string }) => [
+      {
+        title: "1. Objet",
+        paragraphs: [
+          `${APP_NAME} est un service en ligne d'aide au jeu pour League of Legends : statistiques de parties, fiches de draft et bilans de partie écrits par un coach automatique, suivi de l'esport et actualités du jeu. Ces conditions encadrent son utilisation ; créer un compte vaut acceptation.`,
+        ],
+      },
+      {
+        title: `2. ${APP_NAME} et Riot Games`,
+        paragraphs: [
+          `${APP_NAME} n'est ni approuvé ni soutenu par Riot Games. Les données de jeu viennent de l'API officielle de Riot Games et sont utilisées dans le respect de ses règles : aucune estimation de niveau caché (MMR), aucune information que le joueur ne voit pas déjà dans le jeu, plusieurs options proposées plutôt qu'une seule. League of Legends et ses visuels appartiennent à Riot Games.`,
+        ],
+      },
+      {
+        title: "3. Ton compte",
+        paragraphs: [
+          "Il faut avoir au moins 15 ans pour créer un compte, ou l'accord d'un parent. L'abonnement Premium demande d'être majeur ou d'avoir l'accord d'un parent.",
+          "Ton compte est personnel. Garde ton mot de passe pour toi : tout ce qui est fait depuis ton compte est réputé fait par toi. Ton adresse e-mail doit être confirmée pour utiliser le coach.",
+          "Lier un compte Riot sert à suivre tes parties. Un compte lié par « Se connecter avec Riot » est vérifié comme t'appartenant.",
+        ],
+      },
+      {
+        title: "4. Le coach",
+        paragraphs: [
+          "Les fiches de draft et les bilans de partie sont écrits automatiquement par un modèle d'intelligence artificielle (Claude, d'Anthropic), à partir de données vérifiées : la draft, les données officielles de la partie et nos statistiques. Ils proposent des pistes, jamais des ordres, et peuvent se tromper : à toi de juger.",
+          "Le coach ne garantit aucun résultat : ni victoire, ni LP, ni rang.",
+        ],
+      },
+      {
+        title: "5. Offre gratuite et Premium",
+        paragraphs: [
+          `L'essentiel de ${APP_NAME} est gratuit, avec des limites par 24 heures : ${offer.sheets} fiches de draft et ${offer.reviews} bilans de partie. L'application affiche ce qu'il te reste.`,
+          `Premium, à ${offer.price} TTC par mois, relève ces limites. Le paiement, la facture, la TVA, le remboursement et le droit de rétractation sont gérés par Paddle (Paddle.com Market Limited), notre revendeur officiel, selon ses conditions de vente, présentées au moment du paiement.`,
+          "L'abonnement se renouvelle chaque mois. Tu peux le résilier à tout moment depuis la page Premium : il reste actif jusqu'à la fin du mois déjà payé. Un changement de prix est annoncé au moins 30 jours à l'avance, et tu restes libre de résilier.",
+          "Le budget du coach est plafonné chaque mois : s'il est atteint, les fiches et bilans gratuits s'arrêtent jusqu'au mois suivant. Premium n'est pas concerné.",
+        ],
+      },
+      {
+        title: "6. Ce qui n'est pas permis",
+        paragraphs: ["Pour que le service reste juste pour tout le monde, il est interdit :"],
+        items: [
+          "d'utiliser des robots ou d'extraire des données en masse ;",
+          "de créer plusieurs comptes pour multiplier les fiches gratuites ;",
+          "de chercher à contourner les limites, à accéder aux données d'un autre joueur ou à perturber le service ;",
+          "de revendre le service ou ce qu'il produit.",
+        ],
+        after: [
+          `En cas de manquement, ${APP_NAME} peut suspendre ou fermer le compte, après t'avoir prévenu, sauf urgence.`,
+        ],
+      },
+      {
+        title: "7. Disponibilité et responsabilité",
+        paragraphs: [
+          `${APP_NAME} est fourni tel quel et évolue régulièrement. Il peut être interrompu pour maintenance ou parce qu'un service dont il dépend ne répond pas (l'API de Riot Games, par exemple). ${APP_NAME} ne peut être tenu responsable d'une partie perdue, de LP perdus ou d'une décision prise en jeu.`,
+        ],
+      },
+      {
+        title: "8. Propriété",
+        paragraphs: [
+          `Le site, son code, ses textes, son design et ses statistiques agrégées appartiennent à ${APP_NAME}. Les fiches et bilans écrits pour toi sont à ton usage personnel.`,
+        ],
+      },
+      {
+        title: "9. Fin du compte",
+        paragraphs: [
+          "Tu peux supprimer ton compte à tout moment depuis les paramètres : tes données sont effacées (voir la politique de confidentialité) et un abonnement en cours est résilié.",
+        ],
+      },
+      {
+        title: "10. Changements et droit applicable",
+        paragraphs: [
+          "Ces conditions peuvent évoluer. Un changement important est annoncé par e-mail ou dans l'application avant de s'appliquer.",
+          "Elles sont soumises au droit français. En cas de désaccord, écris-nous d'abord : on cherchera une solution à l'amiable. À défaut, les tribunaux français sont compétents, sans préjudice des règles qui protègent les consommateurs.",
+        ],
+      },
+    ],
+    privacySections: [
+      {
+        title: "Ce que nous enregistrons",
+        items: [
+          "Ton compte : adresse e-mail, pseudo (facultatif), empreinte de ton mot de passe (jamais le mot de passe lui-même) et date de confirmation de l'adresse. Avec Discord : ton identifiant, ton nom et ton avatar Discord.",
+          "Tes comptes Riot liés : Riot ID, serveur, rôles choisis, et les données publiques que l'API de Riot Games donne sur tes parties et ton classement.",
+          "Le coach : les drafts, les fiches et les bilans écrits pour toi, et un relevé de la consommation du modèle (pour appliquer les limites). Une capture d'écran envoyée est lue puis oubliée : elle n'est pas conservée.",
+          "Premium : les identifiants client et d'abonnement chez Paddle, le statut et les dates de l'abonnement. Jamais tes coordonnées bancaires : elles restent chez Paddle.",
+          "La sécurité : des compteurs d'essais de connexion, d'inscription et de demandes de lien, rattachés à une empreinte non réversible de l'adresse e-mail ou de l'adresse IP ; les liens envoyés par e-mail, sous forme d'empreinte, qui expirent en 30 minutes ou 48 heures.",
+        ],
+      },
+      {
+        title: "Pourquoi",
+        items: [
+          "Te fournir le service (compte, suivi des parties, coach, Premium) : c'est l'exécution du contrat.",
+          "Protéger le service et ses utilisateurs (limites d'essais, confirmation de l'adresse) : c'est notre intérêt légitime.",
+          "Facturer Premium : c'est une obligation légale, assurée par Paddle.",
+        ],
+        after: ["Pas de publicité ciblée, pas de revente de données, pas de mesure d'audience."],
+      },
+      {
+        title: "Qui les traite pour nous",
+        items: [
+          "Vercel (hébergement du site, États-Unis).",
+          "Neon (base de données, hébergée en Europe, à Francfort).",
+          "Anthropic (modèle Claude) : reçoit la draft, la capture ou les chiffres de la partie à commenter, jamais ton adresse e-mail.",
+          "Resend (envoi des e-mails) : reçoit ton adresse e-mail et le lien à envoyer.",
+          "Paddle (paiement de Premium).",
+          "Riot Games (source des données de jeu, et connexion avec Riot si tu l'utilises), Discord (si tu te connectes avec Discord).",
+        ],
+        after: [
+          "Certains sont établis aux États-Unis : ces transferts reposent sur le cadre de protection des données entre l'Union européenne et les États-Unis, ou sur les clauses contractuelles types de la Commission européenne.",
+        ],
+      },
+      {
+        title: "Combien de temps",
+        paragraphs: [
+          "Tes données sont gardées tant que ton compte existe. Quand tu le supprimes, tout ce qui te concerne est effacé aussitôt, sauf ce que Paddle doit conserver pour la facturation. Un compte inactif depuis trois ans pourra être supprimé, après t'avoir prévenu.",
+          "Les parties brutes (données publiques de Riot Games, partagées entre joueurs) et les statistiques agrégées ne contiennent rien qui t'identifie.",
+        ],
+      },
+      {
+        title: "Cookies",
+        paragraphs: [
+          "Un seul cookie te concerne en permanence : celui de ta session, indispensable pour rester connecté. Un cookie temporaire protège la connexion avec Riot. Au moment du paiement, Paddle peut déposer ses propres cookies, nécessaires à la transaction et à la lutte contre la fraude. Aucun cookie de publicité ni de mesure d'audience : il n'y a rien à accepter.",
+        ],
+      },
+      {
+        title: "Sécurité",
+        paragraphs: [
+          "Les mots de passe sont hachés (scrypt), les échanges chiffrés (HTTPS), les clés d'accès aux services restent sur le serveur, et chaque requête ne lit que les données de son utilisateur.",
+        ],
+      },
+      {
+        title: "Tes droits",
+        paragraphs: [
+          "Tu peux accéder à tes données, les corriger, les récupérer, t'opposer à un traitement ou en demander la limitation, et les effacer (la suppression du compte, dans les paramètres, le fait tout de suite). Écris-nous : on répond sous un mois.",
+          "Si tu estimes que tes droits ne sont pas respectés, tu peux saisir la CNIL (cnil.fr).",
+        ],
+      },
+    ],
+    noticeSections: {
+      publisher: "Éditeur",
+      director: "Directeur de la publication",
+      contact: "Contact",
+      contactLabel: "Contact :",
+      host: "Hébergement",
+      hostBody:
+        "Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis (vercel.com). Base de données : Neon, hébergée en Europe (Francfort).",
+      riot: "Riot Games",
+    },
   },
 } as const;
 

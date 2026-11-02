@@ -438,7 +438,8 @@ export function DraftWorkspace({
               {sheet.status === "error" ? (
                 <div className="flex flex-col items-start gap-3">
                   <ErrorNotice>{copy.analyse.errors[sheet.error]}</ErrorNotice>
-                  {sheet.error !== "quota" && sheet.error !== "budget" ? (
+                  {sheet.error === "email_unverified" ? null : sheet.error !== "quota" &&
+                    sheet.error !== "budget" ? (
                     <Button variant="secondary" size="sm" onClick={() => void analyse()}>
                       {copy.analyse.again}
                     </Button>

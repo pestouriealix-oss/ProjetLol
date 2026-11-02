@@ -1,3 +1,4 @@
+import { canUseCoach } from "@/lib/auth/email-flows";
 import { requireUser } from "@/lib/auth/session";
 import { remainingReviews, ReviewError, writeMatchReview } from "@/lib/coach/review";
 import { freeCoachPaused } from "@/lib/coach/usage";
@@ -23,6 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ mat
   const { matchId } = await params;
   if (!MATCH_ID.test(matchId)) return json(404, { type: "error", error: "match_not_found" });
   if (!llm.isConfigured) return json(503, { type: "error", error: "missing_key" });
+  if (!canUseCoach(user)) return json(403, { type: "error", error: "email_unverified" });
 
   if (await freeCoachPaused(user.plan)) return json(429, { type: "error", error: "budget" });
   const { remaining } = await remainingReviews(user.id, user.plan);

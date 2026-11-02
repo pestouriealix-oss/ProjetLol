@@ -54,6 +54,16 @@ const schema = z.object({
   RIOT_RSO_CLIENT_SECRET: optional,
   /** Autres adresses pour Riot Sign On (tests). */
   RIOT_RSO_BASE_URL: optional,
+  /** Adresse publique du site (« https://gufo.gg ») : les liens des e-mails pointent dessus. */
+  APP_URL: optional,
+  /** Donnée par Vercel en ligne : l'adresse de production, sans « https:// ». */
+  VERCEL_PROJECT_PRODUCTION_URL: optional,
+  /** Clé de Resend (envoi des e-mails). Sans elle, les e-mails sont écrits dans le terminal. */
+  RESEND_API_KEY: optional,
+  /** Expéditeur des e-mails (« Gufo <bonjour@gufo.gg> »), sur un domaine vérifié chez Resend. */
+  EMAIL_FROM: optional,
+  /** Autre adresse pour l'API de Resend (tests). */
+  RESEND_API_BASE_URL: optional,
 });
 
 const parsed = schema.safeParse(process.env);

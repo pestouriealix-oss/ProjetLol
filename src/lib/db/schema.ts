@@ -57,6 +57,11 @@ export const users = pgTable("users", {
   image: text("image"),
   /** Absent pour les comptes créés via Discord. */
   passwordHash: text("password_hash"),
+  /**
+   * Dernier changement de mot de passe : les sessions ouvertes avant cette date
+   * ne valent plus (voir `getCurrentUser`).
+   */
+  passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   plan: planEnum("plan").notNull().default("FREE"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -345,6 +350,31 @@ export type RankSnapshot = typeof rankSnapshots.$inferSelect;
  * fenêtre de temps. La clé est une empreinte (SHA-256) : ni l'e-mail ni
  * l'adresse IP ne sont stockés en clair.
  */
+export const emailTokenKindEnum = pgEnum("email_token_kind", ["VERIFY_EMAIL", "RESET_PASSWORD"]);
+
+/**
+ * Liens envoyés par e-mail (vérification de l'adresse, nouveau mot de passe).
+ * Seule l'empreinte du jeton est gardée : une fuite de la base ne donne aucun
+ * lien utilisable. Un jeton ne sert qu'une fois et expire.
+ */
+export const emailTokens = pgTable(
+  "email_tokens",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: emailTokenKindEnum("kind").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    /** L'adresse à laquelle le lien a été envoyé : il ne vaut que tant qu'elle reste celle du compte. */
+    email: text("email").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (table) => [index("email_tokens_user_kind_idx").on(table.userId, table.kind)],
+);
+
 export const authAttempts = pgTable("auth_attempts", {
   key: text("key").primaryKey(),
   count: integer("count").notNull(),

@@ -69,6 +69,16 @@ export function formatLongDate(date: Date, timeZone: string = DISPLAY_TIME_ZONE)
   return new Intl.DateTimeFormat("fr-FR", { timeZone, day: "numeric", month: "long" }).format(date);
 }
 
+/** « 2 novembre 2026 », à l'heure de Paris. */
+export function formatFullDate(date: Date, timeZone: string = DISPLAY_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
 /**
  * Titre d'un jour de calendrier (« 2026-10-15 ») : « Aujourd'hui », « Demain »,
  * « Hier », sinon « Jeudi 15 octobre ».

@@ -318,6 +318,50 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     ).rejects.toBeInstanceOf(api.RiotAccountLimitError);
   });
 
+  it("un lien reçu par e-mail ne sert qu'une fois, qu'à son usage et qu'à son utilisateur", async () => {
+    const tokens = await import("./email-tokens");
+    const aliceUser = await usersApi.findUserById(alice);
+    const bobUser = await usersApi.findUserById(bob);
+    if (!aliceUser || !bobUser) throw new Error("utilisateurs de test absents");
+
+    const aliceToken = await tokens.issueEmailToken(alice, "VERIFY_EMAIL", aliceUser.email);
+    const bobToken = await tokens.issueEmailToken(bob, "VERIFY_EMAIL", bobUser.email);
+
+    // Le lien de Bob ne concerne que Bob, et ne sert qu'une fois.
+    expect(await tokens.consumeEmailToken("VERIFY_EMAIL", bobToken)).toEqual({
+      userId: bob,
+      email: bobUser.email,
+    });
+    expect(await tokens.consumeEmailToken("VERIFY_EMAIL", bobToken)).toBeNull();
+    expect(await usersApi.markEmailVerified(bob, bobUser.email)).toBe(true);
+    expect((await usersApi.findUserById(alice))?.emailVerified).toBe(false);
+    expect((await usersApi.findUserById(bob))?.emailVerified).toBe(true);
+
+    // Un lien de confirmation ne change pas de mot de passe, et le dernier envoyé annule le précédent.
+    expect(await tokens.consumeEmailToken("RESET_PASSWORD", aliceToken)).toBeNull();
+    const newer = await tokens.issueEmailToken(alice, "VERIFY_EMAIL", aliceUser.email);
+    expect(await tokens.isEmailTokenValid("VERIFY_EMAIL", aliceToken)).toBe(false);
+
+    // Expiré : il ne vaut plus rien.
+    const later = new Date(Date.now() + (tokens.TOKEN_TTL_MINUTES.VERIFY_EMAIL + 1) * 60_000);
+    expect(await tokens.consumeEmailToken("VERIFY_EMAIL", newer, later)).toBeNull();
+
+    // Envoyé à une autre adresse que celle du compte : refusé.
+    const stale = await tokens.issueEmailToken(alice, "RESET_PASSWORD", "ancienne@example.test");
+    expect(await tokens.consumeEmailToken("RESET_PASSWORD", stale)).toBeNull();
+  });
+
+  it("un nouveau mot de passe ne touche que son utilisateur et date le changement", async () => {
+    await usersApi.setPassword(alice, "nouvelle-empreinte");
+    const aliceSession = await usersApi.findSessionUser(alice);
+    const bobSession = await usersApi.findSessionUser(bob);
+    expect(aliceSession?.passwordChangedAt).toBeInstanceOf(Date);
+    expect(aliceSession?.user.emailVerified).toBe(true);
+    expect(bobSession?.passwordChangedAt).toBeNull();
+    const credentials = await usersApi.findUserCredentials(aliceSession!.user.email);
+    expect(credentials?.passwordHash).toBe("nouvelle-empreinte");
+  });
+
   it("refuse un second compte avec le même e-mail", async () => {
     const email = `test-dup-${randomUUID()}@example.test`;
     const first = await usersApi.createUserWithPassword({ email, name: null, passwordHash: "x" });

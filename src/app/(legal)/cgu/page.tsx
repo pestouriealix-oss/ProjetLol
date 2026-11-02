@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
 
-import { Badge } from "@/components/ui/badge";
+import { LegalHeader, LegalSections } from "@/components/legal/legal-sections";
 import { t } from "@/i18n/fr";
+import { limitsFor } from "@/lib/auth/entitlements";
+import { formatPremiumPrice } from "@/lib/billing/plans";
+import { PUBLISHER } from "@/lib/config";
 
 export const metadata: Metadata = { title: t.legal.terms };
 
 export default function Page() {
+  const free = limitsFor("FREE");
+  const sections = t.legal.termsSections({
+    sheets: free.draftAnalysesPerDay,
+    reviews: free.matchReviewsPerDay,
+    price: formatPremiumPrice(),
+  });
   return (
     <>
-      <h1 className="display text-4xl text-ink sm:text-5xl">{t.legal.terms}</h1>
-      <div>
-        <Badge tone="warn" className="h-auto min-h-6 py-1 whitespace-normal">
-          {t.legal.draftNotice}
-        </Badge>
-      </div>
-      <p className="text-lg text-ink-muted">{t.legal.termsBody}</p>
+      <LegalHeader title={t.legal.terms} />
+      <LegalSections sections={sections} />
+      {PUBLISHER.email ? (
+        <p className="text-ink-muted">{t.legal.contactLine(PUBLISHER.email)}</p>
+      ) : null}
     </>
   );
 }

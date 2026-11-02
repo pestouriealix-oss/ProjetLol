@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { canUseCoach } from "@/lib/auth/email-flows";
 import { requireUser } from "@/lib/auth/session";
 import { CoachError } from "@/lib/coach/errors";
 import { remainingSheets, writeDraftSheet } from "@/lib/coach/sheet";
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     return json(400, { type: "error", error: "invalid_draft" });
   }
   if (!llm.isConfigured) return json(503, { type: "error", error: "missing_key" });
+  if (!canUseCoach(user)) return json(403, { type: "error", error: "email_unverified" });
 
   // Plafond mensuel du site atteint : les fiches gratuites attendent le mois suivant.
   if (await freeCoachPaused(user.plan)) return json(429, { type: "error", error: "budget" });

@@ -1,24 +1,25 @@
-# Coach (nom provisoire)
+# Gufo
 
 Un coach pour League of Legends : il conseille le joueur pendant la sélection des
 champions, puis analyse ses parties classées pour l'aider à progresser.
 
-Le nom du produit n'est pas encore choisi. Il vit dans une seule constante,
-`APP_NAME` (`src/lib/config.ts`).
+Le nom (« hibou » en italien) vit dans une seule constante, `APP_NAME`
+(`src/lib/config.ts`) ; le domaine visé est `gufo.gg`.
 
 ## État d'avancement
 
-| Étape  | Contenu                                                            | État    |
-| ------ | ------------------------------------------------------------------ | ------- |
-| 1      | Socle, base de données, connexion, système de design, Paramètres   | Fait    |
-| 2      | API Riot, Data Dragon, synchronisation des parties                 | Fait    |
-| 4a     | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)        | Fait    |
-| Esport | Calendrier, résultats, arbres et classements (PandaScore)          | Fait    |
-| Actus  | Articles en français et en anglais (flux RSS), patchs              | Fait    |
-| 3      | Coach de draft (capture, extraction, fiche en streaming)           | Fait    |
-| 4b     | Bilan d'une partie (faits vérifiés, points forts, axes de progrès) | Fait    |
-| 5      | Tableau de bord global                                             | À faire |
-| 6      | Finitions, pages légales définitives                               | À faire |
+| Étape    | Contenu                                                                        | État    |
+| -------- | ------------------------------------------------------------------------------ | ------- |
+| 1        | Socle, base de données, connexion, système de design, Paramètres               | Fait    |
+| 2        | API Riot, Data Dragon, synchronisation des parties                             | Fait    |
+| 4a       | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)                    | Fait    |
+| Esport   | Calendrier, résultats, arbres et classements (PandaScore)                      | Fait    |
+| Actus    | Articles en français et en anglais (flux RSS), patchs                          | Fait    |
+| 3        | Coach de draft (capture, extraction, fiche en streaming)                       | Fait    |
+| 4b       | Bilan d'une partie (faits vérifiés, points forts, axes de progrès)             | Fait    |
+| En ligne | E-mails (confirmation, mot de passe oublié), pages légales, collecte planifiée | Fait    |
+| 5        | Tableau de bord global                                                         | À faire |
+| 6        | Finitions                                                                      | À faire |
 
 L'ordre suit les priorités du moment : le détail des parties et l'onglet
 Esport (pendant les Worlds) passent avant le coach de draft.
@@ -113,7 +114,7 @@ chaque pays ; le site ne voit jamais de carte. Frais : 5 % + 0,50 $ par
 paiement.
 
 1. Crée un compte de test sur <https://sandbox-vendors.paddle.com>.
-2. **Catalog → Products** : un produit « Kairos Premium » avec un prix
+2. **Catalog → Products** : un produit « Gufo Premium » avec un prix
    récurrent mensuel de 2,99 € ; copie son identifiant (`pri_…`) dans
    `PADDLE_PRICE_ID`.
 3. **Developer tools → Authentication** : une clé d'API (`PADDLE_API_KEY`) et
@@ -198,6 +199,15 @@ commercial : **avant d'ouvrir le site au public payant**, il faudra passer par
 une API d'actualités sous licence (GNews, NewsAPI…) ou des accords avec les
 sites.
 
+### E-mails (facultatif en local)
+
+La confirmation de l'adresse et le lien « mot de passe oublié » partent par
+[Resend](https://resend.com) (`RESEND_API_KEY`, `EMAIL_FROM`, voir
+`.env.example`). Sans clé, rien ne part : l'e-mail s'écrit dans le terminal de
+`npm run dev`, avec son lien à ouvrir, et le coach n'attend pas de
+confirmation. En ligne, le coach (fiches, captures, bilans) n'est ouvert
+qu'aux adresses confirmées.
+
 ### Connexion Discord (facultatif)
 
 Sans configuration, seule la connexion par e-mail et mot de passe est proposée.
@@ -228,9 +238,9 @@ Le bouton « Continuer avec Discord » apparaît dès que les deux valeurs sont 
 ```
 src/
   app/                  Pages et actions serveur (aucune logique métier)
-    (auth)/             Connexion, inscription
+    (auth)/             Connexion, inscription, mot de passe oublié, confirmation d'adresse
     (app)/              Pages protégées : tableau de bord, draft, parties, actus, paramètres
-    (legal)/            CGU, confidentialité
+    (legal)/            Conditions d'utilisation, confidentialité, mentions légales
     fonts/              Polices embarquées et leurs licences
     globals.css         Système de design : jetons, mouvement, transitions de vue
   components/
@@ -244,7 +254,8 @@ src/
     config.ts           Nom de l'app, rôles, serveurs Riot
     env.ts              Variables d'environnement validées au démarrage
     db/                 Schéma, client, accès aux données filtré par utilisateur
-    auth/               Session, mots de passe, droits par offre
+    auth/               Session, mots de passe, droits par offre, liens par e-mail
+    email/              Envoi des e-mails (Resend) et leurs modèles
     validation/         Schémas Zod partagés
     draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
     ddragon/            Data Dragon : patchs, noms et portraits des champions

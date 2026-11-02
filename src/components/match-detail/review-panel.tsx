@@ -28,6 +28,7 @@ const FINAL_ERRORS: ReadonlySet<ReviewErrorKind> = new Set([
   "not_reviewable",
   "match_not_found",
   "missing_key",
+  "email_unverified",
 ]);
 
 /**

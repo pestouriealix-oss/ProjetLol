@@ -11,12 +11,15 @@ export function LegalFooter({ className }: { className?: string }) {
   return (
     <footer className={cn("border-t border-line/70 text-xs text-ink-faint", className)}>
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 sm:px-6">
-        <nav aria-label={t.legal.navLabel} className="flex gap-5">
+        <nav aria-label={t.legal.navLabel} className="flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/cgu" className={linkClasses}>
             {t.legal.terms}
           </Link>
           <Link href="/confidentialite" className={linkClasses}>
             {t.legal.privacy}
+          </Link>
+          <Link href="/mentions-legales" className={linkClasses}>
+            {t.legal.notice}
           </Link>
         </nav>
         <p lang="en" className="max-w-[92ch]">

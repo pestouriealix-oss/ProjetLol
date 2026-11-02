@@ -2,7 +2,24 @@
  * Configuration centrale de l'application.
  * Le nom du produit n'est pas encore arrêté : il vit ici et nulle part ailleurs.
  */
-export const APP_NAME = "Kairos";
+export const APP_NAME = "Gufo";
+
+/**
+ * L'éditeur du site, pour les mentions légales et la politique de
+ * confidentialité. À compléter avant l'ouverture au public : tant qu'un champ
+ * vaut `null`, la page l'affiche comme manquant.
+ */
+export const PUBLISHER: {
+  /** Nom et prénom, ou raison sociale. */
+  name: string | null;
+  /** « Particulier », ou « Entrepreneur individuel, SIRET … ». */
+  status: string | null;
+  /** Adresse de contact, aussi pour les demandes sur les données personnelles. */
+  email: string | null;
+} = { name: null, status: null, email: null };
+
+/** Date de la version en ligne des conditions et de la politique de confidentialité. */
+export const LEGAL_UPDATED_AT = "2026-11-02";
 
 export const ROLES = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"] as const;
 export type Role = (typeof ROLES)[number];
