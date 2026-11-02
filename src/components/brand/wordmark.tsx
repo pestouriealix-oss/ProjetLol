@@ -4,11 +4,11 @@ import { cn } from "@/lib/cn";
 import { Mark } from "./mark";
 
 /**
- * Le logo : l'icône (le K, dans sa tuile, la même que l'onglet du navigateur)
- * puis le nom en entier dans la police de titre.
+ * Le logo : l'icône (le G-œil, dans sa tuile, la même que l'onglet du
+ * navigateur) puis le nom en entier dans la police de titre.
  *
- * Au survol du lien qui le contient, le bras corail se détache un peu plus :
- * le moment saisi.
+ * Au survol du lien qui le contient, la pupille glisse un peu vers l'avant :
+ * le hibou regarde.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
@@ -20,7 +20,7 @@ export function Wordmark({ className }: { className?: string }) {
         <Mark
           compact
           className="h-[0.78em] text-ink"
-          accentClassName="fill-accent transition-[translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-hover/wordmark:translate-x-[0.8px] group-hover/wordmark:-translate-y-[0.8px]"
+          accentClassName="fill-accent transition-[translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-hover/wordmark:translate-x-[0.9px] motion-reduce:transition-none"
         />
       </span>
       <span className="display leading-none tracking-[0.04em] text-ink">{APP_NAME}</span>
