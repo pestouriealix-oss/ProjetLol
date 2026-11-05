@@ -184,7 +184,7 @@ export async function markRiotAccountVerified(
 
 /**
  * Lie un compte dont l'identité vient de Riot Sign On (le joueur s'est
- * connecté chez Riot) : il est vérifié d'office. Le compte déjà lié au même
+ * connecté chez Riot) : il est vérifié, et sa propriété prouvée, d'office. Le compte déjà lié au même
  * joueur est mis à jour (son Riot ID a pu changer) ; une ligne au même Riot ID
  * jamais rattachée à un joueur est vérifiée. Une ligne au même Riot ID mais
  * rattachée à un autre joueur n'est jamais écrasée (`RiotIdTakenError`).
@@ -220,9 +220,10 @@ export async function linkVerifiedRiotAccount(
 
     const existing = samePlayer ?? sameName;
     if (existing) {
+      const now = new Date();
       const [updated] = await tx
         .update(riotAccounts)
-        .set({ ...identity, verifiedAt: new Date() })
+        .set({ ...identity, verifiedAt: now, ownedAt: now })
         .where(owned(userId, existing.id))
         .returning();
       return { account: updated!, created: false };
@@ -237,7 +238,14 @@ export async function linkVerifiedRiotAccount(
 
     const [created] = await tx
       .insert(riotAccounts)
-      .values({ userId, ...identity, roles: [], isPrimary: total === 0, verifiedAt: new Date() })
+      .values({
+        userId,
+        ...identity,
+        roles: [],
+        isPrimary: total === 0,
+        verifiedAt: new Date(),
+        ownedAt: new Date(),
+      })
       .returning();
     return { account: created!, created: true };
   });
@@ -270,4 +278,32 @@ function isUniqueViolation(error: unknown): boolean {
     if ((current as { code?: unknown }).code === "23505") return true;
   }
   return false;
+}
+
+/** Enregistre la preuve demandée : l'icône à mettre sur le compte, et jusqu'à quand. */
+export async function saveOwnershipChallenge(
+  userId: string,
+  accountId: string,
+  challenge: { iconId: number; expiresAt: Date },
+): Promise<boolean> {
+  const updated = await db
+    .update(riotAccounts)
+    .set({ ownershipIconId: challenge.iconId, ownershipExpiresAt: challenge.expiresAt })
+    .where(owned(userId, accountId))
+    .returning({ id: riotAccounts.id });
+  return updated.length > 0;
+}
+
+/** Le compte est bien au joueur : la preuve en cours est effacée. */
+export async function markRiotAccountOwned(
+  userId: string,
+  accountId: string,
+  now = new Date(),
+): Promise<boolean> {
+  const updated = await db
+    .update(riotAccounts)
+    .set({ ownedAt: now, ownershipIconId: null, ownershipExpiresAt: null })
+    .where(owned(userId, accountId))
+    .returning({ id: riotAccounts.id });
+  return updated.length > 0;
 }

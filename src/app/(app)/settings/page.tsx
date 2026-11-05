@@ -15,6 +15,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n/fr";
 import { isPaidPlan, limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
+import { getChampionAssets } from "@/lib/ddragon/champions";
 import { listRiotAccounts } from "@/lib/db/riot-accounts";
 import { isRsoEnabled } from "@/lib/riot/rso";
 
@@ -33,6 +34,13 @@ export default async function SettingsPage({
   const { riot, suppression } = await searchParams;
   const rsoResult = riot && riot in t.settings.riot.rso.results ? (riot as RsoResult) : null;
   const accounts = await listRiotAccounts(user.id);
+  const now = new Date();
+  // Une preuve en cours se reprend après un rechargement : il faut l'image de l'icône.
+  const champions = accounts.some(
+    (account) => account.ownershipExpiresAt && account.ownershipExpiresAt > now,
+  )
+    ? await getChampionAssets()
+    : null;
 
   // Seuls les champs utiles à l'affichage partent vers le navigateur.
   const accountViews: RiotAccountView[] = accounts.map((account) => ({
@@ -42,7 +50,17 @@ export default async function SettingsPage({
     platform: account.platform,
     roles: account.roles,
     isPrimary: account.isPrimary,
-    verified: account.verifiedAt !== null,
+    owned: account.ownedAt !== null,
+    ownershipPending:
+      account.ownershipIconId !== null &&
+      account.ownershipExpiresAt &&
+      account.ownershipExpiresAt > now
+        ? {
+            iconId: account.ownershipIconId,
+            iconUrl: champions?.profileIconUrl(account.ownershipIconId) ?? null,
+            expiresAt: account.ownershipExpiresAt.toISOString(),
+          }
+        : null,
   }));
 
   return (

@@ -9,6 +9,8 @@ import { signOut } from "@/lib/auth";
 import { limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
 import { cancelSubscriptionNow } from "@/lib/billing/paddle";
+import { getChampionAssets } from "@/lib/ddragon/champions";
+import { attemptKey, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
 import { findCurrentSubscription } from "@/lib/db/billing";
 import {
   addRiotAccount,
@@ -19,6 +21,8 @@ import {
   updateRiotAccountRoles,
 } from "@/lib/db/riot-accounts";
 import { deleteUser } from "@/lib/db/users";
+import { riotApi } from "@/lib/riot";
+import { confirmOwnershipChallenge, startOwnershipChallenge } from "@/lib/sync/ownership";
 import { addRiotAccountSchema, rolesSchema } from "@/lib/validation/riot";
 
 const errors = t.settings.riot.errors;
@@ -127,6 +131,78 @@ export async function removeRiotAccountAction(accountId: string): Promise<void> 
   const parsedId = accountIdSchema.safeParse(accountId);
   if (parsedId.success) await removeRiotAccount(user.id, parsedId.data);
   revalidatePath(SETTINGS_PATH);
+}
+
+const ownershipErrors = t.settings.riot.ownership.errors;
+/** Appels à Riot pour prouver la propriété d'un compte, par utilisateur et par heure. */
+const OWNERSHIP_CALLS_PER_HOUR = { max: 30, windowSeconds: 3600 };
+
+async function ownershipLimited(userId: string): Promise<boolean> {
+  const key = attemptKey("riot-ownership", userId);
+  if (await isRateLimited(key, OWNERSHIP_CALLS_PER_HOUR.max)) return true;
+  await recordAttempt(key, OWNERSHIP_CALLS_PER_HOUR.windowSeconds);
+  return false;
+}
+
+export type OwnershipStartResult =
+  | { ok: true; status: "pending"; iconId: number; iconUrl: string | null; expiresAt: string }
+  | { ok: true; status: "owned" }
+  | { ok: false; error: string };
+
+/** Demande la preuve de propriété d'un compte : l'icône à mettre, et jusqu'à quand. */
+export async function startOwnershipAction(accountId: string): Promise<OwnershipStartResult> {
+  const user = await requireUser();
+  const parsedId = accountIdSchema.safeParse(accountId);
+  if (!parsedId.success) return { ok: false, error: ownershipErrors.account_missing };
+  if (await ownershipLimited(user.id)) return { ok: false, error: ownershipErrors.too_many };
+
+  const result = await startOwnershipChallenge(user.id, parsedId.data, { api: riotApi });
+  if (!result.ok) return { ok: false, error: ownershipErrors[result.reason] };
+  if (result.status === "owned") {
+    revalidatePath(SETTINGS_PATH);
+    return result;
+  }
+  const champions = await getChampionAssets();
+  return {
+    ok: true,
+    status: "pending",
+    iconId: result.iconId,
+    iconUrl: champions?.profileIconUrl(result.iconId) ?? null,
+    expiresAt: result.expiresAt.toISOString(),
+  };
+}
+
+export type OwnershipConfirmResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error: string;
+      /** Vrai si la preuve est à redemander (expirée, ou plus aucune en cours). */
+      restart: boolean;
+    };
+
+/** Vérifie chez Riot que l'icône demandée est sur le compte. */
+export async function confirmOwnershipAction(accountId: string): Promise<OwnershipConfirmResult> {
+  const user = await requireUser();
+  const parsedId = accountIdSchema.safeParse(accountId);
+  if (!parsedId.success) {
+    return { ok: false, error: ownershipErrors.account_missing, restart: false };
+  }
+  if (await ownershipLimited(user.id)) {
+    return { ok: false, error: ownershipErrors.too_many, restart: false };
+  }
+
+  const result = await confirmOwnershipChallenge(user.id, parsedId.data, { api: riotApi });
+  if (!result.ok) {
+    return {
+      ok: false,
+      error: ownershipErrors[result.reason],
+      restart: result.reason === "expired" || result.reason === "no_challenge",
+    };
+  }
+  // Pas de revalidation ici : la page se rafraîchit d'elle-même un instant
+  // après, le temps de lire la confirmation (sinon la ligne change aussitôt).
+  return { ok: true };
 }
 
 export async function deleteAccountAction(): Promise<void> {

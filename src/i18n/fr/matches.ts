@@ -101,6 +101,9 @@ export const matchDetail = {
         : "D'après les données officielles de la partie (Riot). Bilan écrit par le coach (Claude).",
     notReviewable:
       "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+    notOwned:
+      "Le coach écrit les bilans de tes propres comptes. Confirme que celui-ci est à toi : 30 secondes dans le client du jeu.",
+    confirmAccount: "Confirmer mon compte",
     noKey:
       "Le coach n'est pas branché : la clé de l'API Anthropic manque sur le serveur (ANTHROPIC_API_KEY).",
     errors: {
@@ -118,6 +121,8 @@ export const matchDetail = {
       invalid_output: "Le bilan reçu était incomplet. Réessaie.",
       email_unverified:
         "Confirme d'abord ton adresse e-mail (lien dans le bandeau en haut de la page) pour utiliser le coach.",
+      account_unowned:
+        "Le coach écrit les bilans de tes propres comptes. Confirme d'abord que celui-ci est à toi, dans les paramètres.",
     },
   },
   duel: {

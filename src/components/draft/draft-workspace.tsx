@@ -52,6 +52,7 @@ type LiveState =
   | { status: "waiting" }
   | { status: "found"; riotId: string }
   | { status: "no_account" }
+  | { status: "not_owned" }
   | { status: "stopped" }
   | { status: "error"; error: LiveDraftError };
 
@@ -132,8 +133,8 @@ export function DraftWorkspace({
           autoStarted.current = true;
           setAutoStart(result.draft);
         }
-      } else if (result.status === "no_account") {
-        setLive({ status: "no_account" });
+      } else if (result.status === "no_account" || result.status === "not_owned") {
+        setLive({ status: result.status });
       } else {
         liveSince.current ??= Date.now();
         const expired = Date.now() - liveSince.current > LIVE_POLL_FOR_MS;
@@ -508,7 +509,9 @@ function LivePanel({ live, onCheck }: { live: LiveState; onCheck: () => void }) 
             ? copy.live.stopped
             : live.status === "no_account"
               ? copy.live.noAccount
-              : (copy.live.errors[live.error] ?? copy.live.errors.unavailable);
+              : live.status === "not_owned"
+                ? copy.live.notOwned
+                : (copy.live.errors[live.error] ?? copy.live.errors.unavailable);
   return (
     <div className="flex flex-col gap-4 rounded-panel border border-line bg-surface px-5 py-5 sm:flex-row sm:items-center">
       <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -535,9 +538,11 @@ function LivePanel({ live, onCheck }: { live: LiveState; onCheck: () => void }) 
           </p>
         </div>
       </div>
-      {live.status === "no_account" ? (
+      {live.status === "no_account" || live.status === "not_owned" ? (
         <Button asChild variant="secondary" className="shrink-0">
-          <Link href="/settings">{copy.live.settings}</Link>
+          <Link href="/settings">
+            {live.status === "no_account" ? copy.live.settings : copy.live.confirm}
+          </Link>
         </Button>
       ) : (
         <Button

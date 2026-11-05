@@ -160,6 +160,8 @@ export async function findPlayedMatch(
   platform: Platform;
   puuid: string;
   accountId: string;
+  /** Propriété du compte prouvée : le coach peut écrire pour cette partie. */
+  owned: boolean;
 } | null> {
   const [row] = await db
     .select({
@@ -168,6 +170,7 @@ export async function findPlayedMatch(
       platform: matches.platform,
       puuid: riotAccounts.puuid,
       accountId: riotAccounts.id,
+      ownedAt: riotAccounts.ownedAt,
     })
     .from(participations)
     .innerJoin(matches, eq(participations.matchId, matches.id))
@@ -182,6 +185,7 @@ export async function findPlayedMatch(
     platform: row.platform,
     puuid: row.puuid,
     accountId: row.accountId,
+    owned: row.ownedAt !== null,
   };
 }
 

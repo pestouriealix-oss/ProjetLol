@@ -45,6 +45,9 @@ export const draft = {
     check: "Vérifier maintenant",
     noAccount: "Lie ton compte Riot : la draft de tes parties se remplira toute seule.",
     settings: "Lier mon compte",
+    notOwned:
+      "Confirme que ton compte Riot est à toi : la draft de tes parties se remplira toute seule.",
+    confirm: "Confirmer mon compte",
     or: "ou",
     errors: {
       riot_unavailable: "Riot ne répond pas pour l'instant. Utilise une capture en attendant.",

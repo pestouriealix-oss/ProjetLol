@@ -108,7 +108,7 @@ prix. Deux réglages facultatifs du `.env` :
 ### Premium et paiement (Paddle)
 
 Premium coûte 2,99 € par mois (`src/lib/billing/plans.ts`) : 40 fiches et 40
-bilans par jour, 10 comptes Riot. Le paiement passe par Paddle, revendeur
+bilans par jour, 3 comptes Riot (1 en gratuit). Le paiement passe par Paddle, revendeur
 officiel (« merchant of record ») : il encaisse, facture et reverse la TVA de
 chaque pays ; le site ne voit jamais de carte. Frais : 5 % + 0,50 $ par
 paiement.
@@ -135,11 +135,22 @@ Paddle (factures, moyen de paiement, résiliation).
 
 « Se connecter avec Riot », dans Paramètres, lie un compte sans taper son
 Riot ID : le joueur se connecte chez Riot, qui confirme son identité ; le
-compte est vérifié d'office. Il faut un client RSO, que Riot n'accorde qu'aux
+compte est vérifié, et sa propriété prouvée, d'office. Il faut un client RSO, que Riot n'accorde qu'aux
 produits dont la clé de production est approuvée (`RIOT_RSO_CLIENT_ID`,
 `RIOT_RSO_CLIENT_SECRET`, adresse de retour
 `https://<ton site>/api/riot/rso/callback`). Sans lui, le bouton n'apparaît
 pas et l'ajout par Riot ID reste le seul moyen.
+
+### Propriété d'un compte
+
+N'importe qui peut lier un Riot ID : tout ce que le site en montre (parties,
+rang, stats) est public, comme sur les sites de statistiques. Le coach, lui
+(bilans, objectifs, fiche en direct, partie en cours), ne travaille que pour
+un compte dont la propriété est prouvée (`riot_accounts.owned_at`). Sans Riot
+Sign On, la preuve se fait par l'icône (`src/lib/sync/ownership.ts`) : le site
+demande une icône de départ (Data Dragon 0 à 28, que tout compte possède), le
+joueur la met dans le client du jeu, et le site vérifie chez Riot (Summoner-V4)
+qu'elle y est, dans les 15 minutes.
 
 ### Bilan de partie
 

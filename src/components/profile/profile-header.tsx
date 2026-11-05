@@ -19,7 +19,8 @@ export type ProfileAccount = {
   tagLine: string;
   platform: Platform;
   roles: Role[];
-  verified: boolean;
+  /** Propriété prouvée : sinon, un badge mène aux paramètres pour la prouver. */
+  owned: boolean;
   /** Icône d'invocateur (déjà résolue en adresse Data Dragon) et niveau, après une synchronisation. */
   iconUrl: string | null;
   level: number | null;
@@ -77,7 +78,11 @@ export function ProfileHeader({
               ) : (
                 <Badge>{copy.noRoles}</Badge>
               )}
-              {account.verified ? null : <Badge tone="warn">{copy.unverified}</Badge>}
+              {account.owned ? null : (
+                <Link href="/settings" className="rounded-pill">
+                  <Badge tone="warn">{copy.unowned}</Badge>
+                </Link>
+              )}
             </div>
           </div>
         </div>

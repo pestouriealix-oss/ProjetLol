@@ -11,7 +11,7 @@ export const dashboard = {
   accounts: "Compte affiché",
   manage: "Gérer les comptes",
   noRoles: "Aucun rôle choisi",
-  unverified: "Non vérifié",
+  unowned: "À confirmer",
   sync: {
     action: "Mettre à jour",
     never: "Jamais mis à jour",

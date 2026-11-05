@@ -69,7 +69,7 @@ export type LiveDraftError = CoachErrorKind | "riot_unavailable" | "too_many";
 
 export type LoadLiveDraftResult =
   | { ok: true; status: "found"; draft: Draft; riotId: string }
-  | { ok: true; status: "not_in_game" | "no_account" }
+  | { ok: true; status: "not_in_game" | "no_account" | "not_owned" }
   | { ok: false; error: LiveDraftError };
 
 /** Vérifications de la partie en cours par utilisateur et par heure (une toutes les 10 s au plus). */

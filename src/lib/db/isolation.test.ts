@@ -65,9 +65,20 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await api.updateRiotAccountRoles(alice, bobAccount.id, ["TOP"])).toBe(false);
     expect(await api.setPrimaryRiotAccount(alice, bobAccount.id)).toBe(false);
     expect(await api.removeRiotAccount(alice, bobAccount.id)).toBe(false);
+    // Ni prouver à sa place que le compte est le sien.
+    expect(
+      await api.saveOwnershipChallenge(alice, bobAccount.id, { iconId: 3, expiresAt: new Date() }),
+    ).toBe(false);
+    expect(await api.markRiotAccountOwned(alice, bobAccount.id)).toBe(false);
 
     const [unchanged] = await api.listRiotAccounts(bob);
-    expect(unchanged).toMatchObject({ id: bobAccount.id, roles: ["JUNGLE"], isPrimary: true });
+    expect(unchanged).toMatchObject({
+      id: bobAccount.id,
+      roles: ["JUNGLE"],
+      isPrimary: true,
+      ownedAt: null,
+      ownershipIconId: null,
+    });
   });
 
   it("le même Riot ID peut être lié par deux utilisateurs, mais pas deux fois par le même", async () => {

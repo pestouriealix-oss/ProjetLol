@@ -113,7 +113,16 @@ export const riotAccounts = pgTable(
       .notNull()
       .default(sql`'{}'::role[]`),
     isPrimary: boolean("is_primary").notNull().default(false),
+    /** Riot a confirmé que ce Riot ID existe (PUUID connu). Ne dit pas à qui il appartient. */
     verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    /**
+     * Propriété prouvée : le joueur s'est connecté chez Riot (RSO) ou a mis
+     * sur son compte l'icône demandée. Le coach ne travaille que pour ces comptes.
+     */
+    ownedAt: timestamp("owned_at", { withTimezone: true }),
+    /** Preuve en cours : l'icône de départ à mettre sur le compte, et jusqu'à quand. */
+    ownershipIconId: integer("ownership_icon_id"),
+    ownershipExpiresAt: timestamp("ownership_expires_at", { withTimezone: true }),
     /** Dernière synchronisation menée à bien avec l'API Riot. */
     lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
     /** Icône d'invocateur (identifiant Data Dragon) et niveau, relevés à la synchronisation. */

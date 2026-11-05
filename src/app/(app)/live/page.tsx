@@ -43,6 +43,21 @@ export default async function LivePage({ searchParams }: { searchParams: Account
       </PageShell>
     );
   }
+  if (!account.ownedAt) {
+    return (
+      <PageShell route="live" title={copy.title}>
+        <Message
+          title={copy.notOwnedTitle}
+          body={copy.notOwnedBody}
+          action={
+            <Button asChild variant="secondary">
+              <Link href="/settings">{copy.confirm}</Link>
+            </Button>
+          }
+        />
+      </PageShell>
+    );
+  }
   if (!isRiotApiConfigured) {
     return (
       <PageShell route="live" title={copy.title}>

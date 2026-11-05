@@ -27,6 +27,7 @@ import { t } from "@/i18n/fr";
 import { PLATFORMS, type Platform, type Role } from "@/lib/config";
 
 import { AddRiotAccountForm } from "./add-riot-account-form";
+import { OwnershipCheck, type OwnershipChallengeView } from "./ownership-check";
 import { RolePicker } from "./role-picker";
 
 const copy = t.settings.riot;
@@ -39,7 +40,10 @@ export type RiotAccountView = {
   platform: Platform;
   roles: Role[];
   isPrimary: boolean;
-  verified: boolean;
+  /** Propriété prouvée (connexion Riot ou icône) : le coach travaille pour ce compte. */
+  owned: boolean;
+  /** Preuve demandée et encore valide, à reprendre où elle en était. */
+  ownershipPending: OwnershipChallengeView | null;
 };
 
 type Change = { type: "remove"; id: string } | { type: "primary"; id: string };
@@ -336,10 +340,10 @@ export function RiotAccountsSection({
                       </p>
                       <Badge>{PLATFORMS[account.platform].short}</Badge>
                       {account.isPrimary ? <Badge tone="strong">{copy.primary}</Badge> : null}
-                      {account.verified ? null : (
-                        <Badge tone="warn" title={copy.unverifiedHint}>
-                          {copy.unverified}
-                        </Badge>
+                      {account.owned ? (
+                        <Badge>{copy.ownership.owned}</Badge>
+                      ) : (
+                        <Badge tone="warn">{copy.ownership.badge}</Badge>
                       )}
                       <div className="ml-auto flex items-center gap-1">
                         {account.isPrimary ? null : (
@@ -360,6 +364,11 @@ export function RiotAccountsSection({
                     <div className="pt-3">
                       <AccountRoles account={account} riotId={riotId} />
                     </div>
+                    {account.owned ? null : (
+                      <div className="pt-4">
+                        <OwnershipCheck accountId={account.id} pending={account.ownershipPending} />
+                      </div>
+                    )}
                   </li>
                 </ViewTransition>
               );

@@ -78,5 +78,9 @@ export const progression = {
     inviteBody:
       "Écris le bilan de ta dernière partie : le coach te fixe un objectif chiffré, vérifié sur les suivantes.",
     inviteAction: "Écrire le bilan",
+    confirmTitle: "Active ton coach",
+    confirmBody:
+      "Confirme que ce compte est à toi pour que le coach écrive tes bilans et te fixe des objectifs.",
+    confirmAction: "Confirmer mon compte",
   },
 } as const;

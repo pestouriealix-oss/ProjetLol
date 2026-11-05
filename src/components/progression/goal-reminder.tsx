@@ -23,15 +23,31 @@ export function GoalReminder({
   champions,
   progressionHref,
   lastMatchId,
+  owned,
 }: {
   progress: GoalProgress | null;
   champions: ChampionAssets | null;
   progressionHref: string;
   /** Dernière partie jouée : là où l'invitation mène. */
   lastMatchId: string | null;
+  /** Propriété du compte prouvée : sinon, l'invitation mène d'abord à la preuve. */
+  owned: boolean;
 }) {
   if (!progress) {
     if (!lastMatchId) return null;
+    if (!owned) {
+      return (
+        <Panel className="flex flex-col gap-3 border-dashed p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-semibold text-ink">{copy.dashboard.confirmTitle}</h2>
+            <p className="text-sm text-ink-muted">{copy.dashboard.confirmBody}</p>
+          </div>
+          <Button asChild variant="secondary" className="w-fit shrink-0">
+            <Link href="/settings">{copy.dashboard.confirmAction}</Link>
+          </Button>
+        </Panel>
+      );
+    }
     return (
       <Panel className="flex flex-col gap-3 border-dashed p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
         <div className="min-w-0 flex-1">

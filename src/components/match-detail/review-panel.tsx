@@ -29,6 +29,7 @@ const FINAL_ERRORS: ReadonlySet<ReviewErrorKind> = new Set([
   "match_not_found",
   "missing_key",
   "email_unverified",
+  "account_unowned",
 ]);
 
 /**
@@ -39,6 +40,7 @@ export function ReviewPanel({
   matchId,
   initial,
   reviewable,
+  owned,
   coachReady,
   remaining: initialRemaining,
   limit,
@@ -47,6 +49,8 @@ export function ReviewPanel({
   initial: Review | null;
   /** Faux pour une partie sans poste (ARAM…). */
   reviewable: boolean;
+  /** Faux si la propriété du compte qui a joué n'est pas prouvée. */
+  owned: boolean;
   /** Faux si la clé du modèle manque sur le serveur. */
   coachReady: boolean;
   remaining: number;
@@ -124,6 +128,7 @@ export function ReviewPanel({
       {state.status === "idle" ? (
         <Start
           reviewable={reviewable}
+          owned={owned}
           coachReady={coachReady}
           remaining={remaining}
           limit={limit}
@@ -144,7 +149,11 @@ export function ReviewPanel({
             </div>
           ) : null}
           <ErrorNotice>{copy.errors[state.error]}</ErrorNotice>
-          {!FINAL_ERRORS.has(state.error) ? (
+          {state.error === "account_unowned" ? (
+            <Button asChild variant="secondary">
+              <Link href="/settings">{copy.confirmAccount}</Link>
+            </Button>
+          ) : !FINAL_ERRORS.has(state.error) ? (
             <Button variant="secondary" onClick={() => void write()}>
               {copy.retry}
             </Button>
@@ -159,18 +168,30 @@ export function ReviewPanel({
 
 function Start({
   reviewable,
+  owned,
   coachReady,
   remaining,
   limit,
   onStart,
 }: {
   reviewable: boolean;
+  owned: boolean;
   coachReady: boolean;
   remaining: number;
   limit: number;
   onStart: () => void;
 }) {
   if (!reviewable) return <p className="text-ink-muted">{copy.notReviewable}</p>;
+  if (!owned) {
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <p className="max-w-[60ch] text-ink-muted">{copy.notOwned}</p>
+        <Button asChild variant="secondary">
+          <Link href="/settings">{copy.confirmAccount}</Link>
+        </Button>
+      </div>
+    );
+  }
   if (!coachReady) return <p className="text-ink-muted">{copy.noKey}</p>;
   if (remaining <= 0) {
     return (

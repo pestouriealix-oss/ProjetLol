@@ -37,7 +37,9 @@ export type ReviewErrorKind =
   /** Partie sans poste attribué (ARAM, modes spéciaux). */
   | "not_reviewable"
   /** Adresse e-mail pas encore confirmée : le coach attend la confirmation. */
-  | "email_unverified";
+  | "email_unverified"
+  /** Le compte qui a joué la partie n'est pas prouvé comme celui du joueur. */
+  | "account_unowned";
 
 export class ReviewError extends Error {
   constructor(
@@ -81,6 +83,7 @@ export async function loadReviewFacts(userId: string, matchId: string): Promise<
   const played = await findPlayedMatch(userId, matchId);
   const detail = played ? buildMatchDetail(played.details, played.puuid) : null;
   if (!played || !detail) throw new ReviewError("match_not_found", "Partie introuvable.");
+  if (!played.owned) throw new ReviewError("account_unowned", "Compte pas encore confirmé.");
 
   const teamOf = new Map(
     detail.teams.flatMap((team) => team.players.map((player) => [player.puuid, team.teamId])),

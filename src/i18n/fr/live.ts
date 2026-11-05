@@ -23,6 +23,10 @@ export const live = {
   unverifiedTitle: "Compte pas encore vérifié",
   unverifiedBody: `Mets d'abord ton compte à jour depuis le tableau de bord : ${APP_NAME} a besoin de l'identifiant Riot du joueur.`,
   toDashboard: "Aller au tableau de bord",
+  notOwnedTitle: "Compte à confirmer",
+  notOwnedBody:
+    "La partie en cours se suit seulement sur tes propres comptes. Confirme que celui-ci est à toi : 30 secondes dans le client du jeu.",
+  confirm: "Confirmer mon compte",
   noAccountBody: "Lie d'abord ton compte Riot pour suivre tes parties en direct.",
   elapsed: "Durée",
   loadingScreen: "Écran de chargement",

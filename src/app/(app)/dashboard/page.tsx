@@ -46,7 +46,7 @@ export default async function DashboardPage({
     tagLine: row.tagLine,
     platform: row.platform,
     roles: row.roles,
-    verified: row.verifiedAt !== null,
+    owned: row.ownedAt !== null,
     iconUrl:
       row.profileIconId !== null ? (champions?.profileIconUrl(row.profileIconId) ?? null) : null,
     level: row.summonerLevel,
@@ -115,7 +115,7 @@ export default async function DashboardPage({
       }
     >
       {/* Si le joueur est en partie, un bandeau y mène ; le reste n'attend pas Riot. */}
-      {selected ? (
+      {selected?.ownedAt ? (
         <Suspense fallback={null}>
           <LiveBanner accountId={selected.id} platform={selected.platform} puuid={selected.puuid} />
         </Suspense>
@@ -140,6 +140,7 @@ export default async function DashboardPage({
             champions={champions}
             progressionHref={`/progression?compte=${account.id}`}
             lastMatchId={matches[0]?.matchId ?? null}
+            owned={account.owned}
           />
           <section aria-labelledby="recent-title" className="flex min-w-0 flex-col gap-4">
             <div className="flex items-baseline justify-between gap-4">

@@ -161,6 +161,7 @@ export default async function MatchDetailPage({
         matchId={matchId}
         initial={review}
         reviewable={me.role !== null}
+        owned={played.owned}
         coachReady={llm.isConfigured}
         remaining={quota.remaining}
         limit={quota.limit}

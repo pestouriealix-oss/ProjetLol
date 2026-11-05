@@ -15,9 +15,11 @@ type Limits = {
 
 const LIMITS: Record<Plan, Limits> = {
   // 3 fiches par jour : de quoi juger le coach sur une soirée, à un coût tenable.
-  FREE: { riotAccounts: 2, draftAnalysesPerDay: 3, matchReviewsPerDay: 3 },
+  // Un seul compte : le sien.
+  FREE: { riotAccounts: 1, draftAnalysesPerDay: 3, matchReviewsPerDay: 3 },
   // 40 fiches par jour : plus que ce qu'un joueur peut enchaîner de parties.
-  PREMIUM: { riotAccounts: 10, draftAnalysesPerDay: 40, matchReviewsPerDay: 40 },
+  // Trois comptes : le principal et deux smurfs.
+  PREMIUM: { riotAccounts: 3, draftAnalysesPerDay: 40, matchReviewsPerDay: 40 },
 };
 
 export function limitsFor(plan: Plan): Limits {
