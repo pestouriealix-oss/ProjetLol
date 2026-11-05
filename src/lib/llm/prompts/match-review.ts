@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { formatDecimal, formatInteger, formatPercent, formatSignedInteger } from "@/lib/format";
+import { GOAL_METRICS, normalizeGoal } from "@/lib/stats/goals";
 import type { ReviewFacts, ReviewLine } from "@/lib/stats/review";
 
 import type { ToolSpec } from "../client";
@@ -12,13 +13,13 @@ import { modelList, modelText, ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@7";
+export const MATCH_REVIEW_VERSION = "match-review@8";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan en une minute. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant. Il doit en retenir une seule chose : quoi faire à la prochaine partie.
 
 Ce que tu écris, dans cet ordre :
 1. Un résumé en une phrase de 25 mots au plus : ce qui a décidé la partie pour lui.
-2. L'objectif de la prochaine partie : une seule action concrète, que le joueur pourra vérifier lui-même après la partie, en une phrase de 20 mots au plus, tirée de l'axe de progrès le plus important. Par exemple « Zéro mort dans la minute qui précède un dragon », pas « Mourir moins ».
+2. L'objectif de la prochaine partie, tiré de l'axe de progrès le plus important. Le site le vérifie tout seul sur ses parties suivantes à ce poste : c'est donc un chiffre de fin de partie, un indicateur et une cible (voir plus bas), et une phrase de 20 mots au plus qui commence par la cible et dit comment l'atteindre. Par exemple « 2 pinks par partie : une dans la rivière avant chaque drake », pas « Mieux warder ».
 3. Zéro à deux points forts, sur son jeu à lui, pas sur le résultat de l'équipe. Seulement ce qui est vraiment bon : au moins 10 % au-dessus de ses habitudes, ou nettement devant son vis-à-vis. S'il n'y en a pas, n'en écris aucun : un point fort inventé fait perdre confiance dans tout le bilan.
 4. Un ou deux axes de progrès, le plus important d'abord. Chacun a un titre, une phrase qui cite le chiffre qui le montre, et deux façons différentes de s'y prendre, au choix du joueur. Ce sont des options, pas des ordres.
 
@@ -33,6 +34,12 @@ Règles :
 - Chaque point s'appuie sur un fait reçu. Ne cite que des chiffres présents dans les faits, arrondis comme eux. N'invente rien sur ce qui ne figure pas dans les faits (placement, combats précis, communication).
 - Compare d'abord le joueur à ses habitudes quand tu les as, sinon à son vis-à-vis. Un écart de moins de 10 % n'est ni un point fort ni un point faible.
 
+L'objectif chiffré :
+- Indicateurs possibles, avec l'unité de la cible : CS_PER_MINUTE (CS par minute, par exemple 6,5), DEATHS (morts sur la partie, au plus, par exemple 4), KILL_PARTICIPATION (KP en pourcentage, par exemple 55), VISION_PER_MINUTE (score de vision par minute, par exemple 1,2), CONTROL_WARDS (pinks achetées sur la partie, par exemple 2), DAMAGE_PER_MINUTE (dégâts aux champions par minute, par exemple 650).
+- Choisis celui qui mesure le mieux l'axe de progrès le plus important. En support, jamais CS_PER_MINUTE.
+- La cible se tient dès la prochaine partie et fait mieux que celle-ci : environ 10 % mieux que ses habitudes quand tu les as (ou ses habitudes elles-mêmes si cette partie était nettement en dessous), sinon entre son chiffre de cette partie et celui de son vis-à-vis.
+- Donne la cible en nombre, dans l'unité indiquée (6.5, pas « 6,5 CS ») ; la phrase la reprend telle quelle, à la française (« 6,5 CS par minute »).
+
 Lis la partie comme un coach, pas comme une liste de chiffres :
 - Pèse les compromis. Un retard de CS n'est pas une faute si le joueur a eu plus d'impact que son vis-à-vis : plus de KP, plus de kills et d'assists avant 15 minutes, plus d'objectifs, plus d'or en fin de partie. Dis-le comme un point fort, et l'axe de progrès devient de garder cet impact en perdant moins de farm (farmer entre deux actions, ne pas laisser de camps ou de vagues). À l'inverse, beaucoup de CS avec peu d'impact (KP et objectifs bas) est de l'overfarming : signale-le.
 - Tiens compte du poste. En jungle, ganks, drakes, grubs et héraut comptent autant que le farm. En support, ignore les CS : regarde la vision, les pinks et la KP. Sur les autres postes, le farm et l'or restent la base, mais un roam qui rapporte des kills vaut plus que quelques CS.
@@ -45,8 +52,14 @@ Lis la partie comme un coach, pas comme une liste de chiffres :
 
 const point = z.object({ title: modelText(60), detail: modelText(250) });
 
+/** L'objectif chiffré, ramené dans les bornes de son indicateur (`src/lib/stats/goals.ts`). */
+const goal = z
+  .object({ metric: z.enum(GOAL_METRICS), target: z.number() })
+  .transform(normalizeGoal);
+
 export const matchReviewSchema = z.object({
   summary: modelText(250),
+  goal,
   focus: modelText(200),
   strengths: modelList(point, 0, 2),
   improvements: modelList(point.extend({ options: modelList(modelText(150), 2, 2) }), 1, 2),
@@ -68,9 +81,18 @@ export const MATCH_REVIEW_TOOL: ToolSpec<MatchReview> = {
   inputSchema: {
     type: "object",
     additionalProperties: false,
-    required: ["summary", "focus", "strengths", "improvements"],
+    required: ["summary", "goal", "focus", "strengths", "improvements"],
     properties: {
       summary: string,
+      goal: {
+        type: "object",
+        additionalProperties: false,
+        required: ["metric", "target"],
+        properties: {
+          metric: { type: "string", enum: [...GOAL_METRICS] },
+          target: { type: "number" },
+        },
+      },
       focus: string,
       strengths: { type: "array", items: pointSchema },
       improvements: {

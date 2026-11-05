@@ -1,6 +1,8 @@
 import "server-only";
 import { and, count, desc, eq, gte } from "drizzle-orm";
 
+import type { Goal } from "@/lib/stats/goals";
+
 import { db } from "./client";
 import { matchReviews, participations, riotAccounts } from "./schema";
 
@@ -14,6 +16,7 @@ export type StoredMatchReview = {
   id: string;
   summary: string;
   focus: string | null;
+  goal: unknown;
   strengths: unknown;
   improvements: unknown;
   facts: unknown;
@@ -25,6 +28,7 @@ const reviewColumns = {
   id: matchReviews.id,
   summary: matchReviews.summary,
   focus: matchReviews.focus,
+  goal: matchReviews.goal,
   strengths: matchReviews.strengths,
   improvements: matchReviews.improvements,
   facts: matchReviews.facts,
@@ -70,6 +74,7 @@ export async function saveMatchReview(
   review: {
     summary: string;
     focus: string;
+    goal: Goal | null;
     strengths: unknown;
     improvements: unknown;
     facts: unknown;

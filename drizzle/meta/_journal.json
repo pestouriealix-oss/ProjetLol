@@ -71,6 +71,13 @@
       "when": 1793633497820,
       "tag": "0009_brave_beyonder",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793876708021,
+      "tag": "0010_glossy_ender_wiggin",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ export const nav = {
   news: "Actus",
   esport: "Esport",
   stats: "Stats",
+  progression: "Progression",
   settings: "Paramètres",
   main: "Navigation principale",
   accountMenu: "Menu du compte",

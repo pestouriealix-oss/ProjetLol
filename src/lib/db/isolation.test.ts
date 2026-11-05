@@ -215,6 +215,7 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     const review = {
       summary: "Bon début de partie.",
       focus: "Moins de deux morts avant 15 minutes.",
+      goal: { metric: "DEATHS" as const, target: 2 },
       strengths: [],
       improvements: [],
       facts: {},
@@ -234,6 +235,20 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     const since = new Date(Date.now() - 60_000);
     expect(await reviews.countMatchReviewsSince(alice, since)).toBe(1);
     expect(await reviews.countMatchReviewsSince(bob, since)).toBe(0);
+
+    // Progression : l'objectif et les parties ne se lisent que par leur propriétaire.
+    const progression = await import("./progression");
+    const goals = await progression.listSetGoals(alice, aliceAccount.id, { limit: 5 });
+    expect(goals.map((goal) => [goal.matchId, goal.metric, goal.target, goal.role])).toEqual([
+      [matchId, "DEATHS", 2, "JUNGLE"],
+    ]);
+    expect(await progression.listSetGoals(bob, aliceAccount.id, { limit: 5 })).toEqual([]);
+    const games = await progression.listPlayedGames(alice, aliceAccount.id, { limit: 50 });
+    expect(games.find((game) => game.matchId === matchId)).toMatchObject({
+      deaths: 2,
+      controlWards: null,
+    });
+    expect(await progression.listPlayedGames(bob, aliceAccount.id, { limit: 50 })).toEqual([]);
   });
 
   it("un abonnement ne concerne que son utilisateur et règle son offre", async () => {

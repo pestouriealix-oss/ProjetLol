@@ -257,6 +257,12 @@ export const matchReviews = pgTable("match_reviews", {
   summary: text("summary").notNull(),
   /** L'objectif de la prochaine partie, en une phrase (absent des premiers bilans). */
   focus: text("focus"),
+  /**
+   * L'objectif chiffré qui accompagne la phrase (`src/lib/stats/goals.ts`) :
+   * indicateur et cible, vérifiés sur les parties suivantes. Absent des bilans
+   * d'avant la version 8 du prompt.
+   */
+  goal: jsonb("goal"),
   /** Les faits de la partie sur lesquels le bilan s'appuie (`src/lib/stats/review.ts`). */
   facts: jsonb("facts"),
   promptVersion: text("prompt_version").notNull(),

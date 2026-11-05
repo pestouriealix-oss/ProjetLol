@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { goalSchema } from "@/lib/stats/goals";
 import { reviewFactsSchema, type ReviewFacts } from "@/lib/stats/review";
 
 /**
@@ -14,6 +15,8 @@ const point = z.object({ title: text, detail: text }).catch({});
 
 export const reviewViewSchema = z.object({
   summary: text,
+  /** Pendant l'écriture, l'objectif n'apparaît qu'une fois sa cible connue. */
+  goal: goalSchema.optional().catch(undefined),
   focus: text,
   strengths: z.array(point).optional().catch(undefined),
   improvements: z

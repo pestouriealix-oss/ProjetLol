@@ -60,6 +60,7 @@ export async function remainingReviews(userId: string, plan: Plan, now = new Dat
 
 const tidy = (review: MatchReview): MatchReview => ({
   summary: frenchSpacing(review.summary),
+  goal: review.goal,
   focus: frenchSpacing(review.focus),
   strengths: review.strengths.map((point) => ({
     title: frenchSpacing(point.title),

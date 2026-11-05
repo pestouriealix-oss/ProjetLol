@@ -6,6 +6,7 @@ import { LiveBanner } from "@/components/live/live-banner";
 import { MatchList } from "@/components/matches/match-list";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
 import { ChampionRecords } from "@/components/profile/champion-records";
+import { GoalReminder } from "@/components/progression/goal-reminder";
 import { LpCard } from "@/components/profile/lp-card";
 import { ProfileHeader, type ProfileAccount } from "@/components/profile/profile-header";
 import { RankCard } from "@/components/profile/rank-card";
@@ -19,6 +20,7 @@ import { listChampionRecords, listPlayedMatches } from "@/lib/db/matches";
 import { listLatestRanks, listRankHistory } from "@/lib/db/ranks";
 import { formatRelative } from "@/lib/format";
 
+import { loadGoalProgress } from "../goal-progress";
 import { getSelectedAccount, type AccountSearchParams } from "../selected-account";
 
 export const metadata: Metadata = { title: t.dashboard.title };
@@ -89,12 +91,13 @@ export default async function DashboardPage({
     );
   }
 
-  const [ranks, soloHistory, flexHistory, records, matches] = await Promise.all([
+  const [ranks, soloHistory, flexHistory, records, matches, goals] = await Promise.all([
     listLatestRanks(user.id, account.id),
     listRankHistory(user.id, account.id, "RANKED_SOLO_5x5", { limit: 300 }),
     listRankHistory(user.id, account.id, "RANKED_FLEX_SR", { limit: 300 }),
     listChampionRecords(user.id, account.id, { limit: 5 }),
     listPlayedMatches(user.id, account.id, { limit: RECENT_MATCHES }),
+    loadGoalProgress(user.id, account.id, { goals: 1 }),
   ]);
   const lastSyncedAt = selected?.lastSyncedAt ?? null;
 
@@ -130,24 +133,33 @@ export default async function DashboardPage({
           />
         </div>
 
-        <section aria-labelledby="recent-title" className="flex min-w-0 flex-col gap-4">
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 id="recent-title" className="display text-2xl text-ink">
-              {copy.recent.title}
-            </h2>
-            <Link
-              href={`/matches?compte=${account.id}`}
-              className="text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
-            >
-              {copy.recent.all}
-            </Link>
-          </div>
-          {matches.length === 0 ? (
-            <MatchListEmpty title={t.matches.emptyTitle} body={copy.recent.empty} />
-          ) : (
-            <MatchList matches={matches} champions={champions} />
-          )}
-        </section>
+        <div className="flex min-w-0 flex-col gap-6">
+          {/* L'objectif du coach d'abord : c'est ce que le joueur doit avoir en tête avant de lancer. */}
+          <GoalReminder
+            progress={goals[0] ?? null}
+            champions={champions}
+            progressionHref={`/progression?compte=${account.id}`}
+            lastMatchId={matches[0]?.matchId ?? null}
+          />
+          <section aria-labelledby="recent-title" className="flex min-w-0 flex-col gap-4">
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 id="recent-title" className="display text-2xl text-ink">
+                {copy.recent.title}
+              </h2>
+              <Link
+                href={`/matches?compte=${account.id}`}
+                className="text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
+              >
+                {copy.recent.all}
+              </Link>
+            </div>
+            {matches.length === 0 ? (
+              <MatchListEmpty title={t.matches.emptyTitle} body={copy.recent.empty} />
+            ) : (
+              <MatchList matches={matches} champions={champions} />
+            )}
+          </section>
+        </div>
       </div>
     </PageShell>
   );

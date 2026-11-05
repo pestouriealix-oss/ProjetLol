@@ -25,11 +25,21 @@ export function HeaderNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center px-3.5 display text-lg tracking-[0.045em] transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                "flex items-center px-2.5 display text-lg tracking-[0.045em] whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out) lg:px-3.5",
                 active ? "text-ink" : "text-ink-muted hover:text-ink",
               )}
             >
-              {item.label}
+              {/* Six liens sur une tablette : le libellé court tant que la place manque. */}
+              {item.shortLabel ? (
+                <>
+                  <span aria-hidden className="lg:hidden">
+                    {item.shortLabel}
+                  </span>
+                  <span className="max-lg:sr-only">{item.label}</span>
+                </>
+              ) : (
+                item.label
+              )}
             </Link>
             {active ? (
               <ViewTransition
@@ -41,7 +51,7 @@ export function HeaderNav() {
               >
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-x-3.5 bottom-0 h-[3px] -skew-x-[30deg] bg-accent"
+                  className="pointer-events-none absolute inset-x-2.5 bottom-0 h-[3px] -skew-x-[30deg] bg-accent lg:inset-x-3.5"
                 />
               </ViewTransition>
             ) : null}

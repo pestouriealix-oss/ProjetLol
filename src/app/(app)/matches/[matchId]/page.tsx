@@ -78,6 +78,7 @@ export default async function MatchDetailPage({
         {
           summary: stored.summary,
           focus: stored.focus ?? undefined,
+          goal: stored.goal ?? undefined,
           strengths: stored.strengths,
           improvements: stored.improvements,
         },

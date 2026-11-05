@@ -73,6 +73,8 @@ export const matchDetail = {
     strengths: "Points forts",
     improvements: "À travailler",
     focus: "Objectif pour la prochaine partie",
+    goalNote: "Vérifié tout seul sur tes prochaines parties à ce poste",
+    goalLink: "Suivre ma progression",
     options: "Deux façons d'y arriver",
     option: (index: number) => `Option ${index} : `,
     facts: {

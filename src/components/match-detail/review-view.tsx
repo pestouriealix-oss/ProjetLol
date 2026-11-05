@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import { Slash } from "@/components/brand/slash";
 import { Block, Growing, Lines } from "@/components/coach/writing";
+import { formatTarget } from "@/components/progression/format";
+import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 import { formatDecimal, formatPercent, formatSignedInteger } from "@/lib/format";
@@ -42,6 +44,22 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
               className="font-semibold text-ink"
               lines={1}
             />
+            {review.goal ? (
+              <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+                <span className="rounded-pill bg-accent/15 px-2 py-0.5 font-semibold text-accent tabular">
+                  {formatTarget(review.goal)}
+                </span>
+                <span>{copy.goalNote}</span>
+                {writing ? null : (
+                  <Link
+                    href="/progression"
+                    className="font-semibold text-ink underline-offset-4 hover:underline"
+                  >
+                    {copy.goalLink}
+                  </Link>
+                )}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}

@@ -71,7 +71,8 @@ describe("matchReviewSchema", () => {
   it("exige plusieurs options pour chaque axe de progrès", () => {
     const review = {
       summary: "Résumé.",
-      focus: "Une seule mort avant 15 minutes.",
+      goal: { metric: "DEATHS", target: 2 },
+      focus: "2 morts au plus : recule dès que ta voie n'est plus visible.",
       strengths: [{ title: "Début", detail: "Avance de 200 or à 10 minutes." }],
       improvements: [
         { title: "Morts", detail: "Deux morts avant 15 minutes.", options: ["Une seule"] },
@@ -80,5 +81,19 @@ describe("matchReviewSchema", () => {
     expect(matchReviewSchema.safeParse(review).success).toBe(false);
     review.improvements[0]!.options.push("Une autre");
     expect(matchReviewSchema.safeParse(review).success).toBe(true);
+  });
+
+  it("ramène la cible de l'objectif dans les bornes de son indicateur", () => {
+    const parsed = matchReviewSchema.parse({
+      summary: "Résumé.",
+      goal: { metric: "CS_PER_MINUTE", target: 6.54 },
+      focus: "6,5 CS par minute : prends chaque vague avant de bouger.",
+      strengths: [],
+      improvements: [{ title: "Farm", detail: "5,2 CS par minute.", options: ["Un", "Deux"] }],
+    });
+    expect(parsed.goal).toEqual({ metric: "CS_PER_MINUTE", target: 6.5 });
+    expect(
+      matchReviewSchema.safeParse({ ...parsed, goal: { metric: "GOLD", target: 400 } }).success,
+    ).toBe(false);
   });
 });

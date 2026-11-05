@@ -18,7 +18,7 @@ Le nom (« hibou » en italien) vit dans une seule constante, `APP_NAME`
 | 3        | Coach de draft (capture, extraction, fiche en streaming)                       | Fait    |
 | 4b       | Bilan d'une partie (faits vérifiés, points forts, axes de progrès)             | Fait    |
 | En ligne | E-mails (confirmation, mot de passe oublié), pages légales, collecte planifiée | Fait    |
-| 5        | Tableau de bord global                                                         | À faire |
+| 5        | Progression (objectif chiffré vérifié, tendances), rappel au tableau de bord   | Fait    |
 | 6        | Finitions                                                                      | À faire |
 
 L'ordre suit les priorités du moment : le détail des parties et l'onglet
@@ -155,6 +155,18 @@ gratuit, 40 en Premium ; même modèle que la fiche (`DRAFT_SHEET_MODEL`).
 
 Les chronologies enregistrées avant ce bilan (version 1) sont redemandées une
 fois à Riot à la première visite.
+
+### Progression
+
+Chaque bilan fixe un objectif chiffré : un indicateur et une cible
+(`src/lib/stats/goals.ts`), parmi CS par minute, morts, KP, vision par minute,
+pinks achetées et dégâts par minute. Tous se calculent avec les chiffres de fin
+de partie, sans chronologie. La page Progression le vérifie seule sur les
+parties commencées après l'écriture du bilan, au même poste, hors remakes,
+jusqu'au bilan suivant. Elle trace aussi les indicateurs du poste sur les 20
+dernières parties, avec la moyenne et la comparaison des cinq dernières aux
+précédentes. Le tableau de bord rappelle l'objectif en cours. Les bilans d'avant
+la version 8 du prompt n'ont pas d'objectif chiffré.
 
 ### Statistiques de matchups (fiche de draft)
 
