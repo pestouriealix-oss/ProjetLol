@@ -1,0 +1,61 @@
+import { APP_NAME } from "@/lib/config";
+
+/** Partie en cours. */
+export const live = {
+  title: "Partie en cours",
+  open: "Partie en cours",
+  banner: "Tu es en partie en ce moment.",
+  bannerAction: "Voir la partie",
+  loading: "Chargement de la partie…",
+  notInGameTitle: "Pas de partie en cours",
+  notInGameBody: (riotId: string) =>
+    `${riotId} n'est pas en partie pour l'instant. Lance une game, puis reviens ici dès l'écran de chargement.`,
+  notInGamePreview: "Ce que tu verras ici :",
+  notInGameItems: [
+    "les dix joueurs, avec leur rang officiel et leur bilan de la saison ;",
+    "leurs sorts d'invocateur et leurs runes ;",
+    "les bannissements, et la durée de la partie en direct.",
+  ],
+  notInGameDraft:
+    "Pour ta fiche, ouvre plutôt Nouvelle game avant de lancer : la draft s'y remplit toute seule au chargement.",
+  toDraft: "Préparer ma fiche",
+  refresh: "Vérifier à nouveau",
+  unverifiedTitle: "Compte pas encore vérifié",
+  unverifiedBody: `Mets d'abord ton compte à jour depuis le tableau de bord : ${APP_NAME} a besoin de l'identifiant Riot du joueur.`,
+  toDashboard: "Aller au tableau de bord",
+  noAccountBody: "Lie d'abord ton compte Riot pour suivre tes parties en direct.",
+  elapsed: "Durée",
+  loadingScreen: "Écran de chargement",
+  ourTeam: "Ton équipe",
+  theirTeam: "Adversaires",
+  blue: "côté bleu",
+  red: "côté rouge",
+  you: "Toi",
+  bans: "Bannissements",
+  unranked: "Non classé",
+  hiddenPlayer: "Joueur masqué",
+  bot: "Bot",
+  rank: (label: string, lp: number) => `${label} · ${lp} LP`,
+  record: (winrate: string, games: number) => `${winrate} sur ${games} parties`,
+  queues: {
+    0: "Partie personnalisée",
+    400: "Normale (draft)",
+    420: "Classée Solo/Duo",
+    430: "Normale (aveugle)",
+    440: "Classée Flex",
+    450: "ARAM",
+    490: "Partie rapide",
+    1700: "Arena",
+    1900: "URF",
+  } as Record<number, string>,
+  otherQueue: "Autre mode",
+  errors: {
+    missing_key:
+      "La synchronisation n'est pas configurée sur ce serveur (clé de l'API Riot absente).",
+    invalid_key: "La clé de l'API Riot est refusée ou expirée.",
+    rate_limited: "Trop de demandes envoyées à Riot. Réessaie dans une minute.",
+    unavailable: "Riot ne répond pas pour l'instant. Réessaie dans quelques minutes.",
+    not_found: "Riot ne trouve pas ce joueur.",
+  },
+  errorTitle: "La partie en cours n'a pas pu être chargée",
+} as const;

@@ -406,12 +406,6 @@
   animation: intro-rise var(--duration-slow) var(--ease-out) var(--intro-delay, 0ms) backwards;
 }
 
-/* Un mot qui arrive, comme un texte en cours d'écriture. */
-@utility intro-word {
-  display: inline-block;
-  animation: intro-word 320ms var(--ease-out) var(--intro-delay, 0ms) backwards;
-}
-
 /* Un pion qui se pose sur la carte. */
 @utility intro-pop {
   transform-box: fill-box;
@@ -427,11 +421,6 @@
 /* Le pion qui suit la pointe du trait. */
 @utility intro-travel {
   animation: intro-travel var(--duration-draw) var(--ease-in-out) var(--intro-delay, 0ms) backwards;
-}
-
-/* Un dévoilement de gauche à droite, pour un axe de temps. */
-@utility intro-wipe {
-  animation: intro-wipe 1000ms var(--ease-in-out) var(--intro-delay, 0ms) backwards;
 }
 
 /* Arrivée sur un autre gabarit (après une connexion, une déconnexion…) : il
@@ -458,13 +447,6 @@
     translate: 0 8px;
   }
 }
-@keyframes intro-word {
-  from {
-    opacity: 0;
-    filter: blur(6px);
-    translate: 0 0.3em;
-  }
-}
 @keyframes intro-pop {
   from {
     opacity: 0;
@@ -479,14 +461,6 @@
 @keyframes intro-travel {
   from {
     stroke-dashoffset: 0;
-  }
-}
-@keyframes intro-wipe {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
   }
 }
 

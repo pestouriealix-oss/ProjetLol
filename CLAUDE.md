@@ -4,7 +4,7 @@
 
 ## Contexte
 
-Coach IA pour League of Legends (nom provisoire, voir `APP_NAME`). Le plan de
+Gufo, coach IA pour League of Legends (le nom vit dans `APP_NAME`). Le plan de
 construction en six étapes et l'architecture sont décrits dans `README.md`.
 Travailler une étape à la fois et attendre la validation entre chacune.
 
@@ -28,7 +28,9 @@ Travailler une étape à la fois et attendre la validation entre chacune.
 - **Validation.** Toute entrée externe passe par un schéma Zod. Aucun `any`.
   Les types sont dérivés des schémas Zod et du schéma Drizzle.
 - **Textes.** Aucun texte en dur dans les composants : tout est dans
-  `src/i18n/fr.ts`. Typographie française (espace insécable avant `:` et `?`).
+  `src/i18n/fr/`, un fichier par partie du site, assemblés par `src/i18n/fr.ts`
+  (on importe toujours `t` depuis `@/i18n/fr`). Typographie française (espace
+  insécable avant `:` et `?`).
 - **Design.** Uniquement les jetons de `src/app/globals.css` (couleurs, polices,
   rayons, durées, courbes). Le corail est réservé à ce que le coach dit de faire.
   Chaque écran gère ses quatre états : chargement, vide, erreur, rempli.

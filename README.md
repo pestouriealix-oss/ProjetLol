@@ -248,7 +248,7 @@ src/
     brand/              Logo
     layout/             En-tête, barre d'onglets, pied de page, gabarit de page
     map/                Mini-carte tactique et pictogrammes des rôles
-    draft/              Fiche de draft : plans, courbe de puissance, texte qui s'écrit
+    draft/              Nouvelle game : la draft, la fiche qui s'écrit en direct
     auth/ settings/
   lib/
     config.ts           Nom de l'app, rôles, serveurs Riot
@@ -257,7 +257,7 @@ src/
     auth/               Session, mots de passe, droits par offre, liens par e-mail
     email/              Envoi des e-mails (Resend) et leurs modèles
     validation/         Schémas Zod partagés
-    draft/              Calculs de la fiche (courbes de puissance, phases de jeu)
+    draft/              La draft : champions, postes, partie en cours, fiche
     ddragon/            Data Dragon : patchs, noms et portraits des champions
     news/               Flux RSS des sites d'actualité (titre, extrait, lien)
     riot/               Client de l'API Riot (comptes, classement, parties)
@@ -266,7 +266,8 @@ src/
     format.ts           Nombres, durées et dates en français
     motion.ts           Petites animations pilotées en JavaScript
     view-transitions.ts Vocabulaire des transitions entre pages
-  i18n/fr.ts            Tous les textes de l'interface
+  i18n/fr.ts            Tous les textes de l'interface, assemblés depuis i18n/fr/
+                        (un fichier par partie du site)
 drizzle/                Migrations SQL générées
 ```
 

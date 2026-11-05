@@ -96,7 +96,7 @@ Dans `src/lib/config.ts`, complète `PUBLISHER` : ton nom, ton statut
 (« Particulier », ou ton numéro SIRET si tu as une micro-entreprise) et
 `contact@gufo.gg`. Tant que ce n'est pas fait, les pages affichent « À compléter
 avant l'ouverture ». Les textes (conditions d'utilisation, confidentialité,
-mentions légales) sont dans `src/i18n/fr.ts` ; ce sont des bases sérieuses,
+mentions légales) sont dans `src/i18n/fr/legal.ts` ; ce sont des bases sérieuses,
 mais pas un avis d'avocat : fais-les relire avant l'ouverture au public et
 avant d'encaisser Premium.
 
