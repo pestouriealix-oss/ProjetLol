@@ -17,7 +17,7 @@ const schema = z.object({
   ANTHROPIC_API_KEY: optional,
   /** Autre adresse pour l'API Anthropic (tests). */
   ANTHROPIC_BASE_URL: optional,
-  /** Modèle qui écrit les fiches (« claude-haiku-5-5 » pour l'essayer). Par défaut, Sonnet. */
+  /** Modèle qui écrit les fiches et les bilans. Par défaut, Haiku ; « claude-sonnet-5-5 » pour comparer. */
   DRAFT_SHEET_MODEL: optional,
   /** Plafond de dépense mensuelle du modèle, en dollars : au-delà, les fiches gratuites s'arrêtent. */
   LLM_MONTHLY_BUDGET_USD: optional.pipe(

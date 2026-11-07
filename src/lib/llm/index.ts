@@ -8,14 +8,18 @@ import { createLlm } from "./client";
 export const llm = createLlm({ apiKey: env.ANTHROPIC_API_KEY, baseURL: env.ANTHROPIC_BASE_URL });
 
 /**
- * Modèles utilisés : un petit modèle rapide pour lire la capture, un plus
- * capable pour écrire la fiche.
+ * Haiku partout par défaut : environ vingt fois moins cher que Sonnet, ce qui
+ * rend chaque abonné rentable malgré les joueurs gratuits (plan marketing,
+ * « Offre, prix et économie »). Sonnet ne revient que si Haiku déçoit
+ * vraiment, par `DRAFT_SHEET_MODEL`.
  */
+const COACH_MODEL = env.DRAFT_SHEET_MODEL ?? "claude-haiku-5-5";
+
 export const MODELS = {
   readDraft: "claude-haiku-5-5",
-  draftSheet: env.DRAFT_SHEET_MODEL ?? "claude-sonnet-5-5",
+  draftSheet: COACH_MODEL,
   /** Le bilan suit le même réglage que la fiche, pour comparer les modèles d'un coup. */
-  matchReview: env.DRAFT_SHEET_MODEL ?? "claude-sonnet-5-5",
+  matchReview: COACH_MODEL,
 } as const;
 
 export { LlmError, type LlmErrorKind } from "./errors";

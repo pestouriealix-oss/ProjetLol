@@ -100,8 +100,9 @@ micro-dollars, d'après `src/lib/llm/pricing.ts`). `npm run llm:costs` donne le
 coût moyen réel d'une fiche et la part des duels resservis, pour régler les
 prix. Deux réglages facultatifs du `.env` :
 
-- `DRAFT_SHEET_MODEL` : le modèle de la fiche (Sonnet par défaut,
-  `claude-haiku-5-5` pour comparer).
+- `DRAFT_SHEET_MODEL` : le modèle de la fiche et du bilan (Haiku par défaut,
+  environ vingt fois moins cher ; `claude-sonnet-5-5` seulement si Haiku déçoit
+  vraiment).
 - `LLM_MONTHLY_BUDGET_USD` : au-delà de ce montant dépensé dans le mois, les
   fiches gratuites se mettent en pause jusqu'au mois suivant ; Premium continue.
 
