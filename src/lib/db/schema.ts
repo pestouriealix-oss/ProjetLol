@@ -64,8 +64,13 @@ export const users = pgTable("users", {
    */
   passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   plan: planEnum("plan").notNull().default("FREE"),
-  /** Le code d'invitation utilisé à l'inscription (test fermé), pour savoir d'où vient chacun. */
+  /**
+   * Le code d'invitation utilisé à l'inscription. Un compte venu ainsi (test
+   * fermé, liste d'attente) est « fondateur » : prix de Premium garanti.
+   */
   inviteId: text("invite_id").references((): AnyPgColumn => invites.id, { onDelete: "set null" }),
+  /** Premium offert jusqu'à cette date (offre fondateurs), sans carte bancaire. */
+  premiumTrialEndsAt: timestamp("premium_trial_ends_at", { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

@@ -1,16 +1,17 @@
-import { Check } from "lucide-react";
+import { Check, Gift } from "lucide-react";
 import type { Metadata } from "next";
 
 import { ActivationWatch } from "@/components/premium/activation-watch";
-import { CheckoutButton } from "@/components/premium/checkout-button";
+import { PlanChoice } from "@/components/premium/plan-choice";
 import { PageShell } from "@/components/layout/page-shell";
+import { Badge } from "@/components/ui/badge";
 import { ErrorNotice } from "@/components/ui/notice";
 import { Panel } from "@/components/ui/panel";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n/fr";
 import { isPaidPlan, limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
-import { checkoutConfig } from "@/lib/billing/paddle";
+import { checkoutConfig, intervalOfPrice } from "@/lib/billing/paddle";
 import { formatPremiumPrice } from "@/lib/billing/plans";
 import { findCurrentSubscription } from "@/lib/db/billing";
 import { formatLongDate } from "@/lib/format";
@@ -29,8 +30,9 @@ export default async function PremiumPage({
   const user = await requireUser();
   const { merci, portail } = await searchParams;
   const subscription = await findCurrentSubscription(user.id);
-  const config = checkoutConfig();
-  const premium = isPaidPlan(user.plan);
+  const config = checkoutConfig({ founder: user.founder });
+  // Premium offert (fondateurs) : on peut s'abonner pendant, rien n'est payé.
+  const subscribed = isPaidPlan(user.plan) && user.trialEndsAt === null;
   const free = limitsFor("FREE");
   const paid = limitsFor("PREMIUM");
 
@@ -47,7 +49,19 @@ export default async function PremiumPage({
         <p className="text-lg text-ink-muted">{copy.lede}</p>
       </header>
 
-      {merci && !premium ? (
+      {user.trialEndsAt ? (
+        <Panel role="status" className="flex items-start gap-3 border-win/40 bg-win-soft px-5 py-4">
+          <Gift aria-hidden className="mt-1 size-5 shrink-0 text-win" />
+          <div className="flex flex-col gap-1">
+            <p className="font-semibold text-ink">
+              {copy.trial.title(formatLongDate(user.trialEndsAt))}
+            </p>
+            <p className="text-ink-muted">{copy.trial.body}</p>
+          </div>
+        </Panel>
+      ) : null}
+
+      {merci && !subscribed ? (
         <Panel role="status" className="border-win/40 bg-win-soft px-5 py-4 text-ink">
           {copy.thanks}
           <ActivationWatch />
@@ -56,24 +70,29 @@ export default async function PremiumPage({
 
       <Panel className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <div className="flex flex-col gap-5">
-          <p className="flex items-baseline gap-2">
-            <span className="display text-6xl text-ink tabular">{formatPremiumPrice()}</span>
-            <span className="text-ink-muted">{copy.perMonth}</span>
-          </p>
-          <p className="text-ink-muted">{copy.noCommitment}</p>
+          {user.founder ? (
+            <p className="flex flex-col items-start gap-2 text-ink-muted">
+              <Badge tone="strong">{copy.founder.badge}</Badge>
+              {copy.founder.priceLock(formatPremiumPrice("month"))}
+            </p>
+          ) : null}
 
-          {premium ? (
+          <PlanChoice
+            config={config}
+            email={user.email}
+            userId={user.id}
+            subscribed={subscribed}
+            initialInterval={subscribed ? intervalOfPrice(subscription?.priceId ?? null) : "month"}
+          />
+
+          {subscribed ? (
             <ActiveSubscription
               status={subscription?.status ?? null}
               periodEnd={subscription?.currentPeriodEnd ?? null}
               cancelAt={subscription?.cancelAt ?? null}
               portalFailed={portail === "erreur"}
             />
-          ) : config ? (
-            <CheckoutButton config={config} email={user.email} userId={user.id} />
-          ) : (
-            <p className="text-ink-muted">{copy.notReady}</p>
-          )}
+          ) : null}
 
           <p className="text-sm text-ink-faint">{copy.paymentBy}</p>
         </div>

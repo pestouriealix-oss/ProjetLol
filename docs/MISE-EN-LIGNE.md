@@ -131,6 +131,23 @@ site fini et en ligne.
 - Lie ton Riot ID, clique sur « Mettre à jour », ouvre une partie et son bilan.
 - En cas d'erreur, l'onglet **Logs** du projet Vercel affiche la cause.
 
+## 8. Le jour du lancement public
+
+Seulement avec la clé de production de Riot.
+
+1. Dernière vague : `npm run invites:prod -- --wave <tous>` envoie un code à
+   chaque personne encore sur la liste ; avec ce code, son compte sera
+   fondateur.
+2. Offre fondateurs : `npm run invites:prod -- --founders-trial 14` offre
+   14 jours de Premium aux comptes venus par invitation. Relance-le dans les
+   jours qui suivent pour ceux qui s'inscrivent avec leur code.
+3. Dans Vercel, `SIGNUP_MODE` passe à `open`, puis **Redeploy** : tout le
+   monde peut s'inscrire, et un code reste accepté (il donne le statut de
+   fondateur).
+4. Paddle en production : les deux prix (2,99 € par mois, 24,99 € par an) dans
+   `PADDLE_PRICE_ID` et `PADDLE_PRICE_ID_YEARLY` (README, « Premium et
+   paiement »).
+
 ## Déjà en place
 
 Limitation des essais (connexion, inscription, liens), confirmation de

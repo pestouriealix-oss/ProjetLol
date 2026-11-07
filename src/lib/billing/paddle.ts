@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { env } from "@/lib/env";
 
+import type { BillingInterval } from "./plans";
+
 /**
  * Paddle, le service de paiement de Premium. Paddle est le vendeur officiel
  * (« merchant of record ») : il encaisse, facture et reverse la TVA de chaque
@@ -18,17 +20,30 @@ const API_BASE_URL = {
 export type CheckoutConfig = {
   environment: "sandbox" | "production";
   clientToken: string;
-  priceId: string;
+  /** Un prix Paddle par durée proposée ; l'annuel manque s'il n'est pas configuré. */
+  prices: Partial<Record<BillingInterval, string>> & { month: string };
 };
 
-/** La configuration du paiement dans la page, ou `null` si Paddle n'est pas branché. */
-export function checkoutConfig(): CheckoutConfig | null {
+/**
+ * La configuration du paiement dans la page, ou `null` si Paddle n'est pas
+ * branché. Un fondateur paie au mois le prix qui lui est garanti.
+ */
+export function checkoutConfig(options: { founder: boolean }): CheckoutConfig | null {
   if (!env.PADDLE_CLIENT_TOKEN || !env.PADDLE_PRICE_ID) return null;
+  const month =
+    options.founder && env.PADDLE_PRICE_ID_FOUNDERS
+      ? env.PADDLE_PRICE_ID_FOUNDERS
+      : env.PADDLE_PRICE_ID;
   return {
     environment: env.PADDLE_ENV,
     clientToken: env.PADDLE_CLIENT_TOKEN,
-    priceId: env.PADDLE_PRICE_ID,
+    prices: env.PADDLE_PRICE_ID_YEARLY ? { month, year: env.PADDLE_PRICE_ID_YEARLY } : { month },
   };
+}
+
+/** La durée d'un prix Paddle déjà payé : l'annuel se reconnaît à son identifiant. */
+export function intervalOfPrice(priceId: string | null): BillingInterval {
+  return priceId && priceId === env.PADDLE_PRICE_ID_YEARLY ? "year" : "month";
 }
 
 /** Vrai si les notifications de Paddle peuvent être vérifiées. */

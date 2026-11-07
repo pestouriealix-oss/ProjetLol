@@ -9,7 +9,12 @@ export const legal = {
   updated: (date: string) => `Dernière mise à jour : ${date}`,
   missing: "À compléter avant l'ouverture",
   contactLine: (email: string) => `Pour toute question : ${email}.`,
-  termsSections: (offer: { sheets: number; reviews: number; price: string }) => [
+  termsSections: (offer: {
+    sheets: number;
+    reviews: number;
+    price: string;
+    yearlyPrice: string;
+  }) => [
     {
       title: "1. Objet",
       paragraphs: [
@@ -41,8 +46,9 @@ export const legal = {
       title: "5. Offre gratuite et Premium",
       paragraphs: [
         `L'essentiel de ${APP_NAME} est gratuit, avec des limites par 24 heures : ${offer.sheets} fiches de draft et ${offer.reviews} bilans de partie. L'application affiche ce qu'il te reste.`,
-        `Premium, à ${offer.price} TTC par mois, relève ces limites. Le paiement, la facture, la TVA, le remboursement et le droit de rétractation sont gérés par Paddle (Paddle.com Market Limited), notre revendeur officiel, selon ses conditions de vente, présentées au moment du paiement.`,
-        "L'abonnement se renouvelle chaque mois. Tu peux le résilier à tout moment depuis la page Premium : il reste actif jusqu'à la fin du mois déjà payé. Un changement de prix est annoncé au moins 30 jours à l'avance, et tu restes libre de résilier.",
+        `Premium, à ${offer.price} TTC par mois ou ${offer.yearlyPrice} TTC par an, relève ces limites. Le paiement, la facture, la TVA, le remboursement et le droit de rétractation sont gérés par Paddle (Paddle.com Market Limited), notre revendeur officiel, selon ses conditions de vente, présentées au moment du paiement.`,
+        "L'abonnement se renouvelle à la fin de chaque période payée (un mois ou un an). Tu peux le résilier à tout moment depuis la page Premium : il reste actif jusqu'à la fin de la période déjà payée. Un changement de prix est annoncé au moins 30 jours à l'avance, et tu restes libre de résilier.",
+        `Offre fondateurs : un compte créé avec une invitation (test fermé, liste d'attente) garde Premium au mois à ${offer.price} TTC tant que son abonnement court, même si le prix public augmente. Il peut aussi recevoir Premium offert pour une durée annoncée, sans moyen de paiement ; à la fin, le compte repasse à l'offre gratuite, sauf s'il s'abonne.`,
         "Le budget du coach est plafonné chaque mois : s'il est atteint, les fiches et bilans gratuits s'arrêtent jusqu'au mois suivant. Premium n'est pas concerné.",
       ],
     },

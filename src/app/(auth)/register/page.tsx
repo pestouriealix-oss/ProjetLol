@@ -40,29 +40,21 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     </p>
   );
 
-  if (!isInviteOnly) {
-    return (
-      <AuthPanel title={t.auth.registerTitle}>
-        <RegisterForm />
-        {isDiscordEnabled ? <DiscordButton signUp={{}} /> : null}
-        {footer}
-      </AuthPanel>
-    );
-  }
-
-  // Test fermé. `?code=` : un code saisi ou reçu par e-mail ; `?invitation=` :
+  // `?code=` : un code saisi ou reçu par e-mail (obligatoire pendant le test
+  // fermé, facultatif ensuite : il fait du compte un fondateur). `?invitation=` :
   // retour d'une inscription Discord refusée (sans code, ou code épuisé).
   const params = await searchParams;
   const typed = first(params.code)?.trim() ?? "";
   const code = normalizeInviteCode(typed);
   const accepted = code ? await isInviteUsable(code) : false;
 
-  if (code && accepted) {
+  if ((code && accepted) || !isInviteOnly) {
+    const inviteCode = code && accepted ? code : undefined;
     return (
       <AuthPanel title={t.auth.registerTitle}>
-        <InviteAccepted code={formatInviteCode(code)} />
-        <RegisterForm inviteCode={code} />
-        {isDiscordEnabled ? <DiscordButton signUp={{ inviteCode: code }} /> : null}
+        {inviteCode ? <InviteAccepted code={formatInviteCode(inviteCode)} /> : null}
+        <RegisterForm inviteCode={inviteCode} />
+        {isDiscordEnabled ? <DiscordButton signUp={{ inviteCode }} /> : null}
         {footer}
       </AuthPanel>
     );

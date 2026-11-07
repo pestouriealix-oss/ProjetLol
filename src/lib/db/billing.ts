@@ -22,6 +22,9 @@ export type StoredSubscription = {
   cancelAt: Date | null;
 };
 
+/** Un abonnement tel qu'on le relit, avec le prix Paddle payé. */
+export type CurrentSubscription = StoredSubscription & { priceId: string | null };
+
 /**
  * Associe le client Paddle à l'utilisateur (le dernier connu l'emporte).
  * Renvoie `false` si ce client appartient déjà à un autre utilisateur.
@@ -111,13 +114,14 @@ export async function saveSubscription(
 }
 
 /** L'abonnement le plus récent de l'utilisateur, pour l'afficher. */
-export async function findCurrentSubscription(userId: string): Promise<StoredSubscription | null> {
+export async function findCurrentSubscription(userId: string): Promise<CurrentSubscription | null> {
   const [row] = await db
     .select({
       id: subscriptions.id,
       status: subscriptions.status,
       currentPeriodEnd: subscriptions.currentPeriodEnd,
       cancelAt: subscriptions.cancelAt,
+      priceId: subscriptions.priceId,
     })
     .from(subscriptions)
     .where(eq(subscriptions.userId, userId))

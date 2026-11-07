@@ -45,8 +45,16 @@ const schema = z.object({
   PADDLE_CLIENT_TOKEN: optional,
   /** Clé secrète des notifications Paddle (« pdl_ntfset_… »), pour vérifier leur signature. */
   PADDLE_WEBHOOK_SECRET: optional,
-  /** Prix de Premium chez Paddle (« pri_… »). */
+  /** Prix de Premium au mois chez Paddle (« pri_… »). */
   PADDLE_PRICE_ID: optional,
+  /** Prix de Premium à l'année (« pri_… »). Sans lui, seule l'offre au mois est proposée. */
+  PADDLE_PRICE_ID_YEARLY: optional,
+  /**
+   * Prix au mois garanti aux fondateurs (comptes venus par invitation). Vide
+   * tant que le prix public n'a pas changé ; le jour où il monte, on y met
+   * l'ancien prix (2,99 €) et `PADDLE_PRICE_ID` reçoit le nouveau.
+   */
+  PADDLE_PRICE_ID_FOUNDERS: optional,
   /** Autre adresse pour l'API Paddle (tests). */
   PADDLE_API_BASE_URL: optional,
   /** Client Riot Sign On (« Se connecter avec Riot »), donné par Riot avec la clé de production. */

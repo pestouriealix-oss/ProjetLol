@@ -16,10 +16,13 @@ const copy = t.premium;
  */
 export function CheckoutButton({
   config,
+  priceId,
   email,
   userId,
 }: {
-  config: { environment: "sandbox" | "production"; clientToken: string; priceId: string };
+  config: { environment: "sandbox" | "production"; clientToken: string };
+  /** Le prix Paddle choisi (au mois ou à l'année). */
+  priceId: string;
   email: string;
   userId: string;
 }) {
@@ -35,7 +38,7 @@ export function CheckoutButton({
       });
       if (!paddle) throw new Error("Paddle.js ne s'est pas chargé.");
       paddle.Checkout.open({
-        items: [{ priceId: config.priceId, quantity: 1 }],
+        items: [{ priceId, quantity: 1 }],
         customer: { email },
         customData: { userId },
         settings: {

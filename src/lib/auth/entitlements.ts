@@ -30,6 +30,21 @@ export function canLinkRiotAccount(plan: Plan, linkedCount: number): boolean {
   return linkedCount < LIMITS[plan].riotAccounts;
 }
 
+/**
+ * L'offre qui s'applique : celle payée, ou Premium offert jusqu'à une date
+ * (offre fondateurs). `trialEndsAt` n'est rendu que si c'est lui qui donne
+ * Premium : un abonné payant n'a pas d'« essai » à afficher.
+ */
+export function effectivePlan(
+  stored: Plan,
+  trialEndsAt: Date | null,
+  now: Date = new Date(),
+): { plan: Plan; trialEndsAt: Date | null } {
+  if (stored !== "FREE") return { plan: stored, trialEndsAt: null };
+  if (trialEndsAt && trialEndsAt > now) return { plan: "PREMIUM", trialEndsAt };
+  return { plan: "FREE", trialEndsAt: null };
+}
+
 /** Vrai pour une offre payante (sert par exemple à mettre son nom en avant). */
 export function isPaidPlan(plan: Plan): boolean {
   return plan !== "FREE";

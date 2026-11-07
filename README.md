@@ -108,16 +108,17 @@ prix. Deux réglages facultatifs du `.env` :
 
 ### Premium et paiement (Paddle)
 
-Premium coûte 2,99 € par mois (`src/lib/billing/plans.ts`) : 40 fiches et 40
-bilans par jour, 3 comptes Riot (1 en gratuit). Le paiement passe par Paddle, revendeur
+Premium coûte 2,99 € par mois ou 24,99 € par an (`src/lib/billing/plans.ts`) :
+40 fiches et 40 bilans par jour, 3 comptes Riot (1 en gratuit). Le paiement passe par Paddle, revendeur
 officiel (« merchant of record ») : il encaisse, facture et reverse la TVA de
 chaque pays ; le site ne voit jamais de carte. Frais : 5 % + 0,50 $ par
 paiement.
 
 1. Crée un compte de test sur <https://sandbox-vendors.paddle.com>.
-2. **Catalog → Products** : un produit « Gufo Premium » avec un prix
-   récurrent mensuel de 2,99 € ; copie son identifiant (`pri_…`) dans
-   `PADDLE_PRICE_ID`.
+2. **Catalog → Products** : un produit « Gufo Premium » avec deux prix
+   récurrents, 2,99 € par mois et 24,99 € par an ; copie leurs identifiants
+   (`pri_…`) dans `PADDLE_PRICE_ID` et `PADDLE_PRICE_ID_YEARLY`. Sans le
+   second, la page ne propose que le mois.
 3. **Developer tools → Authentication** : une clé d'API (`PADDLE_API_KEY`) et
    un jeton client (`PADDLE_CLIENT_TOKEN`, il commence par `test_`).
 4. **Developer tools → Notifications** : une destination vers
@@ -131,6 +132,16 @@ La notification de Paddle passe l'utilisateur en Premium
 (`subscriptions`, `users.plan`) ; une résiliation le repasse en gratuit à la
 fin de la période payée. « Gérer mon abonnement » ouvre le portail client de
 Paddle (factures, moyen de paiement, résiliation).
+
+**Offre fondateurs.** Un compte créé avec une invitation (`users.invite_id`)
+est fondateur : la page Premium lui garantit 2,99 € par mois à vie. Tant que le
+prix public ne change pas, il n'y a rien à faire ; le jour où il monte, crée le
+nouveau prix chez Paddle pour `PADDLE_PRICE_ID` et mets l'ancien dans
+`PADDLE_PRICE_ID_FOUNDERS` (un abonnement déjà en cours garde de toute façon
+son prix chez Paddle). Au lancement, `npm run invites -- --founders-trial 14`
+offre 14 jours de Premium, sans carte, aux fondateurs qui ne les ont pas eus
+(`users.premium_trial_ends_at`, lu par `effectivePlan` dans
+`src/lib/auth/entitlements.ts`).
 
 ### Riot Sign On
 

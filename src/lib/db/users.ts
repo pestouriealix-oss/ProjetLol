@@ -1,6 +1,8 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 
+import { effectivePlan } from "@/lib/auth/entitlements";
+
 import { db } from "./client";
 import { users } from "./schema";
 
@@ -10,7 +12,12 @@ export type CurrentUser = {
   email: string;
   name: string | null;
   image: string | null;
+  /** L'offre qui s'applique : payée, ou Premium offert (voir `trialEndsAt`). */
   plan: "FREE" | "PREMIUM";
+  /** Fin du Premium offert, s'il est en cours et que rien n'est payé. */
+  trialEndsAt: Date | null;
+  /** Inscrit avec une invitation (test fermé, liste d'attente) : prix garanti. */
+  founder: boolean;
   /** Adresse confirmée (lien reçu par e-mail, ou compte Discord vérifié). */
   emailVerified: boolean;
 };
@@ -22,6 +29,8 @@ const publicColumns = {
   image: users.image,
   plan: users.plan,
   emailVerifiedAt: users.emailVerified,
+  inviteId: users.inviteId,
+  premiumTrialEndsAt: users.premiumTrialEndsAt,
 };
 
 type PublicRow = {
@@ -31,10 +40,20 @@ type PublicRow = {
   image: string | null;
   plan: "FREE" | "PREMIUM";
   emailVerifiedAt: Date | null;
+  inviteId: string | null;
+  premiumTrialEndsAt: Date | null;
 };
 
-const toCurrentUser = ({ emailVerifiedAt, ...user }: PublicRow): CurrentUser => ({
+const toCurrentUser = ({
+  emailVerifiedAt,
+  inviteId,
+  premiumTrialEndsAt,
+  plan,
+  ...user
+}: PublicRow): CurrentUser => ({
   ...user,
+  ...effectivePlan(plan, premiumTrialEndsAt),
+  founder: inviteId !== null,
   emailVerified: emailVerifiedAt !== null,
 });
 

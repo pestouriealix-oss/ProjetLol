@@ -10,9 +10,7 @@ export const INVITE_CODE_LENGTH = 8;
 
 /** Un code au hasard (générateur cryptographique, sans biais). */
 export function generateInviteCode(pick: (max: number) => number = randomInt): string {
-  return Array.from({ length: INVITE_CODE_LENGTH }, () => ALPHABET[pick(ALPHABET.length)]).join(
-    "",
-  );
+  return Array.from({ length: INVITE_CODE_LENGTH }, () => ALPHABET[pick(ALPHABET.length)]).join("");
 }
 
 /** Le code tel qu'il est enregistré, ou `null` s'il ne peut pas en être un. */

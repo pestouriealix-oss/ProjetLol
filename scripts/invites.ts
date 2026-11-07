@@ -5,10 +5,13 @@
  *   npm run invites -- --create 1 --uses 50 --note "createur-x"
  *   npm run invites -- --wave 20                         # les 20 plus anciens de la liste
  *   npm run invites -- --summary
+ *   npm run invites -- --founders-trial 14               # au lancement
  *
  * `--wave` crée un code par personne, lui envoie l'e-mail d'invitation (le
  * lien applique le code tout seul) et la note comme invitée. `--days N` donne
- * une date limite aux codes. Lit le fichier .env (base, Resend, APP_URL).
+ * une date limite aux codes. `--founders-trial N` offre N jours de Premium aux
+ * comptes venus par invitation qui ne les ont pas encore eus (on peut le
+ * relancer après chaque vague). Lit le fichier .env (base, Resend, APP_URL).
  */
 import { parseArgs } from "node:util";
 
@@ -16,6 +19,7 @@ import { formatInviteCode, generateInviteCode } from "@/lib/auth/invite-code";
 import {
   closedTestSummary,
   createInvites,
+  grantFounderTrials,
   markWaitlistInvited,
   nextWaitlistEntries,
 } from "@/lib/db/invites";
@@ -30,6 +34,7 @@ const { values } = parseArgs({
     uses: { type: "string", default: "1" },
     note: { type: "string" },
     days: { type: "string" },
+    "founders-trial": { type: "string" },
   },
 });
 
@@ -48,6 +53,7 @@ const create = positive("create", values.create, 500);
 const wave = positive("wave", values.wave, 500);
 const uses = positive("uses", values.uses, 10_000) ?? 1;
 const days = positive("days", values.days, 365);
+const foundersTrial = positive("founders-trial", values["founders-trial"], 90);
 const expiresAt = days ? new Date(Date.now() + days * 24 * 60 * 60 * 1000) : null;
 
 /** Des codes tous différents (le hasard pourrait en tirer deux pareils). */
@@ -66,8 +72,10 @@ async function printSummary() {
 }
 
 async function main() {
-  if (!create && !wave && !values.summary) {
-    console.error("Indique --create N, --wave N ou --summary (voir l'en-tête du script).");
+  if (!create && !wave && !foundersTrial && !values.summary) {
+    console.error(
+      "Indique --create N, --wave N, --founders-trial N ou --summary (voir l'en-tête du script).",
+    );
     process.exit(1);
   }
 
@@ -114,6 +122,14 @@ async function main() {
     }
     if (entries.length > 0)
       console.log(`${sent} invitation(s) envoyée(s) sur ${entries.length}.\n`);
+  }
+
+  if (foundersTrial) {
+    const endsAt = new Date(Date.now() + foundersTrial * 24 * 60 * 60 * 1000);
+    const granted = await grantFounderTrials(endsAt);
+    console.log(
+      `Premium offert jusqu'au ${endsAt.toLocaleDateString("fr-FR")} : ${granted} compte(s) fondateur(s).\n`,
+    );
   }
 
   await printSummary();

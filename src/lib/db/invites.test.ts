@@ -98,4 +98,33 @@ describe.skipIf(!hasDatabase)("test fermé : invitations et liste d'attente", ()
     const after = await api.nextWaitlistEntries(1000);
     expect(after.some((row) => row.email === email)).toBe(false);
   });
+
+  it("offre Premium aux seuls fondateurs, une fois", async () => {
+    const [invite] = await api.createInvites([freshCode()]);
+    const founder = await usersApi.createUserWithPassword({
+      email: `fondateur-${randomUUID()}@example.test`,
+      name: null,
+      passwordHash: "non-utilisé",
+      inviteId: invite!.id,
+    });
+    const other = await usersApi.createUserWithPassword({
+      email: `autre-${randomUUID()}@example.test`,
+      name: null,
+      passwordHash: "non-utilisé",
+    });
+    createdUsers.push(founder.id, other.id);
+
+    const endsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    expect(await api.grantFounderTrials(endsAt)).toBeGreaterThanOrEqual(1);
+    expect(await api.grantFounderTrials(endsAt)).toBe(0);
+
+    const founderNow = await usersApi.findUserById(founder.id);
+    expect(founderNow).toMatchObject({ plan: "PREMIUM", founder: true });
+    expect(founderNow?.trialEndsAt?.getTime()).toBe(endsAt.getTime());
+    expect(await usersApi.findUserById(other.id)).toMatchObject({
+      plan: "FREE",
+      founder: false,
+      trialEndsAt: null,
+    });
+  });
 });

@@ -13,7 +13,8 @@ export default function Page() {
   const sections = t.legal.termsSections({
     sheets: free.draftAnalysesPerDay,
     reviews: free.matchReviewsPerDay,
-    price: formatPremiumPrice(),
+    price: formatPremiumPrice("month"),
+    yearlyPrice: formatPremiumPrice("year"),
   });
   return (
     <>

@@ -6,7 +6,25 @@ export const premium = {
   headline: "Plus de coach, pour le prix d'un café",
   lede: `Tout ${APP_NAME} reste gratuit. Premium lève les limites pour ceux qui enchaînent les parties.`,
   perMonth: "par mois",
+  perYear: "par an",
   noCommitment: "Sans engagement, résiliable en deux clics.",
+  interval: {
+    legend: "Durée",
+    month: "Au mois",
+    year: "À l'année",
+    saving: (percent: number) => `−${percent} %`,
+  },
+  yearlyNote: (perMonth: string) =>
+    `Soit ${perMonth} par mois. Payé une fois par an, résiliable quand tu veux : Premium reste actif jusqu'à la fin de l'année payée.`,
+  founder: {
+    badge: "Fondateur",
+    priceLock: (price: string) =>
+      `Tu étais là avant l'ouverture : ${price} par mois, garantis à vie, même si le prix monte.`,
+  },
+  trial: {
+    title: (date: string) => `Premium t'est offert jusqu'au ${date}`,
+    body: "Rien à payer d'ici là, et aucune carte demandée. Pour garder Premium ensuite, abonne-toi quand tu veux : sinon, tu repasses simplement à l'offre gratuite.",
+  },
   compare: {
     feature: "Ce qui change",
     free: "Gratuit",

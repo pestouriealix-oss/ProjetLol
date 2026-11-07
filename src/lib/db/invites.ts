@@ -15,10 +15,7 @@ import { accounts, invites, users, waitlistEntries } from "./schema";
 
 /** Un code encore utilisable : des places restantes, et pas expiré. */
 const usable = (now: Date) =>
-  and(
-    lt(invites.uses, invites.maxUses),
-    or(isNull(invites.expiresAt), gt(invites.expiresAt, now)),
-  );
+  and(lt(invites.uses, invites.maxUses), or(isNull(invites.expiresAt), gt(invites.expiresAt, now)));
 
 /** Enregistre des codes (déjà normalisés). */
 export async function createInvites(
@@ -91,9 +88,7 @@ export async function hasLinkedAccount(provider: string, providerAccountId: stri
   const [row] = await db
     .select({ userId: accounts.userId })
     .from(accounts)
-    .where(
-      and(eq(accounts.provider, provider), eq(accounts.providerAccountId, providerAccountId)),
-    )
+    .where(and(eq(accounts.provider, provider), eq(accounts.providerAccountId, providerAccountId)))
     .limit(1);
   return row !== undefined;
 }
@@ -132,6 +127,19 @@ export async function markWaitlistInvited(
     .update(waitlistEntries)
     .set({ invitedAt: now, inviteId })
     .where(eq(waitlistEntries.id, entryId));
+}
+
+/**
+ * Offre fondateurs : Premium offert jusqu'à `endsAt` aux comptes venus par
+ * invitation qui ne l'ont pas encore reçu. Renvoie le nombre de comptes.
+ */
+export async function grantFounderTrials(endsAt: Date): Promise<number> {
+  const updated = await db
+    .update(users)
+    .set({ premiumTrialEndsAt: endsAt })
+    .where(and(isNotNull(users.inviteId), isNull(users.premiumTrialEndsAt)))
+    .returning({ id: users.id });
+  return updated.length;
 }
 
 /** Où en est le test fermé : la liste, les invitations envoyées, les codes utilisés. */

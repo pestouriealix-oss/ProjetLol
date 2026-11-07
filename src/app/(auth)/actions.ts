@@ -152,14 +152,12 @@ export async function registerAction(
   const blocked = await safely(() => isRateLimited(registerKey, LIMITS.registerPerIp.max), false);
   if (blocked) return refuse({ error: t.auth.errors.tooManyAttempts });
 
-  // Test fermé : une place est prise sur le code avant de créer le compte, et
-  // rendue si la création échoue (adresse déjà prise, panne).
-  let inviteId: string | null = null;
-  if (isInviteOnly) {
-    const code = normalizeInviteCode(text(formData, "code"));
-    inviteId = code ? await consumeInvite(code) : null;
-    if (!inviteId) return refuse({ error: t.auth.invite.invalid });
-  }
+  // Un code d'invitation (obligatoire pendant le test fermé, facultatif
+  // ensuite : il fait de son compte un « fondateur ») : une place est prise
+  // avant de créer le compte, et rendue si la création échoue.
+  const code = normalizeInviteCode(text(formData, "code"));
+  const inviteId = code ? await consumeInvite(code) : null;
+  if (isInviteOnly && !inviteId) return refuse({ error: t.auth.invite.invalid });
 
   try {
     const user = await createUserWithPassword({
@@ -202,15 +200,16 @@ export async function discordSignInAction(): Promise<void> {
 }
 
 /**
- * Inscription via Discord pendant le test fermé : le code est vérifié, puis
- * gardé dans un cookie le temps de l'aller-retour chez Discord (la place est
- * prise au retour, voir `signIn` dans `src/lib/auth`).
+ * Inscription via Discord. Un code d'invitation (obligatoire pendant le test
+ * fermé) est vérifié, puis gardé dans un cookie le temps de l'aller-retour
+ * chez Discord : la place est prise au retour (voir `src/lib/auth`).
  */
 export async function discordSignUpAction(formData: FormData): Promise<void> {
   if (!isDiscordEnabled) return;
-  if (isInviteOnly) {
-    const code = normalizeInviteCode(text(formData, "code"));
-    if (!code || !(await isInviteUsable(code))) redirect("/register?invitation=invalide");
+  const code = normalizeInviteCode(text(formData, "code"));
+  const usable = code ? await isInviteUsable(code) : false;
+  if (isInviteOnly && !usable) redirect("/register?invitation=invalide");
+  if (code && usable) {
     (await cookies()).set(INVITE_COOKIE, code, {
       httpOnly: true,
       sameSite: "lax",

@@ -102,11 +102,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   events: {
-    /** Un compte créé via Discord garde la trace du code qui l'a ouvert. */
+    /**
+     * Un compte créé via Discord garde la trace du code qui l'a ouvert. Pendant
+     * le test fermé, la place a déjà été prise dans `signIn` ; ensuite, le code
+     * est facultatif et sa place se prend ici.
+     */
     async createUser({ user }) {
-      if (!isInviteOnly || !user.id) return;
+      if (!user.id) return;
       const code = normalizeInviteCode((await cookies()).get(INVITE_COOKIE)?.value ?? "");
-      const inviteId = code ? await findInviteId(code) : null;
+      if (!code) return;
+      const inviteId = isInviteOnly ? await findInviteId(code) : await consumeInvite(code);
       if (inviteId) await attachInviteToUser(user.id, inviteId);
     },
     // Un compte Discord dont l'adresse est vérifiée chez Discord n'a pas à la reconfirmer.
