@@ -25,11 +25,6 @@ export type NewsSource = {
    * catégorie correspond.
    */
   match?: RegExp;
-  /**
-   * Agrégateur (Google Actualités) : chaque article indique son site d'origine,
-   * affiché à la place du nom de la source, et n'a pas d'extrait à lui.
-   */
-  aggregator?: boolean;
 };
 
 /** Mots qui signalent un article sur League of Legends ou sa scène. */
@@ -37,44 +32,12 @@ export const LEAGUE_TOPICS =
   /league of legends|\blol\b|\bworlds\b|\bmsi\b|\blfl\b|\blec\b|\blck\b|\blpl\b|karmine|\bfaker\b|\bT1\b/i;
 
 /**
- * Recherche Google Actualités sur « League of Legends », articles des sept
- * derniers jours. Elle regroupe les sites qui bloquent les lecteurs RSS
- * (Millenium, Sheep Esports, Dot Esports…).
- *
- * Les conditions de Google réservent ces flux à un usage personnel et non
- * commercial : à remplacer par une API d'actualités sous licence avant
- * d'ouvrir le site au public payant.
+ * Seulement les flux que les sites publient eux-mêmes : c'est l'usage prévu
+ * pour un flux RSS. Pas d'agrégateur (Google Actualités et consorts réservent
+ * leurs flux à un usage personnel). Les sites qui bloquent les lecteurs RSS
+ * (Millenium, Sheep Esports, Dot Esports…) n'y sont donc pas.
  */
-const googleNews = (lang: NewsLanguage) => {
-  const url = new URL("https://news.google.com/rss/search");
-  url.searchParams.set("q", '"League of Legends" when:7d');
-  if (lang === "fr") {
-    url.searchParams.set("hl", "fr");
-    url.searchParams.set("gl", "FR");
-    url.searchParams.set("ceid", "FR:fr");
-  } else {
-    url.searchParams.set("hl", "en-US");
-    url.searchParams.set("gl", "US");
-    url.searchParams.set("ceid", "US:en");
-  }
-  return url.toString();
-};
-
 export const NEWS_SOURCES: readonly NewsSource[] = [
-  {
-    id: "gnews-fr",
-    name: "Google Actualités",
-    lang: "fr",
-    feedUrl: googleNews("fr"),
-    aggregator: true,
-  },
-  {
-    id: "gnews-en",
-    name: "Google News",
-    lang: "en",
-    feedUrl: googleNews("en"),
-    aggregator: true,
-  },
   {
     id: "journaldugeek-fr",
     name: "Journal du Geek",
