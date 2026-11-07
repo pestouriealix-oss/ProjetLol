@@ -399,4 +399,13 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
       await usersApi.deleteUser(first.id);
     }
   });
+
+  // `invites` et `waitlist_entries` précèdent le compte (exception documentée
+  // dans `invites.ts`) : rien de ce qu'on en lit ne désigne un utilisateur.
+  it("le test fermé ne renvoie que des totaux, jamais une adresse ni un utilisateur", async () => {
+    const invitesApi = await import("./invites");
+    const summary = await invitesApi.closedTestSummary();
+    expect(Object.values(summary).every((value) => typeof value === "number")).toBe(true);
+    expect(await invitesApi.isInviteUsable(alice)).toBe(false);
+  });
 });

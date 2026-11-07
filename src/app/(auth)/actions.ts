@@ -1,7 +1,7 @@
 "use server";
 
 import { AuthError } from "next-auth";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -13,15 +13,19 @@ import {
   sendPasswordReset,
   sendVerificationEmail,
 } from "@/lib/auth/email-flows";
+import { INVITE_COOKIE, INVITE_COOKIE_SECONDS } from "@/lib/auth/invite-cookie";
+import { normalizeInviteCode } from "@/lib/auth/invite-code";
 import { hashPassword } from "@/lib/auth/password";
 import { attemptKey, clearAttempts, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
+import { consumeInvite, isInviteUsable, joinWaitlist, releaseInvite } from "@/lib/db/invites";
 import { createUserWithPassword, EmailTakenError } from "@/lib/db/users";
-import { isDiscordEnabled } from "@/lib/env";
+import { isDiscordEnabled, isInviteOnly } from "@/lib/env";
 import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  waitlistSchema,
 } from "@/lib/validation/auth";
 
 const AFTER_LOGIN = "/dashboard";
@@ -49,6 +53,7 @@ const LIMITS = {
   registerPerIp: { max: 10, windowSeconds: 60 * 60 },
   forgotPerEmail: { max: 3, windowSeconds: 60 * 60 },
   forgotPerIp: { max: 10, windowSeconds: 60 * 60 },
+  waitlistPerIp: { max: 10, windowSeconds: 60 * 60 },
 } as const;
 
 /** Adresse du visiteur, telle que transmise par l'hébergeur (première de la liste). */
@@ -147,16 +152,27 @@ export async function registerAction(
   const blocked = await safely(() => isRateLimited(registerKey, LIMITS.registerPerIp.max), false);
   if (blocked) return refuse({ error: t.auth.errors.tooManyAttempts });
 
+  // Test fermé : une place est prise sur le code avant de créer le compte, et
+  // rendue si la création échoue (adresse déjà prise, panne).
+  let inviteId: string | null = null;
+  if (isInviteOnly) {
+    const code = normalizeInviteCode(text(formData, "code"));
+    inviteId = code ? await consumeInvite(code) : null;
+    if (!inviteId) return refuse({ error: t.auth.invite.invalid });
+  }
+
   try {
     const user = await createUserWithPassword({
       email: parsed.data.email,
       name: parsed.data.name,
       passwordHash: await hashPassword(parsed.data.password),
+      inviteId,
     });
     // Le lien de confirmation part tout de suite ; s'il échoue, le bandeau de
     // l'application permet de le renvoyer : l'inscription ne doit pas en dépendre.
     await safely(() => sendVerificationEmail(user), undefined);
   } catch (error) {
+    if (inviteId) await safely(() => releaseInvite(inviteId), undefined);
     if (error instanceof EmailTakenError) {
       return refuse({ fieldErrors: { email: t.auth.errors.emailTaken } });
     }
@@ -183,6 +199,72 @@ export async function registerAction(
 export async function discordSignInAction(): Promise<void> {
   if (!isDiscordEnabled) return;
   await signIn("discord", { redirectTo: AFTER_LOGIN });
+}
+
+/**
+ * Inscription via Discord pendant le test fermé : le code est vérifié, puis
+ * gardé dans un cookie le temps de l'aller-retour chez Discord (la place est
+ * prise au retour, voir `signIn` dans `src/lib/auth`).
+ */
+export async function discordSignUpAction(formData: FormData): Promise<void> {
+  if (!isDiscordEnabled) return;
+  if (isInviteOnly) {
+    const code = normalizeInviteCode(text(formData, "code"));
+    if (!code || !(await isInviteUsable(code))) redirect("/register?invitation=invalide");
+    (await cookies()).set(INVITE_COOKIE, code, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: INVITE_COOKIE_SECONDS,
+    });
+  }
+  await signIn("discord", { redirectTo: AFTER_REGISTER });
+}
+
+export type WaitlistState = {
+  attempt: number;
+  status?: "added" | "already";
+  error?: string;
+  email?: string;
+};
+
+/** Liste d'attente : une adresse et son consentement, rien d'autre. */
+export async function joinWaitlistAction(
+  previous: WaitlistState,
+  formData: FormData,
+): Promise<WaitlistState> {
+  const email = text(formData, "email");
+  const refuse = (error: string): WaitlistState => ({
+    attempt: previous.attempt + 1,
+    error,
+    email,
+  });
+
+  const parsed = waitlistSchema.safeParse({
+    email,
+    consent: formData.get("consent"),
+    source: text(formData, "source") || null,
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return refuse(
+      issue?.path[0] === "consent" ? t.auth.invite.consentRequired : t.auth.errors.emailInvalid,
+    );
+  }
+
+  const ipKey = attemptKey("waitlist-ip", await clientIp());
+  if (await safely(() => isRateLimited(ipKey, LIMITS.waitlistPerIp.max), false)) {
+    return refuse(t.auth.errors.tooManyAttempts);
+  }
+  try {
+    const status = await joinWaitlist(parsed.data.email, parsed.data.source);
+    await safely(() => recordAttempt(ipKey, LIMITS.waitlistPerIp.windowSeconds), undefined);
+    return { attempt: previous.attempt, status };
+  } catch (error) {
+    console.error("Liste d'attente indisponible :", error);
+    return refuse(t.auth.errors.unavailable);
+  }
 }
 
 export type ForgotPasswordState = {

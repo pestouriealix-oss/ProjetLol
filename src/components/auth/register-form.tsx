@@ -11,7 +11,8 @@ import { t } from "@/i18n/fr";
 const initialState: AuthFormState = { attempt: 0 };
 const FIELD_ORDER: readonly AuthField[] = ["name", "email", "password"];
 
-export function RegisterForm() {
+/** `inviteCode` : le code accepté pendant le test fermé, renvoyé avec le formulaire. */
+export function RegisterForm({ inviteCode }: { inviteCode?: string }) {
   const [state, formAction] = useActionState(registerAction, initialState);
 
   // Après un refus, le curseur va sur le premier champ à corriger.
@@ -24,6 +25,7 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {state.error ? <ErrorNotice attempt={state.attempt}>{state.error}</ErrorNotice> : null}
+      {inviteCode ? <input type="hidden" name="code" value={inviteCode} /> : null}
       <Field
         id="name"
         label={t.auth.name}

@@ -27,9 +27,12 @@ function actionEmail(input: {
   action: string;
   link: string;
   expiry: string;
+  /** Pourquoi la personne reçoit cet e-mail ; par défaut, parce qu'elle a un compte. */
+  footer?: string;
 }): Email {
   const greeting = copy.greeting(input.name);
-  const text = [greeting, "", input.body, input.link, "", input.expiry, "", copy.footer].join("\n");
+  const footer = input.footer ?? copy.footer;
+  const text = [greeting, "", input.body, input.link, "", input.expiry, "", footer].join("\n");
 
   const p = (content: string, color = COLORS.text) =>
     `<p style="margin:0 0 16px;font-size:15px;line-height:1.55;color:${color}">${content}</p>`;
@@ -46,7 +49,7 @@ function actionEmail(input: {
       ${p(escapeHtml(input.expiry), COLORS.muted)}
       <p style="margin:0 0 8px;font-size:13px;color:${COLORS.muted}">${escapeHtml(copy.linkFallback)}</p>
       <p style="margin:0 0 24px;font-size:13px;word-break:break-all"><a href="${escapeHtml(input.link)}" style="color:${COLORS.text}">${escapeHtml(input.link)}</a></p>
-      <p style="margin:0;padding-top:16px;border-top:1px solid ${COLORS.line};font-size:12px;line-height:1.5;color:${COLORS.muted}">${escapeHtml(copy.footer)}</p>
+      <p style="margin:0;padding-top:16px;border-top:1px solid ${COLORS.line};font-size:12px;line-height:1.5;color:${COLORS.muted}">${escapeHtml(footer)}</p>
     </div>
   </body>
 </html>`;
@@ -60,4 +63,10 @@ export function verifyEmailMessage(to: string, name: string | null, link: string
 
 export function resetPasswordMessage(to: string, name: string | null, link: string): Email {
   return actionEmail({ to, name, link, ...copy.reset });
+}
+
+/** L'invitation au test fermé, envoyée à une personne de la liste d'attente. */
+export function inviteMessage(to: string, code: string, link: string): Email {
+  const { body, ...rest } = copy.invite;
+  return actionEmail({ to, name: null, link, body: body(code), ...rest });
 }

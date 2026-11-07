@@ -232,6 +232,28 @@ La confirmation de l'adresse et le lien « mot de passe oublié » partent par
 confirmation. En ligne, le coach (fiches, captures, bilans) n'est ouvert
 qu'aux adresses confirmées.
 
+### Test fermé : invitations et liste d'attente
+
+Tant que `SIGNUP_MODE` vaut `invite` (par défaut), on ne crée un compte qu'avec
+un code d'invitation : la clé Personal de Riot n'autorise qu'une petite
+communauté privée. Sans code, `/register` propose la liste d'attente (adresse +
+accord, et la source `?ref=` d'un lien de créateur). Un code se saisit sur la
+page ou arrive dans le lien `/register?code=…` ; avec Discord, il voyage dans
+un cookie de 15 minutes et la place n'est prise qu'au retour. Une place est
+prise d'un seul coup (`consumeInvite`), et rendue si l'inscription échoue.
+
+```bash
+npm run invites -- --create 10 --note "amis"          # 10 codes à une place
+npm run invites -- --create 1 --uses 50 --note "createur-x"
+npm run invites -- --wave 20                           # e-mail aux 20 plus anciens de la liste
+npm run invites -- --summary
+```
+
+`--wave` a besoin de Resend ; `--days N` donne une date limite aux codes.
+`npm run invites:prod` fait de même sur la base en ligne, avec les valeurs de
+`.env.neon` (voir `docs/MISE-EN-LIGNE.md`). Le jour du lancement,
+`SIGNUP_MODE=open` ouvre l'inscription à tous.
+
 ### Connexion Discord (facultatif)
 
 Sans configuration, seule la connexion par e-mail et mot de passe est proposée.
@@ -256,6 +278,7 @@ Le bouton « Continuer avec Discord » apparaît dès que les deux valeurs sont 
 | `npm run db:generate` | Génère une migration après modification du schéma       |
 | `npm run db:migrate`  | Applique les migrations                                 |
 | `npm run db:studio`   | Explore la base dans le navigateur                      |
+| `npm run invites`     | Codes d'invitation et vagues de la liste d'attente      |
 
 ## Architecture
 

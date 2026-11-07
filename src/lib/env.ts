@@ -64,6 +64,12 @@ const schema = z.object({
   EMAIL_FROM: optional,
   /** Autre adresse pour l'API de Resend (tests). */
   RESEND_API_BASE_URL: optional,
+  /**
+   * « invite » (par défaut) : on ne s'inscrit qu'avec un code d'invitation, les
+   * autres rejoignent la liste d'attente. C'est la règle de la clé Personal de
+   * Riot (une petite communauté privée). « open » le jour du lancement public.
+   */
+  SIGNUP_MODE: z.enum(["invite", "open"]).optional().default("invite"),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -78,3 +84,6 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const isDiscordEnabled = Boolean(env.AUTH_DISCORD_ID && env.AUTH_DISCORD_SECRET);
+
+/** Vrai tant que l'inscription demande un code d'invitation. */
+export const isInviteOnly = env.SIGNUP_MODE === "invite";

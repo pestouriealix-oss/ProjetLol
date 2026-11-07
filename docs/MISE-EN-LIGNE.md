@@ -59,6 +59,7 @@ les comptes gratuits.
    | `RESEND_API_KEY`         | la clé de l'étape 2                                                     |
    | `EMAIL_FROM`             | `Gufo <bonjour@gufo.gg>`                                                |
    | `PANDASCORE_TOKEN`       | ta clé PandaScore                                                       |
+   | `SIGNUP_MODE`            | `invite` (test fermé) ; `open` seulement au lancement public            |
 
    `AUTH_DISCORD_ID` et `AUTH_DISCORD_SECRET` sont facultatifs. Pour Discord,
    déclare aussi l'adresse de redirection
@@ -117,7 +118,14 @@ site fini et en ligne.
 
 ## 7. Vérifier
 
-- Crée un compte : l'e-mail de confirmation arrive, le lien confirme l'adresse.
+- Sur ton Mac, crée un fichier `.env.neon` (jamais commité, comme `.env`) avec
+  les valeurs du site en ligne : `DATABASE_URL` (Neon), `RESEND_API_KEY`,
+  `EMAIL_FROM` et `APP_URL`. `npm run invites:prod` agit alors sur la base en
+  ligne, `npm run invites` reste sur ta base locale.
+- Crée ton propre code (`npm run invites:prod -- --create 1 --note moi`), puis
+  un compte avec : l'e-mail de confirmation arrive, le lien confirme l'adresse.
+- Sans code, `/register` propose la liste d'attente : inscris une adresse, puis
+  `npm run invites:prod -- --wave 1` lui envoie son invitation.
 - « Mot de passe oublié » depuis la page de connexion : le lien arrive et marche
   une seule fois.
 - Lie ton Riot ID, clique sur « Mettre à jour », ouvre une partie et son bilan.

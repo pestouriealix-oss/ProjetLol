@@ -8,7 +8,7 @@ import { Link } from "@/components/ui/link";
 import { SuccessNotice } from "@/components/ui/notice";
 import { t } from "@/i18n/fr";
 import { getCurrentUser } from "@/lib/auth/session";
-import { isDiscordEnabled } from "@/lib/env";
+import { isDiscordEnabled, isInviteOnly } from "@/lib/env";
 
 export const metadata: Metadata = { title: t.auth.loginTitle };
 
@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <p className="text-ink-muted">
         {t.auth.noAccount}{" "}
         <Link href="/register" className={authLinkClasses}>
-          {t.auth.goToRegister}
+          {isInviteOnly ? t.auth.goToInvite : t.auth.goToRegister}
         </Link>
       </p>
     </AuthPanel>

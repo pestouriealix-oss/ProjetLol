@@ -21,6 +21,29 @@ export const auth = {
   goToRegister: "Créer un compte",
   goToLogin: "Se connecter",
   forgotLink: "Mot de passe oublié ?",
+  goToInvite: "S'inscrire sur invitation",
+  invite: {
+    closedTitle: "Gufo est en test fermé",
+    closedIntro:
+      "On ouvre par petites vagues pour bien accompagner chaque joueur. Tu as un code d'invitation ? Entre-le. Sinon, laisse ton e-mail : on t'écrit dès que ta place est prête.",
+    code: "Code d'invitation",
+    codeHint: "8 caractères, reçus par e-mail ou d'un créateur.",
+    useCode: "Utiliser ce code",
+    accepted: (code: string) => `Invitation ${code}`,
+    acceptedHint: "Ton code est valable. Crée ton compte pour l'utiliser.",
+    otherCode: "Changer de code",
+    invalid: "Ce code n'existe pas ou a déjà servi. Vérifie-le, ou rejoins la liste d'attente.",
+    required:
+      "L'inscription se fait sur invitation pendant le test fermé. Rejoins la liste d'attente : on t'écrit dès que ta place est prête.",
+    waitlistTitle: "Rejoindre la liste d'attente",
+    consent:
+      "J'accepte qu'on m'écrive pour m'inviter au test, puis pour le lancement. Rien d'autre, et l'adresse n'est jamais transmise.",
+    privacy: "Confidentialité",
+    join: "Rejoindre la liste",
+    joined: "C'est noté ! On t'écrit dès que ta place est prête.",
+    already: "Tu es déjà sur la liste : on t'écrit dès que ta place est prête.",
+    consentRequired: "Coche la case pour qu'on puisse t'écrire.",
+  },
   forgot: {
     title: "Mot de passe oublié",
     intro:
@@ -102,6 +125,14 @@ export const emails = {
     body: "Un clic pour confirmer ton adresse e-mail et débloquer le coach : fiches de draft et bilans de partie.",
     action: "Confirmer mon adresse",
     expiry: "Le lien est valable 48 heures.",
+  },
+  invite: {
+    subject: `Ta place au test fermé de ${APP_NAME} est prête`,
+    body: (code: string) =>
+      `Tu étais sur la liste d'attente : ta place au test fermé est prête. Ton code d'invitation : ${code}. Le bouton l'applique tout seul.`,
+    action: "Créer mon compte",
+    expiry: "Le code ne sert qu'une fois. Garde-le pour toi.",
+    footer: `Tu reçois cet e-mail parce que tu t'es inscrit sur la liste d'attente de ${APP_NAME}.`,
   },
   reset: {
     subject: `Ton nouveau mot de passe ${APP_NAME}`,

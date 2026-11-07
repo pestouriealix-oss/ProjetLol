@@ -31,6 +31,20 @@ export const registerSchema = z.object({
 
 export const forgotPasswordSchema = z.object({ email });
 
+export const waitlistSchema = z.object({
+  email,
+  /** La case cochée : sans consentement, on n'enregistre rien. */
+  consent: z.literal("on", { error: t.auth.invite.consentRequired }),
+  /** Origine déclarée par le lien (« ?ref=tiktok ») : quelques caractères simples, sinon ignorée. */
+  source: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9_-]{1,40}$/)
+    .nullable()
+    .catch(null),
+});
+
 export const resetPasswordSchema = z.object({
   /** Jeton du lien : 32 octets en base64url. */
   token: z

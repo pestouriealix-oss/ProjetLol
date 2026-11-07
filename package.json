@@ -17,7 +17,9 @@
     "check": "npm run typecheck && npm run lint && npm run test",
     "news:check": "tsx scripts/check-news-feeds.ts",
     "matchups:collect": "node --env-file=.env --conditions=react-server --import tsx scripts/collect-matchups.ts",
-    "llm:costs": "node --env-file=.env --conditions=react-server --import tsx scripts/llm-costs.ts"
+    "llm:costs": "node --env-file=.env --conditions=react-server --import tsx scripts/llm-costs.ts",
+    "invites": "node --env-file=.env --conditions=react-server --import tsx scripts/invites.ts",
+    "invites:prod": "node --env-file=.env --env-file=.env.neon --conditions=react-server --import tsx scripts/invites.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

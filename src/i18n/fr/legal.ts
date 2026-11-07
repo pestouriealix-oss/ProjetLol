@@ -89,9 +89,10 @@ export const legal = {
     {
       title: "Ce que nous enregistrons",
       items: [
-        "Ton compte : adresse e-mail, pseudo (facultatif), empreinte de ton mot de passe (jamais le mot de passe lui-même) et date de confirmation de l'adresse. Avec Discord : ton identifiant, ton nom et ton avatar Discord.",
+        "Ton compte : adresse e-mail, pseudo (facultatif), empreinte de ton mot de passe (jamais le mot de passe lui-même) et date de confirmation de l'adresse, et le code d'invitation utilisé pendant le test fermé. Avec Discord : ton identifiant, ton nom et ton avatar Discord.",
         "Tes comptes Riot liés : Riot ID, serveur, rôles choisis, et les données publiques que l'API de Riot Games donne sur tes parties et ton classement.",
         "Le coach : les drafts, les fiches et les bilans écrits pour toi, et un relevé de la consommation du modèle (pour appliquer les limites). Une capture d'écran envoyée est lue puis oubliée : elle n'est pas conservée.",
+        "La liste d'attente du test fermé : ton adresse e-mail, la date de ton inscription et de ton accord, d'où tu viens (le lien d'un créateur, par exemple) et la date de ton invitation. Rien d'autre.",
         "Premium : les identifiants client et d'abonnement chez Paddle, le statut et les dates de l'abonnement. Jamais tes coordonnées bancaires : elles restent chez Paddle.",
         "La sécurité : des compteurs d'essais de connexion, d'inscription et de demandes de lien, rattachés à une empreinte non réversible de l'adresse e-mail ou de l'adresse IP ; les liens envoyés par e-mail, sous forme d'empreinte, qui expirent en 30 minutes ou 48 heures.",
       ],
@@ -102,6 +103,7 @@ export const legal = {
         "Te fournir le service (compte, suivi des parties, coach, Premium) : c'est l'exécution du contrat.",
         "Protéger le service et ses utilisateurs (limites d'essais, confirmation de l'adresse) : c'est notre intérêt légitime.",
         "Facturer Premium : c'est une obligation légale, assurée par Paddle.",
+        "T'écrire depuis la liste d'attente (ton code, puis le lancement) : c'est ton accord, que tu peux retirer à tout moment en nous écrivant.",
       ],
       after: ["Pas de publicité ciblée, pas de revente de données, pas de mesure d'audience."],
     },
@@ -123,13 +125,14 @@ export const legal = {
       title: "Combien de temps",
       paragraphs: [
         "Tes données sont gardées tant que ton compte existe. Quand tu le supprimes, tout ce qui te concerne est effacé aussitôt, sauf ce que Paddle doit conserver pour la facturation. Un compte inactif depuis trois ans pourra être supprimé, après t'avoir prévenu.",
+        "Une adresse de la liste d'attente est effacée dès que tu le demandes, et au plus tard six mois après l'ouverture publique du site.",
         "Les parties brutes (données publiques de Riot Games, partagées entre joueurs) et les statistiques agrégées ne contiennent rien qui t'identifie.",
       ],
     },
     {
       title: "Cookies",
       paragraphs: [
-        "Un seul cookie te concerne en permanence : celui de ta session, indispensable pour rester connecté. Un cookie temporaire protège la connexion avec Riot. Au moment du paiement, Paddle peut déposer ses propres cookies, nécessaires à la transaction et à la lutte contre la fraude. Aucun cookie de publicité ni de mesure d'audience : il n'y a rien à accepter.",
+        "Un seul cookie te concerne en permanence : celui de ta session, indispensable pour rester connecté. Un cookie temporaire protège la connexion avec Riot, un autre garde ton code d'invitation le temps d'une inscription avec Discord (15 minutes). Au moment du paiement, Paddle peut déposer ses propres cookies, nécessaires à la transaction et à la lutte contre la fraude. Aucun cookie de publicité ni de mesure d'audience : il n'y a rien à accepter.",
       ],
     },
     {

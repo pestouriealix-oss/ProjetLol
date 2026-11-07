@@ -1,16 +1,25 @@
 import "server-only";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
+import { cookies } from "next/headers";
 import Credentials from "next-auth/providers/credentials";
 import Discord from "next-auth/providers/discord";
 import { z } from "zod";
 
 import { db } from "@/lib/db/client";
 import { accounts, users } from "@/lib/db/schema";
-import { findUserCredentials, markEmailVerified } from "@/lib/db/users";
-import { env, isDiscordEnabled } from "@/lib/env";
+import {
+  attachInviteToUser,
+  consumeInvite,
+  findInviteId,
+  hasLinkedAccount,
+} from "@/lib/db/invites";
+import { findUserCredentials, findUserIdByEmail, markEmailVerified } from "@/lib/db/users";
+import { env, isDiscordEnabled, isInviteOnly } from "@/lib/env";
 import { loginSchema } from "@/lib/validation/auth";
 
+import { INVITE_COOKIE } from "./invite-cookie";
+import { normalizeInviteCode } from "./invite-code";
 import { hashPassword, verifyPassword } from "./password";
 
 declare module "next-auth" {
@@ -62,6 +71,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       : []),
   ],
   callbacks: {
+    /**
+     * Test fermé : un nouveau compte Discord n'est créé qu'avec un code
+     * d'invitation, déposé dans un cookie par la page d'inscription juste
+     * avant de partir chez Discord. La place est prise ici, d'un seul coup ;
+     * un compte Discord déjà lié se connecte sans code. Une adresse qui a déjà
+     * un compte passe aussi : Auth.js refuse alors de lier les deux (et le code
+     * n'est pas gâché).
+     */
+    async signIn({ account, user }) {
+      if (account?.provider !== "discord" || !isInviteOnly) return true;
+      if (await hasLinkedAccount("discord", account.providerAccountId)) return true;
+      if (user.email && (await findUserIdByEmail(user.email.toLowerCase()))) return true;
+      const code = normalizeInviteCode((await cookies()).get(INVITE_COOKIE)?.value ?? "");
+      if (code && (await consumeInvite(code))) return true;
+      return "/register?invitation=requise";
+    },
     jwt({ token, user }) {
       // `user` n'est présent qu'à la connexion : on date la session à ce moment-là.
       if (user?.id) {
@@ -77,6 +102,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   events: {
+    /** Un compte créé via Discord garde la trace du code qui l'a ouvert. */
+    async createUser({ user }) {
+      if (!isInviteOnly || !user.id) return;
+      const code = normalizeInviteCode((await cookies()).get(INVITE_COOKIE)?.value ?? "");
+      const inviteId = code ? await findInviteId(code) : null;
+      if (inviteId) await attachInviteToUser(user.id, inviteId);
+    },
     // Un compte Discord dont l'adresse est vérifiée chez Discord n'a pas à la reconfirmer.
     async signIn({ user, account, profile }) {
       if (account?.provider !== "discord" || !user.id || !user.email) return;

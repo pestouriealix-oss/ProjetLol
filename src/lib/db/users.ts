@@ -124,6 +124,8 @@ export async function createUserWithPassword(input: {
   email: string;
   name: string | null;
   passwordHash: string;
+  /** Le code d'invitation utilisé, pendant le test fermé. */
+  inviteId?: string | null;
 }): Promise<CurrentUser> {
   // La contrainte d'unicité tranche les inscriptions simultanées : pas de
   // « vérifier puis insérer », qui laisserait une fenêtre de course.

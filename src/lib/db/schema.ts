@@ -18,6 +18,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 import { PLANS, PLATFORM_IDS, ROLES, SUBSCRIPTION_STATUSES } from "@/lib/config";
@@ -63,6 +64,8 @@ export const users = pgTable("users", {
    */
   passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
   plan: planEnum("plan").notNull().default("FREE"),
+  /** Le code d'invitation utilisé à l'inscription (test fermé), pour savoir d'où vient chacun. */
+  inviteId: text("invite_id").references((): AnyPgColumn => invites.id, { onDelete: "set null" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -389,6 +392,42 @@ export const emailTokens = pgTable(
   },
   (table) => [index("email_tokens_user_kind_idx").on(table.userId, table.kind)],
 );
+
+// ── Test fermé : invitations et liste d'attente ────────────────────────────
+
+/**
+ * Codes d'invitation. Un code sert `maxUses` fois (une par défaut) : un par
+ * personne de la liste d'attente, ou un code partagé pour un créateur.
+ */
+export const invites = pgTable("invites", {
+  id: id(),
+  /** En majuscules, sans tiret (« K7QM2XPA ») ; affiché « K7QM-2XPA ». */
+  code: text("code").notNull().unique(),
+  /** D'où vient le code : « vague 1 », « créateur Untel »… */
+  note: text("note"),
+  maxUses: integer("max_uses").notNull().default(1),
+  uses: integer("uses").notNull().default(0),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+/**
+ * Liste d'attente : une adresse, son consentement, d'où elle vient, et
+ * l'invitation qu'elle a reçue. Rien ne la relie à un compte : les inscrits
+ * de la liste n'en ont pas encore.
+ */
+export const waitlistEntries = pgTable("waitlist_entries", {
+  id: id(),
+  /** En minuscules. */
+  email: text("email").notNull().unique(),
+  /** Origine déclarée par le lien (« ?ref=… »), pour mesurer les canaux. */
+  source: text("source"),
+  /** Moment où la personne a accepté d'être écrite (case cochée). */
+  consentAt: timestamp("consent_at", { withTimezone: true }).notNull(),
+  invitedAt: timestamp("invited_at", { withTimezone: true }),
+  inviteId: text("invite_id").references(() => invites.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+});
 
 export const authAttempts = pgTable("auth_attempts", {
   key: text("key").primaryKey(),
