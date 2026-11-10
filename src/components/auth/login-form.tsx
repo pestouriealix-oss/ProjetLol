@@ -10,7 +10,7 @@ import { t } from "@/i18n/fr";
 
 const initialState: AuthFormState = { attempt: 0 };
 
-export function LoginForm({ initialError }: { initialError?: string }) {
+export function LoginForm({ initialError, next }: { initialError?: string; next?: string }) {
   const [state, formAction] = useActionState(loginAction, initialState);
   const error = state.error ?? initialError;
 
@@ -22,6 +22,7 @@ export function LoginForm({ initialError }: { initialError?: string }) {
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       {error ? <ErrorNotice attempt={state.attempt}>{error}</ErrorNotice> : null}
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <Field id="email" label={t.auth.email}>
         {(control) => (
           <Input

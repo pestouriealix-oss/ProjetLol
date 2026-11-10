@@ -39,7 +39,7 @@ const eslintConfig = defineConfig([
     files: ["src/components/ui/link.tsx"],
     rules: { "no-restricted-imports": ["error", { patterns: [databaseLayer] }] },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "drizzle/**"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "drizzle/**", "overwolf/**"]),
 ]);
 
 export default eslintConfig;

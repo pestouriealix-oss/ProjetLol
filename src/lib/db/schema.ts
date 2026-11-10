@@ -506,3 +506,42 @@ export const matchupNotes = pgTable(
   },
   (table) => [index("matchup_notes_patch_idx").on(table.patch)],
 );
+
+/**
+ * Liaison de l'app Overwolf, comme pour une télé : l'app demande un code
+ * court, le joueur le valide sur le site une fois connecté, puis l'app échange
+ * son secret contre un jeton. La demande disparaît à l'échange ou à
+ * l'expiration (10 minutes).
+ */
+export const appLinkRequests = pgTable("app_link_requests", {
+  id: id(),
+  /** Empreinte du secret gardé par l'app : seul l'app peut récupérer le jeton. */
+  deviceCodeHash: text("device_code_hash").notNull().unique(),
+  /** Le code affiché dans l'app, en majuscules sans tiret (« K7QM2XPA »). */
+  userCode: text("user_code").notNull().unique(),
+  /** Le compte qui a validé le code. */
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: createdAt(),
+});
+
+/**
+ * Accès d'une app reliée (l'app Overwolf) à un compte. La base ne garde que
+ * l'empreinte du jeton ; le joueur peut le révoquer dans Paramètres.
+ */
+export const appTokens = pgTable(
+  "app_tokens",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    /** Ce que le joueur voit dans Paramètres (« App Overwolf »). */
+    name: text("name").notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (table) => [index("app_tokens_user_idx").on(table.userId)],
+);

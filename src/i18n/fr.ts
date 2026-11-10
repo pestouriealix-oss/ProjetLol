@@ -5,6 +5,7 @@
  * fera en ajoutant un dossier jumeau.
  */
 import { auth, emails } from "./fr/auth";
+import { companion } from "./fr/companion";
 import { dashboard } from "./fr/dashboard";
 import { draft } from "./fr/draft";
 import { esport } from "./fr/esport";
@@ -37,6 +38,7 @@ export const fr = {
   common,
   emails,
   legal,
+  companion,
 } as const;
 
 export const t = fr;

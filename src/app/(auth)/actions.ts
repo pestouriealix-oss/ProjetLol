@@ -16,6 +16,7 @@ import {
 import { INVITE_COOKIE, INVITE_COOKIE_SECONDS } from "@/lib/auth/invite-cookie";
 import { normalizeInviteCode } from "@/lib/auth/invite-code";
 import { hashPassword } from "@/lib/auth/password";
+import { safeNext } from "@/lib/auth/safe-next";
 import { attemptKey, clearAttempts, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
 import { consumeInvite, isInviteUsable, joinWaitlist, releaseInvite } from "@/lib/db/invites";
 import { createUserWithPassword, EmailTakenError } from "@/lib/db/users";
@@ -105,7 +106,10 @@ export async function loginAction(
   if (blocked) return refuse(t.auth.errors.tooManyAttempts);
 
   try {
-    await signIn("credentials", { ...parsed.data, redirectTo: AFTER_LOGIN });
+    await signIn("credentials", {
+      ...parsed.data,
+      redirectTo: safeNext(text(formData, "next")) ?? AFTER_LOGIN,
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       if (error.type === "CredentialsSignin") {
@@ -194,9 +198,9 @@ export async function registerAction(
   return previous;
 }
 
-export async function discordSignInAction(): Promise<void> {
+export async function discordSignInAction(formData: FormData): Promise<void> {
   if (!isDiscordEnabled) return;
-  await signIn("discord", { redirectTo: AFTER_LOGIN });
+  await signIn("discord", { redirectTo: safeNext(text(formData, "next")) ?? AFTER_LOGIN });
 }
 
 /**

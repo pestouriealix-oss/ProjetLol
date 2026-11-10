@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { LinkedAppsSection } from "@/components/companion/linked-apps-section";
 import { PageShell } from "@/components/layout/page-shell";
 import { DeleteAccountButton } from "@/components/settings/delete-account-button";
 import {
@@ -16,6 +17,7 @@ import { t } from "@/i18n/fr";
 import { isPaidPlan, limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
 import { getChampionAssets } from "@/lib/ddragon/champions";
+import { listAppTokens } from "@/lib/db/app-links";
 import { listRiotAccounts } from "@/lib/db/riot-accounts";
 import { isRsoEnabled } from "@/lib/riot/rso";
 
@@ -33,7 +35,7 @@ export default async function SettingsPage({
   const user = await requireUser();
   const { riot, suppression } = await searchParams;
   const rsoResult = riot && riot in t.settings.riot.rso.results ? (riot as RsoResult) : null;
-  const accounts = await listRiotAccounts(user.id);
+  const [accounts, apps] = await Promise.all([listRiotAccounts(user.id), listAppTokens(user.id)]);
   const now = new Date();
   // Une preuve en cours se reprend après un rechargement : il faut l'image de l'icône.
   const champions = accounts.some(
@@ -72,6 +74,7 @@ export default async function SettingsPage({
         maxAccounts={limitsFor(user.plan).riotAccounts}
         rso={{ enabled: isRsoEnabled(), result: rsoResult }}
       >
+        {apps.length > 0 ? <LinkedAppsSection apps={apps} /> : null}
         <section
           aria-labelledby="account-title"
           className="flex flex-col gap-6 border-t border-line pt-10"

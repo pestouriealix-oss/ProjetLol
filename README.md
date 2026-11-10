@@ -19,7 +19,8 @@ Le nom (« hibou » en italien) vit dans une seule constante, `APP_NAME`
 | 4b       | Bilan d'une partie (faits vérifiés, points forts, axes de progrès)             | Fait    |
 | En ligne | E-mails (confirmation, mot de passe oublié), pages légales, collecte planifiée | Fait    |
 | 5        | Progression (objectif chiffré vérifié, tendances), rappel au tableau de bord   | Fait    |
-| 6        | Finitions                                                                      | À faire |
+| 6        | App Overwolf : fiche à l'écran de chargement, liaison au compte (`overwolf/`)  | En test |
+| 7        | Finitions                                                                      | À faire |
 
 L'ordre suit les priorités du moment : le détail des parties et l'onglet
 Esport (pendant les Worlds) passent avant le coach de draft.
@@ -265,6 +266,14 @@ npm run invites -- --summary
 `.env.neon` (voir `docs/MISE-EN-LIGNE.md`). Le jour du lancement,
 `SIGNUP_MODE=open` ouvre l'inscription à tous.
 
+### App Overwolf
+
+L'app de bureau vit dans `overwolf/` (voir son `README.md`) : la fiche
+s'ouvre toute seule à l'écran de chargement. Elle parle au site par
+`/api/app/*`, avec un jeton obtenu par code court (page `/app`, comme pour une
+télé) et révocable dans Paramètres. Ces routes acceptent toute origine (CORS)
+parce qu'elles ne lisent jamais de cookie : seul le jeton compte.
+
 ### Connexion Discord (facultatif)
 
 Sans configuration, seule la connexion par e-mail et mot de passe est proposée.
@@ -290,6 +299,7 @@ Le bouton « Continuer avec Discord » apparaît dès que les deux valeurs sont 
 | `npm run db:migrate`  | Applique les migrations                                 |
 | `npm run db:studio`   | Explore la base dans le navigateur                      |
 | `npm run invites`     | Codes d'invitation et vagues de la liste d'attente      |
+| `npm run check:app`   | Types et tests de l'app Overwolf (`overwolf/`)          |
 
 ## Architecture
 
@@ -312,7 +322,9 @@ src/
     config.ts           Nom de l'app, rôles, serveurs Riot
     env.ts              Variables d'environnement validées au démarrage
     db/                 Schéma, client, accès aux données filtré par utilisateur
-    auth/               Session, mots de passe, droits par offre, liens par e-mail
+    auth/               Session, mots de passe, droits par offre, liens par e-mail,
+                        jeton de l'app Overwolf
+    companion/          Réponses de l'API de l'app Overwolf (/api/app/*)
     email/              Envoi des e-mails (Resend) et leurs modèles
     validation/         Schémas Zod partagés
     draft/              La draft : champions, postes, partie en cours, fiche
@@ -327,6 +339,8 @@ src/
   i18n/fr.ts            Tous les textes de l'interface, assemblés depuis i18n/fr/
                         (un fichier par partie du site)
 drizzle/                Migrations SQL générées
+overwolf/               L'app Overwolf (Vite + React), qui réutilise textes,
+                        schémas et composants d'affichage de src/
 ```
 
 Trois règles tiennent l'ensemble :

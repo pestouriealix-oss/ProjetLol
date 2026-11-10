@@ -15,14 +15,18 @@ Travailler une étape à la fois et attendre la validation entre chacune.
   De même, l'API Riot vivra dans `src/lib/riot`, le modèle dans `src/lib/llm`,
   Data Dragon dans `src/lib/ddragon`, PandaScore (esport) dans `src/lib/esport`,
   les flux d'articles (RSS) dans `src/lib/news`, les calculs dans `src/lib/stats`,
-  le paiement (Paddle) dans `src/lib/billing`.
+  le paiement (Paddle) dans `src/lib/billing`. L'app Overwolf vit dans
+  `overwolf/` et ne reprend de `src/` que du code sans Next.js ni serveur
+  (textes, schémas, composants d'affichage).
 - **Articles.** Jamais le texte d'un article : titre, court extrait et lien vers
   le site qui l'a publié.
 - **Isolation.** Toute fonction de `src/lib/db` qui touche une donnée personnelle
   prend `userId` en premier argument et l'utilise dans sa clause WHERE. Ajouter
   un cas dans `src/lib/db/isolation.test.ts` pour chaque nouvelle table.
 - **Authentification.** Chaque page, action serveur ou route protégée commence
-  par `await requireUser()`. Ne jamais se fier au seul layout.
+  par `await requireUser()`. Ne jamais se fier au seul layout. Les routes de
+  l'app Overwolf (`/api/app/*`) commencent par `await requireAppUser(request)`
+  (jeton, jamais de cookie) et répondent avec `src/lib/companion/http.ts`.
 - **Droits.** Ne jamais comparer `user.plan` directement : passer par
   `src/lib/auth/entitlements.ts`.
 - **Validation.** Toute entrée externe passe par un schéma Zod. Aucun `any`.
@@ -82,5 +86,6 @@ un rechercher-remplacer sans vérifier que le remplacement a bien eu lieu.
 
 ## Avant chaque commit
 
-`npm run check` (types, lint, tests) puis `npm run build`. Schéma modifié :
+`npm run check` (types, lint, tests) puis `npm run build`. App Overwolf
+modifiée : `npm run check:app` et `npm --prefix overwolf run build`. Schéma modifié :
 `npm run db:generate` et commiter la migration.

@@ -1,0 +1,24 @@
+{
+  "name": "gufo-overwolf",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "L'app Gufo pour Overwolf : la fiche de draft à l'écran de chargement de League of Legends.",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc --noEmit && vite build",
+    "pack": "npm run build && node scripts/pack.mjs"
+  },
+  "devDependencies": {
+    "@overwolf/types": "^3.51.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "jszip": "^3.10.2",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.7",
+    "vitest": "^5.1.0"
+  }
+}

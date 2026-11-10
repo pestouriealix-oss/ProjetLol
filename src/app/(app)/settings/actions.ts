@@ -10,6 +10,7 @@ import { limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
 import { cancelSubscriptionNow } from "@/lib/billing/paddle";
 import { getChampionAssets } from "@/lib/ddragon/champions";
+import { revokeAppToken } from "@/lib/db/app-links";
 import { attemptKey, isRateLimited, recordAttempt } from "@/lib/db/auth-attempts";
 import { findCurrentSubscription } from "@/lib/db/billing";
 import {
@@ -220,4 +221,13 @@ export async function deleteAccountAction(): Promise<void> {
   }
   await deleteUser(user.id);
   await signOut({ redirectTo: "/login" });
+}
+
+/** Coupe l'accès d'une app reliée (l'app Overwolf) : elle est déconnectée tout de suite. */
+export async function revokeAppTokenAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const tokenId = z.uuid().safeParse(formData.get("tokenId"));
+  if (!tokenId.success) return;
+  await revokeAppToken(user.id, tokenId.data);
+  revalidatePath(SETTINGS_PATH);
 }

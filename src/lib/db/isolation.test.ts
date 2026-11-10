@@ -408,4 +408,20 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(Object.values(summary).every((value) => typeof value === "number")).toBe(true);
     expect(await invitesApi.isInviteUsable(alice)).toBe(false);
   });
+
+  it("une app reliée n'appartient qu'à son compte", async () => {
+    const links = await import("./app-links");
+    const { deviceCode, userCode } = await links.createAppLinkRequest();
+    expect(await links.approveAppLinkRequest(alice, userCode)).toBe(true);
+    // Bob ne peut pas reprendre un code déjà validé par Alice.
+    expect(await links.approveAppLinkRequest(bob, userCode)).toBe(false);
+    const exchange = await links.exchangeAppLinkRequest(deviceCode);
+    expect(exchange.status).toBe("approved");
+
+    const [aliceApp] = await links.listAppTokens(alice);
+    expect(aliceApp).toBeDefined();
+    expect(await links.listAppTokens(bob)).toEqual([]);
+    expect(await links.revokeAppToken(bob, aliceApp!.id)).toBe(false);
+    expect(await links.listAppTokens(alice)).toHaveLength(1);
+  });
 });

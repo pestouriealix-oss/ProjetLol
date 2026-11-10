@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Archive des emblèmes de Riot (téléchargée à part, voir src/components/rank)
 .emblems-tmp/
+
+# App Overwolf
+/overwolf/node_modules
+/overwolf/dist
+/overwolf/*.opk
