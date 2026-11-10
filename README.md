@@ -11,7 +11,7 @@ Le nom (« hibou » en italien) vit dans une seule constante, `APP_NAME`
 | Étape    | Contenu                                                                        | État    |
 | -------- | ------------------------------------------------------------------------------ | ------- |
 | 1        | Socle, base de données, connexion, système de design, Paramètres               | Fait    |
-| 2        | API Riot, Data Dragon, synchronisation des parties                             | Fait    |
+| 2        | API Riot, Data Dragon, synchronisation des parties (classées et normales)      | Fait    |
 | 4a       | Détail d'une partie (dix joueurs, objets, runes, vis-à-vis)                    | Fait    |
 | Esport   | Calendrier, résultats, arbres et classements (PandaScore)                      | Fait    |
 | Actus    | Articles en français et en anglais (flux RSS), patchs                          | Fait    |
@@ -163,7 +163,9 @@ un compte dont la propriété est prouvée (`riot_accounts.owned_at`). Sans Riot
 Sign On, la preuve se fait par l'icône (`src/lib/sync/ownership.ts`) : le site
 demande une icône de départ (Data Dragon 0 à 28, que tout compte possède), le
 joueur la met dans le client du jeu, et le site vérifie chez Riot (Summoner-V4)
-qu'elle y est, dans les 15 minutes.
+qu'elle y est. Il a 30 minutes pour changer d'icône ; comme Riot met parfois
+plusieurs minutes à montrer la nouvelle, l'icône demandée vaut encore preuve
+pendant 24 heures après le délai, et une nouvelle demande garde la même icône.
 
 ### Bilan de partie
 

@@ -113,6 +113,19 @@ export function createRiotApi(client: RiotClient) {
       );
     },
 
+    /**
+     * Match-V5 : identifiants des dernières parties, toutes files confondues, de
+     * la plus récente à la plus ancienne. Le tri (Faille ou non) se fait ensuite.
+     */
+    getRecentMatchIds(platform: Platform, puuid: string, count: number): Promise<string[]> {
+      return client.get(
+        { kind: "regional", platform },
+        `/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids`,
+        matchIdsSchema,
+        { start: 0, count },
+      );
+    },
+
     /** Match-V5 : identifiants des dernières parties classées, de la plus récente à la plus ancienne. */
     getRankedMatchIds(platform: Platform, puuid: string, count: number): Promise<string[]> {
       return client.get(

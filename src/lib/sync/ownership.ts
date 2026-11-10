@@ -20,7 +20,14 @@ import { RiotApiError, type RiotErrorKind } from "@/lib/riot/errors";
 /** Icônes de départ (Data Dragon 0 à 28) : tout compte les possède. */
 export const STARTER_ICON_COUNT = 29;
 /** Temps laissé pour changer d'icône. */
-export const CHALLENGE_MINUTES = 15;
+export const CHALLENGE_MINUTES = 30;
+/**
+ * Riot met parfois plusieurs minutes à montrer une nouvelle icône : passé le
+ * délai, l'icône demandée vaut encore preuve pendant ce temps-là.
+ */
+export const LATE_GRACE_MINUTES = 24 * 60;
+
+const graceEnd = (expiresAt: Date) => new Date(expiresAt.getTime() + LATE_GRACE_MINUTES * 60_000);
 
 /** Une icône de départ au hasard, différente de celle que le compte affiche déjà. */
 export function pickChallengeIcon(current: number | null, random: () => number = Math.random) {
@@ -49,7 +56,9 @@ type Deps = { api: RiotApi; now?: () => Date; random?: () => number };
 /**
  * Demande la preuve : l'icône à mettre et jusqu'à quand. Une demande encore
  * valide est reprise telle quelle, pour que le joueur ne voie pas l'icône
- * changer s'il revient sur la page.
+ * changer s'il revient sur la page ; une demande expirée garde la même icône
+ * (il l'a peut-être déjà mise). Si Riot montre déjà l'icône demandée, le
+ * compte est confirmé tout de suite.
  */
 export async function startOwnershipChallenge(
   userId: string,
@@ -87,21 +96,22 @@ export async function startOwnershipChallenge(
     });
 
     const current = now();
-    if (
-      account.ownershipIconId !== null &&
-      account.ownershipExpiresAt &&
-      account.ownershipExpiresAt > current &&
-      account.ownershipIconId !== summoner.profileIconId
-    ) {
-      return {
-        ok: true,
-        status: "pending",
-        iconId: account.ownershipIconId,
-        expiresAt: account.ownershipExpiresAt,
-      };
+    const asked = account.ownershipIconId;
+    const deadline = account.ownershipExpiresAt;
+    if (asked !== null && deadline) {
+      if (asked === summoner.profileIconId && current <= graceEnd(deadline)) {
+        await markRiotAccountOwned(userId, accountId, current);
+        return { ok: true, status: "owned" };
+      }
+      if (deadline > current) {
+        return { ok: true, status: "pending", iconId: asked, expiresAt: deadline };
+      }
     }
 
-    const iconId = pickChallengeIcon(summoner.profileIconId, random);
+    const iconId =
+      asked !== null && asked !== summoner.profileIconId
+        ? asked
+        : pickChallengeIcon(summoner.profileIconId, random);
     const expiresAt = new Date(current.getTime() + CHALLENGE_MINUTES * 60_000);
     await saveOwnershipChallenge(userId, accountId, { iconId, expiresAt });
     return { ok: true, status: "pending", iconId, expiresAt };
@@ -123,11 +133,11 @@ export type ConfirmResult =
         | "account_missing"
         /** Aucune preuve demandée pour ce compte. */
         | "no_challenge"
-        /** Le temps laissé est passé : il faut recommencer. */
-        | "expired"
-        /** Riot montre encore une autre icône sur ce compte. */
-        | "icon_mismatch";
-    };
+        /** Le temps laissé est passé, et Riot ne montre pas l'icône : il faut recommencer. */
+        | "expired";
+    }
+  /** Riot montre encore une autre icône sur ce compte : celle-ci. */
+  | { ok: false; reason: "icon_mismatch"; seenIconId: number };
 
 /** Vérifie auprès de Riot que l'icône demandée est sur le compte. */
 export async function confirmOwnershipChallenge(
@@ -142,7 +152,11 @@ export async function confirmOwnershipChallenge(
     return { ok: false, reason: "no_challenge" };
   }
   const current = now();
-  if (account.ownershipExpiresAt <= current) return { ok: false, reason: "expired" };
+  // Passé le délai, l'icône demandée vaut encore preuve un moment (Riot en retard).
+  const late = account.ownershipExpiresAt <= current;
+  if (late && current > graceEnd(account.ownershipExpiresAt)) {
+    return { ok: false, reason: "expired" };
+  }
 
   try {
     const summoner = await api.getSummoner(account.platform, account.puuid);
@@ -151,7 +165,9 @@ export async function confirmOwnershipChallenge(
       summonerLevel: summoner.summonerLevel,
     });
     if (summoner.profileIconId !== account.ownershipIconId) {
-      return { ok: false, reason: "icon_mismatch" };
+      return late
+        ? { ok: false, reason: "expired" }
+        : { ok: false, reason: "icon_mismatch", seenIconId: summoner.profileIconId };
     }
   } catch (error) {
     if (error instanceof RiotApiError) return { ok: false, reason: error.kind };

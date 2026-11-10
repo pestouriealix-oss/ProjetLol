@@ -18,14 +18,14 @@
     "start_window": "background",
     "game_targeting": {
       "type": "dedicated",
-      "game_ids": [5426]
+      "game_ids": [5426, 10902]
     },
-    "game_events": [5426],
+    "game_events": [5426, 10902],
     "launch_events": [
       {
         "event": "GameLaunch",
         "event_data": {
-          "game_ids": [5426],
+          "game_ids": [5426, 10902],
           "include_launchers": true
         },
         "start_minimized": true

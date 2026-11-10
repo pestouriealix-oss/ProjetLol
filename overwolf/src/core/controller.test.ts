@@ -150,6 +150,26 @@ describe("la fiche à l'écran de chargement", () => {
     await flush();
     signals().gameRunning(true);
     for (let i = 0; i < 4; i += 1) await flush();
-    expect(controller.getState().sheet).toEqual({ status: "error", reason: "quota" });
+    expect(controller.getState().sheet).toEqual({
+      status: "error",
+      reason: "quota",
+      code: "quota",
+    });
+  });
+
+  it("distingue une clé du modèle refusée d'une panne", async () => {
+    const { controller, signals, flush } = setup({
+      token: "jeton",
+      live: [{ status: "found", draft, riotId: "Alix" }],
+      sheet: [{ type: "error", error: "invalid_key" }],
+    });
+    await flush();
+    signals().gameRunning(true);
+    for (let i = 0; i < 4; i += 1) await flush();
+    expect(controller.getState().sheet).toEqual({
+      status: "error",
+      reason: "coach_setup",
+      code: "invalid_key",
+    });
   });
 });

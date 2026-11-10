@@ -2,10 +2,15 @@ import "server-only";
 import { and, count, desc, eq, exists, inArray, sql } from "drizzle-orm";
 
 import type { Platform } from "@/lib/config";
-import type { MatchSummary, ParticipationData } from "@/lib/stats/participation";
+import {
+  NORMAL_QUEUE_IDS,
+  RIFT_QUEUE_IDS,
+  type MatchSummary,
+  type ParticipationData,
+} from "@/lib/stats/participation";
 
 import { db } from "./client";
-import { matches, participations, riotAccounts } from "./schema";
+import { matches, participations, riotAccounts, skippedMatches } from "./schema";
 
 /**
  * Parties et performances. Une partie brute est partagée entre tous les
@@ -24,12 +29,28 @@ export async function listKnownMatchIds(
   matchIds: string[],
 ): Promise<string[]> {
   if (matchIds.length === 0) return [];
-  const rows = await db
-    .select({ matchId: participations.matchId })
-    .from(participations)
-    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
-    .where(and(ownedAccount(userId, accountId), inArray(participations.matchId, matchIds)));
-  return rows.map((row) => row.matchId);
+  const [rows, skipped] = await Promise.all([
+    db
+      .select({ matchId: participations.matchId })
+      .from(participations)
+      .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+      .where(and(ownedAccount(userId, accountId), inArray(participations.matchId, matchIds))),
+    // Les parties hors Faille déjà vues, pour tout le monde : rien à redemander à Riot.
+    db
+      .select({ matchId: skippedMatches.matchId })
+      .from(skippedMatches)
+      .where(inArray(skippedMatches.matchId, matchIds)),
+  ]);
+  return [...rows, ...skipped].map((row) => row.matchId);
+}
+
+/**
+ * Note une partie hors Faille (ARAM, Arène…) pour ne plus la demander à Riot.
+ * Exception assumée à la règle « `userId` en premier » : un identifiant de
+ * partie public et sa file, rien qui désigne un joueur.
+ */
+export async function skipMatch(matchId: string, queueId: number): Promise<void> {
+  await db.insert(skippedMatches).values({ matchId, queueId }).onConflictDoNothing();
 }
 
 /**
@@ -190,14 +211,20 @@ export async function findPlayedMatch(
 }
 
 /** File de parties à prendre en compte : toutes les classées, ou une seule. */
-export type QueueFilter = "ALL" | "SOLO" | "FLEX";
+export type QueueFilter = "ALL" | "SOLO" | "FLEX" | "NORMAL";
 
-const queueCondition = (queue: QueueFilter) =>
-  queue === "SOLO"
-    ? eq(matches.queueId, 420)
-    : queue === "FLEX"
-      ? eq(matches.queueId, 440)
-      : inArray(matches.queueId, [420, 440]);
+const queueCondition = (queue: QueueFilter) => {
+  switch (queue) {
+    case "SOLO":
+      return eq(matches.queueId, 420);
+    case "FLEX":
+      return eq(matches.queueId, 440);
+    case "NORMAL":
+      return inArray(matches.queueId, NORMAL_QUEUE_IDS);
+    case "ALL":
+      return inArray(matches.queueId, RIFT_QUEUE_IDS);
+  }
+};
 
 /** Totaux d'un groupe de parties, à partir desquels l'interface calcule moyennes et taux. */
 const totals = {

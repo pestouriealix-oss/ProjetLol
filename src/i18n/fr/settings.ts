@@ -57,11 +57,13 @@ export const settings = {
       check: "Vérifier",
       later: "Plus tard",
       restart: "Recommencer",
+      seen: "Ce que Riot montre pour l'instant :",
       done: "Compte confirmé. Tu peux remettre ton icône.",
       errors: {
         icon_mismatch:
-          "Riot montre encore une autre icône sur ce compte. Le changement peut prendre une minute : réessaie.",
-        expired: "Le délai est passé. Recommence pour obtenir une nouvelle icône.",
+          "Riot montre encore une autre icône sur ce compte. Le changement peut prendre plusieurs minutes : garde la nouvelle icône et réessaie, même après l'heure indiquée.",
+        expired:
+          "Le délai est passé et Riot ne montre pas l'icône. Recommence : ce sera la même icône.",
         no_challenge: "Aucune vérification en cours. Recommence.",
         player_unknown: "Riot ne connaît pas ce Riot ID sur ce serveur. Vérifie son orthographe.",
         player_already_linked: "Ce joueur est déjà lié à ton compte sous un autre Riot ID.",

@@ -3,11 +3,19 @@ export const matches = {
   title: "Parties",
   emptyTitle: "Aucune partie pour l'instant",
   emptyBody:
-    "Mets ton compte à jour depuis le tableau de bord : tes parties classées s'afficheront ici, de la plus récente à la plus ancienne.",
+    "Mets ton compte à jour depuis le tableau de bord : tes parties s'afficheront ici, de la plus récente à la plus ancienne.",
   toDashboard: "Aller au tableau de bord",
   win: "Victoire",
   loss: "Défaite",
-  queues: { SOLO: "Solo/Duo", FLEX: "Flex", OTHER: "Autre file" },
+  queues: {
+    SOLO: "Solo/Duo",
+    FLEX: "Flex",
+    DRAFT: "Normale draft",
+    BLIND: "Normale aveugle",
+    QUICK: "Partie rapide",
+    CLASH: "Clash",
+    OTHER: "Autre file",
+  },
   kda: (ratio: string) => `${ratio} KDA`,
   cs: (cs: number, perMinute: string) => `${cs} CS (${perMinute}/min)`,
   killParticipation: (percent: string) => `${percent} KP`,
@@ -97,7 +105,7 @@ export const matchDetail = {
     },
     sources: (games: number) =>
       games > 0
-        ? `D'après les données officielles de la partie (Riot) et tes ${games} autres parties classées à ce poste. Bilan écrit par le coach (Claude).`
+        ? `D'après les données officielles de la partie (Riot) et tes ${games} autres parties à ce poste. Bilan écrit par le coach (Claude).`
         : "D'après les données officielles de la partie (Riot). Bilan écrit par le coach (Claude).",
     notReviewable:
       "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",

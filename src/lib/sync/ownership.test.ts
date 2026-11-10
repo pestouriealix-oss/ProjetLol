@@ -115,7 +115,7 @@ describe.skipIf(!hasDatabase)("preuve de propriété d'un compte Riot", () => {
     // Icône pas encore changée : refusé, le compte reste à confirmer.
     expect(
       await ownership.confirmOwnershipChallenge(userId, account.id, { api, now: at(3) }),
-    ).toEqual({ ok: false, reason: "icon_mismatch" });
+    ).toEqual({ ok: false, reason: "icon_mismatch", seenIconId: 4568 });
 
     player.icon = started.iconId;
     expect(
@@ -146,11 +146,61 @@ describe.skipIf(!hasDatabase)("preuve de propriété d'un compte Riot", () => {
       { ok: false, reason: "account_missing" },
     );
 
-    const late = at(ownership.CHALLENGE_MINUTES + 1);
+    const tooLate = at(ownership.CHALLENGE_MINUTES + ownership.LATE_GRACE_MINUTES + 1);
+    expect(
+      await ownership.confirmOwnershipChallenge(userId, account.id, { api, now: tooLate }),
+    ).toEqual({ ok: false, reason: "expired" });
+    expect((await accountsApi.findRiotAccount(userId, account.id))?.ownedAt).toBeNull();
+  });
+
+  it("accepte l'icône que Riot montre en retard, et garde la même icône si on recommence", async () => {
+    const userId = await newUser();
+    const account = await link(userId);
+    const { api, player } = fakeApi();
+
+    const started = await ownership.startOwnershipChallenge(userId, account.id, {
+      api,
+      now: at(0),
+      random: () => 0.3,
+    });
+    if (!started.ok || started.status !== "pending") throw new Error("preuve non demandée");
+
+    // Délai passé, Riot montre toujours l'ancienne icône : à recommencer…
+    const late = at(ownership.CHALLENGE_MINUTES + 5);
     expect(
       await ownership.confirmOwnershipChallenge(userId, account.id, { api, now: late }),
     ).toEqual({ ok: false, reason: "expired" });
-    expect((await accountsApi.findRiotAccount(userId, account.id))?.ownedAt).toBeNull();
+    // … avec la même icône, que le joueur a peut-être déjà mise.
+    const again = await ownership.startOwnershipChallenge(userId, account.id, {
+      api,
+      now: late,
+      random: () => 0.9,
+    });
+    expect(again).toMatchObject({ status: "pending", iconId: started.iconId });
+
+    // Riot finit par la montrer, même après l'heure : c'est une preuve.
+    player.icon = started.iconId;
+    const muchLater = at(ownership.CHALLENGE_MINUTES * 3);
+    expect(
+      await ownership.confirmOwnershipChallenge(userId, account.id, { api, now: muchLater }),
+    ).toEqual({ ok: true });
+  });
+
+  it("confirme tout de suite si l'icône demandée est déjà en place", async () => {
+    const userId = await newUser();
+    const account = await link(userId);
+    const { api, player } = fakeApi();
+
+    const started = await ownership.startOwnershipChallenge(userId, account.id, {
+      api,
+      now: at(0),
+    });
+    if (!started.ok || started.status !== "pending") throw new Error("preuve non demandée");
+    player.icon = started.iconId;
+    expect(
+      await ownership.startOwnershipChallenge(userId, account.id, { api, now: at(1) }),
+    ).toEqual({ ok: true, status: "owned" });
+    expect((await accountsApi.findRiotAccount(userId, account.id))?.ownedAt).toEqual(at(1)());
   });
 
   it("dit quand Riot ne connaît pas ce Riot ID", async () => {

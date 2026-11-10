@@ -25,13 +25,28 @@ const isLeague = (classId: number | undefined) =>
   classId !== undefined && Math.floor(classId) === LOL_GAME_ID;
 
 /**
+ * Le lanceur de LoL : son `id` porte un chiffre de plus que la classe
+ * (109021 → 10902), comme dans l'exemple officiel d'Overwolf.
+ */
+const isLeagueLauncher = (launcher: overwolf.games.launchers.LauncherInfo) =>
+  launcher.classId === LOL_LAUNCHER_ID || Math.floor(launcher.id / 10) === LOL_LAUNCHER_ID;
+
+/** Traces lisibles dans la console de la fenêtre cachée (Development options → background). */
+const trace = (...values: unknown[]) => console.info("[Gufo]", ...values);
+
+/**
  * Overwolf n'accepte la demande de données qu'une fois le jeu (ou le lanceur)
  * prêt : on réessaie quelques secondes, comme le recommande sa doc.
  */
-function requireFeatures(set: (done: (ok: boolean) => void) => void, attempt = 0) {
-  set((ok) => {
+function requireFeatures(
+  label: string,
+  set: (done: (ok: boolean, detail: unknown) => void) => void,
+  attempt = 0,
+) {
+  set((ok, detail) => {
+    trace(`${label} : demande des données`, ok ? "acceptée" : "refusée", detail);
     if (!ok && attempt < MAX_RETRIES) {
-      setTimeout(() => requireFeatures(set, attempt + 1), RETRY_MS);
+      setTimeout(() => requireFeatures(label, set, attempt + 1), RETRY_MS);
     }
   });
 }
@@ -74,18 +89,24 @@ export function overwolfPlatform(): Platform {
       // ── Lanceur : salon, sélection, partie ──
       const readLauncher = (payload: unknown) => {
         const entries = readInfoEntries(payload);
+        trace(
+          "lanceur :",
+          entries.map((entry) => `${entry.category}.${entry.key}`).join(", ") || payload,
+        );
         const phase = findEntry(entries, "game_flow", "phase");
         if (typeof phase === "string") signals.launcherPhase(phase);
         const raw = findEntry(entries, "champ_select", "raw");
         if (raw !== undefined) signals.champSelect(raw);
       };
-      const watchLauncher = () =>
-        requireFeatures((done) =>
+      const watchLauncher = () => {
+        // Client ouvert : au moins le salon, en attendant la première étape lue.
+        signals.launcherPhase("None");
+        requireFeatures("lanceur", (done) =>
           overwolf.games.launchers.events.setRequiredFeatures(
             LOL_LAUNCHER_ID,
             LAUNCHER_FEATURES,
             (result) => {
-              done(result.success);
+              done(result.success, result.error ?? result.supportedFeatures);
               if (!result.success) return;
               overwolf.games.launchers.events.getInfo(LOL_LAUNCHER_ID, (info) => {
                 if (info.success && info.res) readLauncher({ info: info.res });
@@ -93,26 +114,32 @@ export function overwolfPlatform(): Platform {
             },
           ),
         );
+      };
 
       overwolf.games.launchers.events.onInfoUpdates.addListener(readLauncher);
       overwolf.games.launchers.onLaunched.addListener((launcher) => {
-        if (launcher.classId === LOL_LAUNCHER_ID) watchLauncher();
+        trace("lanceur ouvert", launcher.id, launcher.classId);
+        if (isLeagueLauncher(launcher)) watchLauncher();
       });
       overwolf.games.launchers.onTerminated.addListener((launcher) => {
-        if (launcher.classId === LOL_LAUNCHER_ID) signals.launcherPhase(null);
+        trace("lanceur fermé", launcher.id, launcher.classId);
+        if (isLeagueLauncher(launcher)) signals.launcherPhase(null);
       });
       overwolf.games.launchers.getRunningLaunchersInfo((result) => {
-        const running =
-          result.success && result.launchers.some((l) => l.classId === LOL_LAUNCHER_ID);
+        trace(
+          "lanceurs en cours",
+          result.success ? result.launchers.map((l) => [l.id, l.classId]) : result,
+        );
+        const running = result.success && result.launchers.some(isLeagueLauncher);
         if (running) watchLauncher();
         else signals.launcherPhase(null);
       });
 
       // ── Partie : chargement, puis horloge ──
       const watchGame = () =>
-        requireFeatures((done) =>
+        requireFeatures("partie", (done) =>
           overwolf.games.events.setRequiredFeatures(GAME_FEATURES, (result) =>
-            done(result.success),
+            done(result.success, result.error ?? result.supportedFeatures),
           ),
         );
       overwolf.games.events.onInfoUpdates2.addListener((update) => {
@@ -125,6 +152,7 @@ export function overwolfPlatform(): Platform {
         const info = event.gameInfo;
         if (!info || !isLeague(info.classId)) return;
         if (event.runningChanged || event.gameChanged) {
+          trace("partie", info.isRunning ? "lancée" : "terminée");
           signals.gameRunning(info.isRunning);
           if (info.isRunning) watchGame();
         }

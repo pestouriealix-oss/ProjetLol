@@ -37,11 +37,21 @@ export function OwnershipCheck({
   const router = useRouter();
   const [challenge, setChallenge] = useState(pending);
   const [busy, setBusy] = useState<"start" | "check" | null>(null);
-  const [error, setError] = useState<{ message: string; attempt: number; restart: boolean }>();
+  const [error, setError] = useState<{
+    message: string;
+    attempt: number;
+    restart: boolean;
+    seenIconUrl?: string | null;
+  }>();
   const [done, setDone] = useState(false);
 
-  const fail = (message: string, restart = false) =>
-    setError((previous) => ({ message, attempt: (previous?.attempt ?? 0) + 1, restart }));
+  const fail = (message: string, restart = false, seenIconUrl?: string | null) =>
+    setError((previous) => ({
+      message,
+      attempt: (previous?.attempt ?? 0) + 1,
+      restart,
+      seenIconUrl,
+    }));
 
   const start = async () => {
     setBusy("start");
@@ -73,7 +83,7 @@ export function OwnershipCheck({
       const result = await confirmOwnershipAction(accountId);
       if (!result.ok) {
         if (result.restart) setChallenge(null);
-        return fail(result.error, result.restart);
+        return fail(result.error, result.restart, result.seenIconUrl);
       }
       setDone(true);
       setTimeout(() => router.refresh(), REFRESH_AFTER_MS);
@@ -126,6 +136,19 @@ export function OwnershipCheck({
         </p>
       </div>
       {error ? <ErrorNotice attempt={error.attempt}>{error.message}</ErrorNotice> : null}
+      {error?.seenIconUrl ? (
+        <p className="flex items-center gap-3 text-sm text-ink-muted">
+          {copy.seen}
+          <Image
+            src={error.seenIconUrl}
+            alt=""
+            width={32}
+            height={32}
+            unoptimized
+            className="size-8 rounded-control border border-line-strong"
+          />
+        </p>
+      ) : null}
     </div>
   );
 }

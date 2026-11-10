@@ -15,7 +15,7 @@ import {
   type MatchReview,
 } from "@/lib/llm/prompts/match-review";
 import { buildMatchDetail } from "@/lib/stats/match-detail";
-import { rankedQueue } from "@/lib/stats/participation";
+import { gameQueue } from "@/lib/stats/participation";
 import { buildReviewFacts, type ReviewFacts } from "@/lib/stats/review";
 import { loadMatchTimeline } from "@/lib/sync/match-timeline";
 
@@ -101,7 +101,7 @@ export async function loadReviewFacts(userId: string, matchId: string): Promise<
     detail,
     timeline.ok ? timeline.timeline : null,
     totals,
-    rankedQueue(detail.queueId) !== null,
+    gameQueue(detail.queueId) !== null,
   );
   if (!facts) throw new ReviewError("not_reviewable", "Partie sans poste attribué.");
   return facts;

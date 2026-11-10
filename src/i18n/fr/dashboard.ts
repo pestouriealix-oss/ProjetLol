@@ -84,6 +84,7 @@ export const dashboard = {
   recent: {
     title: "Dernières parties",
     all: "Tout l'historique",
-    empty: "Clique sur « Mettre à jour » : tes parties classées récentes s'afficheront ici.",
+    empty:
+      "Clique sur « Mettre à jour » : tes parties récentes s'afficheront ici (classées, normales et parties rapides).",
   },
 } as const;

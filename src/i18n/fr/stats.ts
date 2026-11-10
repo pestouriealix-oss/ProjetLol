@@ -1,9 +1,10 @@
 /** Statistiques. */
 export const stats = {
   title: "Statistiques",
-  intro: "Tes parties classées synchronisées, champion par champion et rôle par rôle.",
+  intro:
+    "Tes parties synchronisées sur la Faille de l'invocateur, champion par champion et rôle par rôle.",
   queue: "File",
-  queues: { ALL: "Toutes les classées", SOLO: "Solo/Duo", FLEX: "Flex" },
+  queues: { ALL: "Toutes", SOLO: "Solo/Duo", FLEX: "Flex", NORMAL: "Normales" },
   lp: {
     title: "Évolution du classement",
     body: "Un point à chaque changement de rang relevé lors d'une mise à jour.",
@@ -51,6 +52,6 @@ export const stats = {
     `${wins} victoire${wins > 1 ? "s" : ""}, ${losses} défaite${losses > 1 ? "s" : ""} : trop peu de parties pour un pourcentage`,
   emptyTitle: "Pas encore de statistiques",
   emptyBody:
-    "Mets ton compte à jour depuis le tableau de bord : tes statistiques se calculent à partir de tes parties classées.",
+    "Mets ton compte à jour depuis le tableau de bord : tes statistiques se calculent à partir de tes parties.",
   seeAll: "Toutes les stats",
 } as const;

@@ -545,3 +545,14 @@ export const appTokens = pgTable(
   },
   (table) => [index("app_tokens_user_idx").on(table.userId)],
 );
+
+/**
+ * Parties vues mais pas gardées parce qu'elles ne se jouent pas sur la Faille
+ * (ARAM, Arène…) : on ne redemande pas leur détail à Riot à chaque mise à
+ * jour. Rien de personnel : un identifiant de partie public et sa file.
+ */
+export const skippedMatches = pgTable("skipped_matches", {
+  matchId: text("match_id").primaryKey(),
+  queueId: integer("queue_id").notNull(),
+  createdAt: createdAt(),
+});

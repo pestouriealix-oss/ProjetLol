@@ -424,4 +424,21 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
     expect(await links.revokeAppToken(bob, aliceApp!.id)).toBe(false);
     expect(await links.listAppTokens(alice)).toHaveLength(1);
   });
+
+  // `skipped_matches` ne garde que des identifiants de parties publiques (ARAM,
+  // Arène…) et leur file : rien qui désigne un joueur, partagé par tous.
+  it("une partie écartée ne dit rien du joueur qui l'a jouée", async () => {
+    const matchesApi = await import("./matches");
+    const matchId = `TESTSKIP_${randomUUID()}`;
+    await matchesApi.skipMatch(matchId, 450);
+    const [aliceAccount] = await api.listRiotAccounts(alice);
+    const [bobAccount] = await api.listRiotAccounts(bob);
+    expect(await matchesApi.listKnownMatchIds(alice, aliceAccount!.id, [matchId])).toEqual([
+      matchId,
+    ]);
+    expect(await matchesApi.listKnownMatchIds(bob, bobAccount!.id, [matchId])).toEqual([matchId]);
+    expect(
+      await matchesApi.listPlayedMatches(alice, aliceAccount!.id, { limit: 50 }),
+    ).not.toContainEqual(expect.objectContaining({ matchId }));
+  });
 });

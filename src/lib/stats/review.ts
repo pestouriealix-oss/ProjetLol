@@ -244,7 +244,7 @@ export function buildReviewFacts(
   detail: MatchDetail,
   timeline: ReducedTimeline | null,
   roleTotals: RoleTotals | null,
-  /** Vrai si cette partie est comptée dans `roleTotals` (partie classée). */
+  /** Vrai si cette partie est comptée dans `roleTotals` (partie de la Faille suivie). */
   countedInTotals: boolean,
 ): ReviewFacts | null {
   const { me } = detail;

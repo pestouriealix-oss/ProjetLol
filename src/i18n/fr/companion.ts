@@ -118,6 +118,7 @@ export const companion = {
       onSite: "Ta fiche est aussi sur gufo.gg.",
       retry: "Réessayer",
       seePremium: "Voir Premium",
+      code: (code: string) => `Code : ${code}`,
       signedOut: {
         title: "App pas encore reliée",
         body: "Ouvre Gufo depuis Overwolf pour relier l'app à ton compte.",
@@ -146,6 +147,14 @@ export const companion = {
         budget: {
           title: "Fiches gratuites en pause",
           body: "Les fiches gratuites reprennent le mois prochain. Premium continue.",
+        },
+        coach_setup: {
+          title: "Coach indisponible",
+          body: "Le serveur de Gufo n'a pas accès au modèle (clé absente, refusée ou sans crédit). Ce n'est pas de ton côté.",
+        },
+        busy: {
+          title: "Coach débordé",
+          body: "Trop de fiches demandées en même temps. Réessaie dans un instant.",
         },
         unavailable: {
           title: "Le coach ne répond pas",

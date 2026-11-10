@@ -8,7 +8,7 @@ import {
   Trophy,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,13 @@ export function DesktopApp({
   windowActions: { drag?: () => void; minimize?: () => void; close?: () => void };
 }) {
   const state = useAppState(controller);
+
+  // Un compte Riot ajouté ou confirmé sur le site entre-temps apparaît dès qu'on revient ici.
+  useEffect(() => {
+    const onFocus = () => controller.refreshAccountSoon();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [controller]);
 
   return (
     <div className="flex h-full flex-col bg-canvas text-ink">

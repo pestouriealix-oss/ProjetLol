@@ -64,6 +64,10 @@ export type SheetErrorReason =
   | "email_unverified"
   | "quota"
   | "budget"
+  /** Le serveur n'a pas accès au modèle : clé absente, refusée ou sans crédit. */
+  | "coach_setup"
+  /** Trop d'appels au modèle en même temps. */
+  | "busy"
   | "unavailable";
 
 export type SheetState =
@@ -71,7 +75,8 @@ export type SheetState =
   | { status: "looking" }
   | { status: "writing"; draft: Draft; sheet: SheetView }
   | { status: "ready"; draft: Draft; sheet: SheetView; id: string }
-  | { status: "error"; reason: SheetErrorReason };
+  /** `code` : l'erreur telle que le serveur l'a nommée, affichée en petit pour l'aide. */
+  | { status: "error"; reason: SheetErrorReason; code?: string };
 
 export type AppState = {
   account: AccountState;
@@ -98,7 +103,12 @@ const SERVER_ERRORS: Record<string, SheetErrorReason> = {
   quota: "quota",
   budget: "budget",
   email_unverified: "email_unverified",
+  missing_key: "coach_setup",
+  invalid_key: "coach_setup",
+  rate_limited: "busy",
 };
+/** On ne relit pas le compte plus souvent que ça quand la fenêtre revient au premier plan. */
+const ACCOUNT_REFRESH_MS = 20_000;
 
 type Options = {
   sleep?: (ms: number) => Promise<void>;
@@ -117,6 +127,7 @@ export class Controller {
   private sheetRun = 0;
   private linkRun = 0;
   private sheetAbort: AbortController | null = null;
+  private accountReadAt = 0;
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly now: () => number;
 
@@ -199,7 +210,14 @@ export class Controller {
 
   // ── Compte ────────────────────────────────────────────────────────────────
 
+  /** Relit le compte si la dernière lecture date un peu (fenêtre revenue au premier plan). */
+  refreshAccountSoon() {
+    if (this.now() - this.accountReadAt < ACCOUNT_REFRESH_MS) return;
+    void this.refreshAccount();
+  }
+
   async refreshAccount(): Promise<void> {
+    this.accountReadAt = this.now();
     if (!this.platform.storage.get(TOKEN_KEY)) {
       this.set({ account: { status: "signed_out" } });
       return;
@@ -397,9 +415,8 @@ export class Controller {
           void this.refreshAccount();
           return;
         } else {
-          this.set({
-            sheet: { status: "error", reason: SERVER_ERRORS[event.error] ?? "unavailable" },
-          });
+          const reason = SERVER_ERRORS[event.error] ?? "unavailable";
+          this.set({ sheet: { status: "error", reason, code: event.error } });
           return;
         }
         this.set({ sheet: { status: "writing", draft, sheet } });
@@ -410,9 +427,14 @@ export class Controller {
         this.handleApiError(error);
         return;
       }
+      if (this.state.sheet.status === "writing") {
+        const code = error instanceof ApiError ? error.kind : "network";
+        this.set({ sheet: { status: "error", reason: "unavailable", code } });
+        return;
+      }
     }
     if (current() && this.state.sheet.status === "writing") {
-      this.set({ sheet: { status: "error", reason: "unavailable" } });
+      this.set({ sheet: { status: "error", reason: "unavailable", code: "stream_ended" } });
     }
   }
 }

@@ -52,10 +52,13 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
     puuid = `puuid-${randomUUID()}`,
     matchIds,
     failOn,
+    queues = {},
   }: {
     puuid?: string;
     matchIds: string[];
     failOn?: Record<string, RiotApiError>;
+    /** File de certaines parties (420 par défaut). */
+    queues?: Record<string, number>;
   }) {
     const calls = { account: 0, matches: [] as string[] };
     const api: RiotApi = {
@@ -88,6 +91,9 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
       async getRankedMatchIds() {
         return [...matchIds];
       },
+      async getRecentMatchIds() {
+        return [...matchIds];
+      },
       async getMatch(_platform, matchId) {
         calls.matches.push(matchId);
         const failure = failOn?.[matchId];
@@ -97,6 +103,7 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
           matchFixture({
             matchId,
             puuid,
+            queueId: queues[matchId] ?? 420,
             win: index % 2 === 0,
             startedAt: Date.UTC(2026, 9, 10) - index * 3_600_000,
           }),
@@ -120,8 +127,34 @@ describe.skipIf(!hasDatabase)("synchronisation d'un compte Riot", () => {
   afterAll(async () => {
     for (const userId of users) await usersApi.deleteUser(userId);
     const { db } = await import("@/lib/db/client");
-    const { matches } = await import("@/lib/db/schema");
+    const { matches, skippedMatches } = await import("@/lib/db/schema");
     await db.delete(matches).where(like(matches.id, `${run}_%`));
+    await db.delete(skippedMatches).where(like(skippedMatches.matchId, `${run}_%`));
+  });
+
+  it("garde les normales de la Faille, écarte l'ARAM sans le redemander", async () => {
+    const bob = await newUser();
+    const account = await link(bob, "bob");
+    const [draft, aram, quick] = ids(41, 42, 43);
+    const { api, calls } = fakeApi({
+      matchIds: [draft!, aram!, quick!],
+      queues: { [draft!]: 400, [aram!]: 450, [quick!]: 490 },
+    });
+
+    const first = await sync.syncRiotAccount(bob, account.id, { api, now: at(0) });
+    expect(first).toEqual({ ok: true, newMatches: 2, partial: false });
+    const played = await matchesApi.listPlayedMatches(bob, account.id, { limit: 10 });
+    expect(played.map((match) => match.matchId)).toEqual([draft, quick]);
+    expect(await matchesApi.listRoleStats(bob, account.id, "NORMAL")).toMatchObject([
+      { role: "JUNGLE", games: 2 },
+    ]);
+    expect(await matchesApi.listRoleStats(bob, account.id, "SOLO")).toEqual([]);
+
+    // Seconde mise à jour : rien n'est redemandé, pas même l'ARAM.
+    calls.matches.length = 0;
+    const second = await sync.syncRiotAccount(bob, account.id, { api, now: at(5) });
+    expect(second).toEqual({ ok: true, newMatches: 0, partial: false });
+    expect(calls.matches).toEqual([]);
   });
 
   it("vérifie le compte, relève le classement et enregistre les parties", async () => {

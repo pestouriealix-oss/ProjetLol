@@ -13,6 +13,36 @@ export function rankedQueue(queueId: number): RankedQueue | null {
   return queueId === 420 ? "SOLO" : queueId === 440 ? "FLEX" : null;
 }
 
+/**
+ * Les files de la Faille de l'invocateur que Gufo suit : classées, normales,
+ * parties rapides et Clash. ARAM, Arène et les modes temporaires restent
+ * dehors : autre carte, autres règles, le coach n'est pas fait pour eux.
+ */
+export const RIFT_QUEUES = {
+  420: "SOLO",
+  440: "FLEX",
+  400: "DRAFT",
+  430: "BLIND",
+  480: "QUICK",
+  490: "QUICK",
+  700: "CLASH",
+} as const;
+export type GameQueue = (typeof RIFT_QUEUES)[keyof typeof RIFT_QUEUES];
+
+const RIFT_QUEUE_MAP = new Map<number, GameQueue>(
+  Object.entries(RIFT_QUEUES).map(([id, queue]) => [Number(id), queue]),
+);
+
+/** Toutes les files suivies (numéros de Riot). */
+export const RIFT_QUEUE_IDS = [...RIFT_QUEUE_MAP.keys()];
+/** Les parties normales : draft, aveugle, rapides. */
+export const NORMAL_QUEUE_IDS = [400, 430, 480, 490];
+
+/** La file d'une partie, ou `null` si Gufo ne la suit pas (ARAM, Arène…). */
+export function gameQueue(queueId: number): GameQueue | null {
+  return RIFT_QUEUE_MAP.get(queueId) ?? null;
+}
+
 const POSITIONS: Record<string, Role> = {
   TOP: "TOP",
   JUNGLE: "JUNGLE",

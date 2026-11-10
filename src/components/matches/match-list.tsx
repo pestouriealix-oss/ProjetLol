@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 import type { ChampionAssets } from "@/lib/ddragon/champions";
 import type { PlayedMatch } from "@/lib/db/matches";
 import { formatDecimal, formatDuration, formatPercent, formatRelative } from "@/lib/format";
-import { kdaRatio, rankedQueue } from "@/lib/stats/participation";
+import { gameQueue, kdaRatio } from "@/lib/stats/participation";
 
 const copy = t.matches;
 
@@ -27,7 +27,7 @@ export function MatchList({
     <ul className="flex flex-col gap-2">
       {matches.map((match) => {
         const name = champions?.name(match.championName) ?? match.championName;
-        const queue = rankedQueue(match.queueId) ?? "OTHER";
+        const queue = gameQueue(match.queueId) ?? "OTHER";
         const minutes = Math.max(1, match.durationSeconds / 60);
         return (
           <li key={match.id}>

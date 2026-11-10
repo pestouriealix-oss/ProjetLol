@@ -23,12 +23,14 @@ export const metadata: Metadata = { title: t.stats.title };
 
 const copy = t.stats;
 
-const QUEUE_PARAM = { tout: "ALL", solo: "SOLO", flex: "FLEX" } as const satisfies Record<
-  string,
-  QueueFilter
->;
+const QUEUE_PARAM = {
+  tout: "ALL",
+  solo: "SOLO",
+  flex: "FLEX",
+  normales: "NORMAL",
+} as const satisfies Record<string, QueueFilter>;
 const queueParam = z
-  .enum(["tout", "solo", "flex"])
+  .enum(["tout", "solo", "flex", "normales"])
   .catch("solo")
   .optional()
   .transform((value) => value ?? "solo");
@@ -39,6 +41,7 @@ const RANK_QUEUES: Record<QueueFilter, string | null> = {
   ALL: null,
   SOLO: "RANKED_SOLO_5x5",
   FLEX: "RANKED_FLEX_SR",
+  NORMAL: null,
 };
 
 export default async function StatsPage({ searchParams }: { searchParams: StatsSearchParams }) {

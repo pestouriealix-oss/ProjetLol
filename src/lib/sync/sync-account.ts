@@ -1,6 +1,6 @@
 import "server-only";
 
-import { listKnownMatchIds, saveMatchForAccount } from "@/lib/db/matches";
+import { listKnownMatchIds, saveMatchForAccount, skipMatch } from "@/lib/db/matches";
 import { recordRanks } from "@/lib/db/ranks";
 import {
   findRiotAccount,
@@ -11,9 +11,9 @@ import {
 } from "@/lib/db/riot-accounts";
 import type { RiotApi } from "@/lib/riot/api";
 import { RiotApiError, type RiotErrorKind } from "@/lib/riot/errors";
-import { extractParticipation, summarizeMatch } from "@/lib/stats/participation";
+import { extractParticipation, gameQueue, summarizeMatch } from "@/lib/stats/participation";
 
-/** Parties classées regardées à chaque synchronisation. */
+/** Dernières parties regardées à chaque synchronisation (toutes files). */
 export const MATCHES_PER_SYNC = 20;
 /** Délai minimum entre deux synchronisations d'un même compte. */
 export const SYNC_COOLDOWN_SECONDS = 60;
@@ -40,7 +40,8 @@ export type SyncResult =
 
 /**
  * Met un compte à jour depuis l'API Riot : identité, icône et niveau, classement, puis les
- * parties classées récentes qui manquent.
+ * parties récentes de la Faille (classées, normales, rapides, Clash) qui manquent.
+ * Les autres modes (ARAM, Arène…) sont notés pour ne plus être redemandés.
  *
  * Tout est repris sans dégât si on relance : une partie déjà enregistrée est
  * ignorée, et une interruption à mi-chemin laisse les parties déjà sauvées.
@@ -104,7 +105,7 @@ export async function syncRiotAccount(
       })),
     );
 
-    const ids = await api.getRankedMatchIds(account.platform, puuid, MATCHES_PER_SYNC);
+    const ids = await api.getRecentMatchIds(account.platform, puuid, MATCHES_PER_SYNC);
     const known = new Set(await listKnownMatchIds(userId, accountId, ids));
     const missing = ids.filter((id) => !known.has(id));
 
@@ -123,6 +124,10 @@ export async function syncRiotAccount(
         // Partie introuvable (purgée par Riot) : on passe à la suivante.
         if (error instanceof RiotApiError && error.kind === "not_found") continue;
         throw error;
+      }
+      if (gameQueue(match.info.queueId) === null) {
+        await skipMatch(matchId, match.info.queueId);
+        continue;
       }
       const participation = extractParticipation(match, puuid);
       if (!participation) continue;

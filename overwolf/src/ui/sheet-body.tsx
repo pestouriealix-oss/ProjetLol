@@ -72,7 +72,10 @@ export function SheetBody({
       return (
         <Message title={error.title} body={error.body} tone="warn">
           <div className="flex flex-wrap gap-2 pt-1">
-            {sheet.reason === "not_found" || sheet.reason === "unavailable" ? (
+            {sheet.reason === "not_found" ||
+            sheet.reason === "unavailable" ||
+            sheet.reason === "busy" ||
+            sheet.reason === "coach_setup" ? (
               <Button size="sm" variant="secondary" onClick={onRetry}>
                 {copy.retry}
               </Button>
@@ -88,6 +91,7 @@ export function SheetBody({
               </Button>
             ) : null}
           </div>
+          {sheet.code ? <p className="text-xs text-ink-faint">{copy.code(sheet.code)}</p> : null}
         </Message>
       );
     }

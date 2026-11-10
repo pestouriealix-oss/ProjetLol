@@ -32,7 +32,7 @@ import { readReviewView } from "@/lib/review/review-view";
 import { loadPlayerRanks } from "@/lib/riot";
 import { rankQueueFor } from "@/lib/stats/live-game";
 import { buildMatchDetail, type DetailTeam } from "@/lib/stats/match-detail";
-import { rankedQueue } from "@/lib/stats/participation";
+import { gameQueue } from "@/lib/stats/participation";
 
 export const metadata: Metadata = { title: t.matchDetail.title };
 
@@ -99,7 +99,7 @@ export default async function MatchDetailPage({
   const [ours, theirs] = teams;
   const champion = assets.champion(me.championName);
   const opponent = me.role ? (theirs.players.find((p) => p.role === me.role) ?? null) : null;
-  const queue = rankedQueue(detail.queueId) ?? "OTHER";
+  const queue = gameQueue(detail.queueId) ?? "OTHER";
   const minutes = detail.durationSeconds / 60;
   const tables: TeamsProps = {
     ours,

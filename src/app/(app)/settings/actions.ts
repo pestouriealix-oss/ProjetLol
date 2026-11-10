@@ -180,6 +180,8 @@ export type OwnershipConfirmResult =
       error: string;
       /** Vrai si la preuve est à redemander (expirée, ou plus aucune en cours). */
       restart: boolean;
+      /** L'icône que Riot montre encore, quand ce n'est pas la bonne. */
+      seenIconUrl?: string | null;
     };
 
 /** Vérifie chez Riot que l'icône demandée est sur le compte. */
@@ -194,6 +196,15 @@ export async function confirmOwnershipAction(accountId: string): Promise<Ownersh
   }
 
   const result = await confirmOwnershipChallenge(user.id, parsedId.data, { api: riotApi });
+  if (!result.ok && result.reason === "icon_mismatch") {
+    const champions = await getChampionAssets();
+    return {
+      ok: false,
+      error: ownershipErrors.icon_mismatch,
+      restart: false,
+      seenIconUrl: champions?.profileIconUrl(result.seenIconId) ?? null,
+    };
+  }
   if (!result.ok) {
     return {
       ok: false,
