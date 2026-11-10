@@ -50,15 +50,16 @@ mêmes routes.
    whitelisté.
 2. Sur le Mac, lance le site (`npm run dev`) et note son adresse « Network »
    (`http://192.168.x.x:3000`).
-3. Sur la tour, dans PowerShell :
+3. Sur la tour, dans l'**Invite de commandes** (`cmd`, pas PowerShell, qui
+   bloque `npm` par défaut) :
 
-   ```powershell
+   ```bat
    git clone https://github.com/pestouriealix-oss/ProjetLol.git
    cd ProjetLol
    npm install
    cd overwolf
    npm install
-   $env:VITE_GUFO_URL = "http://192.168.x.x:3000"
+   set VITE_GUFO_URL=http://192.168.x.x:3000
    npm run build
    ```
 
