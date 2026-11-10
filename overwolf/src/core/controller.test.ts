@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Draft } from "@/lib/draft/draft";
 
 import { ApiError, type GufoApi, type LiveResult, type Me, type SheetEvent } from "./api";
-import { Controller, type Platform, type PlatformSignals } from "./controller";
+import { Controller, SHEET_IN_GAME_MS, type Platform, type PlatformSignals } from "./controller";
 
 const me: Me = {
   name: "Alix",
@@ -22,7 +22,14 @@ const draft: Draft = {
 };
 
 function setup(
-  options: { token?: string; live?: LiveResult[]; sheet?: SheetEvent[]; meError?: ApiError } = {},
+  options: {
+    token?: string;
+    live?: LiveResult[];
+    sheet?: SheetEvent[];
+    meError?: ApiError;
+    /** Remplace l'attente instantanée pour un délai donné ; `undefined` garde l'instantané. */
+    sleep?: (ms: number) => Promise<void> | undefined;
+  } = {},
 ) {
   const store = new Map<string, string>(options.token ? [["gufo.token", options.token]] : []);
   let signals: PlatformSignals | undefined;
@@ -67,13 +74,15 @@ function setup(
   let clock = 0;
   const controller = new Controller(platform, () => api as unknown as GufoApi, {
     sleep: async (ms) => {
+      const custom = options.sleep?.(ms);
+      if (custom) return custom;
       clock += ms;
     },
     now: () => clock,
   });
   controller.start();
   const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
-  return { controller, platform, api, store, signals: () => signals!, flush };
+  return { controller, platform, api, store, signals: () => signals!, flush, clock: () => clock };
 }
 
 describe("liaison avec le compte", () => {
@@ -101,9 +110,9 @@ describe("liaison avec le compte", () => {
 });
 
 describe("la fiche à l'écran de chargement", () => {
-  it("cherche la partie, écrit la fiche, puis l'efface quand la partie commence", async () => {
+  it("cherche la partie, écrit la fiche, et la garde jusqu'à 1:30 de jeu", async () => {
     const sheet = { winConditions: { ours: "Jouer autour du dragon", theirs: "Diviser" } };
-    const { controller, platform, signals, flush } = setup({
+    const { controller, platform, signals, flush, clock } = setup({
       token: "jeton",
       live: [{ status: "not_in_game" }, { status: "found", draft, riotId: "Alix" }],
       sheet: [
@@ -122,12 +131,72 @@ describe("la fiche à l'écran de chargement", () => {
     for (let i = 0; i < 5; i += 1) await flush();
     expect(controller.getState().sheet).toMatchObject({ status: "ready", id: "fiche-1" });
 
+    vi.mocked(platform.hideWindow).mockClear();
     signals().matchStarted();
     expect(controller.getState().stage).toBe("in_game");
+    // Toujours là au début de la partie…
+    expect(controller.getState().sheetVisible).toBe(true);
+    expect(platform.hideWindow).not.toHaveBeenCalled();
+    // … puis rangée une fois le délai passé.
+    await flush();
+    expect(clock()).toBeGreaterThanOrEqual(SHEET_IN_GAME_MS);
+    expect(controller.getState().sheetVisible).toBe(false);
     expect(platform.hideWindow).toHaveBeenCalledWith("in_game");
-    // Le raccourci ne rouvre pas la fiche pendant la partie.
+
+    // Le raccourci la rouvre pendant la partie, sans la réécrire.
+    signals().hotkey();
+    expect(controller.getState().sheetVisible).toBe(true);
+    expect(controller.getState().sheet).toMatchObject({ status: "ready", id: "fiche-1" });
     signals().hotkey();
     expect(controller.getState().sheetVisible).toBe(false);
+
+    // Fin de partie : elle ne se rouvre plus.
+    signals().gameRunning(false);
+    signals().launcherPhase("EndOfGame");
+    signals().hotkey();
+    expect(controller.getState().sheetVisible).toBe(false);
+  });
+
+  it("ne range pas une fiche que le joueur a rouverte entre-temps", async () => {
+    let release: () => void = () => undefined;
+    const { controller, signals, flush } = setup({
+      token: "jeton",
+      live: [{ status: "found", draft, riotId: "Alix" }],
+      sheet: [{ type: "done", id: "fiche-2", sheet: {} }],
+      // Le délai de 1:30 ne s'écoule que sur commande.
+      sleep: (ms) =>
+        ms === SHEET_IN_GAME_MS ? new Promise<void>((resolve) => (release = resolve)) : undefined,
+    });
+    await flush();
+    signals().gameRunning(true);
+    for (let i = 0; i < 5; i += 1) await flush();
+    signals().matchStarted();
+    // Le joueur la range puis la rouvre avant 1:30 : elle reste.
+    signals().hotkey();
+    signals().hotkey();
+    release();
+    await flush();
+    expect(controller.getState().sheetVisible).toBe(true);
+  });
+
+  it("écrit la fiche à la demande si le compte n'était pas prêt au chargement", async () => {
+    const { controller, api, signals, flush } = setup({
+      token: "jeton",
+      live: [{ status: "found", draft, riotId: "Alix" }],
+      sheet: [{ type: "done", id: "fiche-3", sheet: {} }],
+    });
+    // Lancée avec le jeu : la partie démarre avant que le compte soit relu.
+    signals().gameRunning(true);
+    signals().matchStarted();
+    await flush();
+    expect(controller.getState().account.status).toBe("signed_in");
+    expect(controller.getState().sheetVisible).toBe(false);
+    expect(api.live).not.toHaveBeenCalled();
+
+    signals().hotkey();
+    for (let i = 0; i < 5; i += 1) await flush();
+    expect(controller.getState().sheetVisible).toBe(true);
+    expect(controller.getState().sheet).toMatchObject({ status: "ready", id: "fiche-3" });
   });
 
   it("dit pourquoi il n'y a pas de fiche", async () => {

@@ -109,6 +109,12 @@ const SERVER_ERRORS: Record<string, SheetErrorReason> = {
 };
 /** On ne relit pas le compte plus souvent que ça quand la fenêtre revient au premier plan. */
 const ACCOUNT_REFRESH_MS = 20_000;
+/**
+ * Au début de la partie, la fiche reste le temps d'aller en voie : elle se range
+ * vers 1:30, quand les premiers CS arrivent. Un chargement rapide ne laisse
+ * sinon pas le temps de la lire.
+ */
+export const SHEET_IN_GAME_MS = 90_000;
 
 type Options = {
   sleep?: (ms: number) => Promise<void>;
@@ -126,6 +132,8 @@ export class Controller {
   /** Chaque recherche de fiche porte un numéro : une recherche dépassée s'arrête. */
   private sheetRun = 0;
   private linkRun = 0;
+  /** Le rangement automatique en début de partie ; un geste du joueur l'annule. */
+  private autoHideRun = 0;
   private sheetAbort: AbortController | null = null;
   private accountReadAt = 0;
   private readonly sleep: (ms: number) => Promise<void>;
@@ -317,16 +325,32 @@ export class Controller {
     this.platform.openUrl(this.api.siteUrl(path));
   }
 
-  /** La fiche ne s'affiche qu'à l'écran de chargement, jamais pendant la partie. */
+  /**
+   * La fiche s'affiche à l'écran de chargement et, sur demande, pendant la
+   * partie : elle ne change pas une fois écrite, c'est un mémo, pas une alerte.
+   */
   showSheet() {
-    if (this.state.stage !== "loading") return;
+    const stage = this.state.stage;
+    if (stage !== "loading" && stage !== "in_game") return;
+    this.autoHideRun += 1;
+    // App ouverte en pleine partie : la fiche n'a pas encore été demandée.
+    if (stage === "in_game" && this.state.sheet.status === "idle") void this.runSheet();
     this.platform.showWindow(WINDOWS.inGame);
     this.set({ sheetVisible: true });
   }
 
   hideSheet() {
+    this.autoHideRun += 1;
     this.platform.hideWindow(WINDOWS.inGame);
     if (this.state.sheetVisible) this.set({ sheetVisible: false });
+  }
+
+  /** Range la fiche vers 1:30 de jeu, sauf si le joueur l'a rangée ou rouverte entre-temps. */
+  private async hideSheetSoon() {
+    this.autoHideRun += 1;
+    const run = this.autoHideRun;
+    await this.sleep(SHEET_IN_GAME_MS);
+    if (run === this.autoHideRun && this.state.stage === "in_game") this.hideSheet();
   }
 
   toggleSheet() {
@@ -345,8 +369,11 @@ export class Controller {
     if (stage === "loading") {
       void this.runSheet();
       if (this.state.autoShow && this.state.account.status === "signed_in") this.showSheet();
+    } else if (stage === "in_game") {
+      // La partie commence : la fiche affichée reste le temps d'aller en voie.
+      if (this.state.sheetVisible) void this.hideSheetSoon();
     } else {
-      // La fiche s'efface dès que la partie commence (ou que le chargement est abandonné).
+      // Fin de partie, retour au salon, chargement abandonné : la fiche se range.
       this.hideSheet();
     }
     if (stage === "champ_select") {
@@ -364,7 +391,7 @@ export class Controller {
 
   /** Relance la recherche de la fiche (bouton « Réessayer »). */
   retrySheet() {
-    if (this.state.stage === "loading") void this.runSheet();
+    if (this.state.stage === "loading" || this.state.stage === "in_game") void this.runSheet();
   }
 
   private async runSheet(): Promise<void> {

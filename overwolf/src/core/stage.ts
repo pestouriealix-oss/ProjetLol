@@ -11,7 +11,7 @@ export type Stage =
   | "champ_select"
   /** Écran de chargement : le moment de la fiche. */
   | "loading"
-  /** La partie a commencé : la fiche s'efface. */
+  /** La partie a commencé : la fiche se range vers 1:30 ; le raccourci la rouvre. */
   | "in_game"
   /** Fin de partie : direction le bilan. */
   | "after_game";

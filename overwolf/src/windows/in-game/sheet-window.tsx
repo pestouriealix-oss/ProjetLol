@@ -11,8 +11,8 @@ const copy = t.companion.app;
 
 /**
  * La fiche posée sur l'écran de chargement : un panneau qui se lit en dix
- * secondes, à déplacer d'un glisser. Aucun pseudo, aucune pub. Elle s'efface
- * toute seule quand la partie commence.
+ * secondes, à déplacer d'un glisser. Aucun pseudo, aucune pub. Elle reste le
+ * temps d'aller en voie, puis se range ; le raccourci la rouvre en partie.
  */
 export function SheetWindow({
   controller,

@@ -90,7 +90,7 @@ export const companion = {
       },
       in_game: {
         title: "Bonne partie",
-        body: "La fiche s'efface pendant la partie. Elle t'attend ici et sur gufo.gg.",
+        body: "La fiche se range vers 1:30 de jeu. Ton raccourci la rouvre quand tu veux, et elle t'attend ici et sur gufo.gg.",
       },
       after_game: {
         title: "Partie terminée",
