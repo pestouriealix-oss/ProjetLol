@@ -10,6 +10,9 @@ import { showsWinrate } from "@/lib/stats/sample";
 
 const copy = t.dashboard.rank;
 
+/** Un classement, d'un relevé enregistré ou lu à l'instant chez Riot. */
+export type RankLine = Pick<RankSnapshot, "queue" | "tier" | "division" | "lp" | "wins" | "losses">;
+
 const QUEUES = [
   { id: "RANKED_SOLO_5x5", label: t.matches.queues.SOLO },
   { id: "RANKED_FLEX_SR", label: t.matches.queues.FLEX },
@@ -24,7 +27,7 @@ const tierGlow = (tier: string) =>
  * estimation de niveau caché. La file Solo/Duo est mise en avant, emblème en
  * grand dans un halo de la couleur du palier ; la Flex suit, en une ligne.
  */
-export function RankCard({ ranks, synced }: { ranks: RankSnapshot[]; synced: boolean }) {
+export function RankCard({ ranks, synced }: { ranks: RankLine[]; synced: boolean }) {
   const [main, second] = QUEUES.map((queue) => ({
     ...queue,
     rank: ranks.find((candidate) => candidate.queue === queue.id) ?? null,
@@ -91,7 +94,7 @@ export function RankCard({ ranks, synced }: { ranks: RankSnapshot[]; synced: boo
 }
 
 /** « 42 LP · 61 V 55 D · 53 % » : le pourcentage seulement sur assez de parties. */
-function details(rank: RankSnapshot): string {
+function details(rank: RankLine): string {
   const games = rank.wins + rank.losses;
   return `${copy.lp(rank.lp)} · ${copy.record(rank.wins, rank.losses)}${
     showsWinrate(games) ? ` · ${formatPercent(rank.wins / games)}` : ""

@@ -14,6 +14,7 @@ import { live } from "./fr/live";
 import { matches, matchDetail } from "./fr/matches";
 import { nav, roles, plans, common } from "./fr/general";
 import { news } from "./fr/news";
+import { player } from "./fr/player";
 import { premium } from "./fr/premium";
 import { progression } from "./fr/progression";
 import { settings } from "./fr/settings";
@@ -34,6 +35,7 @@ export const fr = {
   stats,
   progression,
   live,
+  player,
   esport,
   common,
   emails,

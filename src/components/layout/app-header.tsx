@@ -1,4 +1,7 @@
+import { Search } from "lucide-react";
+
 import { Wordmark } from "@/components/brand/wordmark";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import type { CurrentUser } from "@/lib/db/users";
@@ -24,6 +27,18 @@ export function AppHeader({ user, signOutAction }: AppHeaderProps) {
           <HeaderNav />
         </nav>
         <div className="ml-auto flex items-center gap-3">
+          {/* La recherche d'un joueur, partout : on croise un nom, on regarde qui c'est. */}
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            aria-label={t.player.searchOpen}
+            title={t.player.searchOpen}
+          >
+            <Link href="/joueur">
+              <Search aria-hidden />
+            </Link>
+          </Button>
           <NewGameLink />
           <AccountMenu email={user.email} name={user.name} signOutAction={signOutAction} />
         </div>

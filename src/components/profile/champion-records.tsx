@@ -15,11 +15,14 @@ export function ChampionRecords({
   records,
   champions,
   statsHref,
+  emptyText = copy.empty,
 }: {
   records: ChampionRecord[];
   champions: ChampionAssets | null;
   /** Lien vers la page de statistiques complètes du compte. */
   statsHref?: string;
+  /** Texte quand aucune partie n'est comptée (le profil d'un autre joueur ne dit pas « tes »). */
+  emptyText?: string;
 }) {
   return (
     <Panel className="p-5">
@@ -35,7 +38,7 @@ export function ChampionRecords({
         ) : null}
       </div>
       {records.length === 0 ? (
-        <p className="pt-3 text-ink-muted">{copy.empty}</p>
+        <p className="pt-3 text-ink-muted">{emptyText}</p>
       ) : (
         <ul className="flex flex-col pt-2">
           {records.map((record) => {

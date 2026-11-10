@@ -107,6 +107,7 @@ export default async function MatchDetailPage({
     maxDamage: detail.maxDamage,
     durationMinutes: minutes,
     assets,
+    platform: played.platform,
   };
 
   return (
@@ -171,7 +172,6 @@ export default async function MatchDetailPage({
       <Suspense fallback={<Teams {...tables} />}>
         <RankedTeams
           {...tables}
-          platform={played.platform}
           queueId={detail.queueId}
           puuids={[...ours.players, ...theirs.players].map((player) => player.puuid)}
         />
@@ -198,6 +198,8 @@ type TeamsProps = {
   durationMinutes: number;
   assets: AssetResolver;
   ranks?: PlayerRanks;
+  /** Serveur de la partie : les noms des joueurs mènent à leur profil. */
+  platform: Platform;
 };
 
 function Teams({ ours, theirs, ranks, ...shared }: TeamsProps) {
@@ -211,14 +213,13 @@ function Teams({ ours, theirs, ranks, ...shared }: TeamsProps) {
 
 /** Les deux équipes avec le classement actuel de chaque joueur, dans la file de la partie. */
 async function RankedTeams({
-  platform,
   queueId,
   puuids,
   ...teams
-}: TeamsProps & { platform: Platform; queueId: number; puuids: string[] }) {
+}: TeamsProps & { queueId: number; puuids: string[] }) {
   let entries: Awaited<ReturnType<typeof loadPlayerRanks>>;
   try {
-    entries = await loadPlayerRanks(platform, puuids);
+    entries = await loadPlayerRanks(teams.platform, puuids);
   } catch (error) {
     // Sans les rangs, la partie reste lisible : les tableaux restent tels quels.
     console.error("Rangs des joueurs indisponibles", error);

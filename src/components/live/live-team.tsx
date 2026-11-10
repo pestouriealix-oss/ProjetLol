@@ -1,10 +1,12 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { TeamMark } from "@/components/draft/team-mark";
 import { GameIcon } from "@/components/match-detail/game-icon";
+import { PlayerRiotId } from "@/components/player/player-riot-id";
 import { RankEmblem, rankText, tierTextClass } from "@/components/rank/rank-badge";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
+import type { Platform } from "@/lib/config";
 import { formatPercent } from "@/lib/format";
 import { showsWinrate } from "@/lib/stats/sample";
 import type { LivePlayer, LiveTeam } from "@/lib/stats/live-game";
@@ -23,7 +25,16 @@ export type LiveAssets = {
  * avec champion, sorts, runes et classement officiel. Aucune estimation de
  * niveau caché : seulement ce que Riot publie.
  */
-export function LiveTeamSection({ team, assets }: { team: LiveTeam; assets: LiveAssets }) {
+export function LiveTeamSection({
+  team,
+  assets,
+  platform,
+}: {
+  team: LiveTeam;
+  assets: LiveAssets;
+  /** Serveur de la partie : les noms des joueurs mènent à leur profil. */
+  platform?: Platform;
+}) {
   const titleId = `live-${team.teamId}`;
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-3">
@@ -55,14 +66,27 @@ export function LiveTeamSection({ team, assets }: { team: LiveTeam; assets: Live
       </header>
       <ul className="flex flex-col gap-1.5">
         {team.players.map((player, index) => (
-          <PlayerRow key={player.puuid ?? index} player={player} assets={assets} />
+          <PlayerRow
+            key={player.puuid ?? index}
+            player={player}
+            assets={assets}
+            platform={platform}
+          />
         ))}
       </ul>
     </section>
   );
 }
 
-function PlayerRow({ player, assets }: { player: LivePlayer; assets: LiveAssets }) {
+function PlayerRow({
+  player,
+  assets,
+  platform,
+}: {
+  player: LivePlayer;
+  assets: LiveAssets;
+  platform?: Platform;
+}) {
   const champion = assets.champion(player.championKey);
   const [spellA, spellB] = player.spells.map((key) => assets.spell(key));
   const keystone = player.keystone ? assets.rune(player.keystone) : null;
@@ -99,14 +123,11 @@ function PlayerRow({ player, assets }: { player: LivePlayer; assets: LiveAssets 
       </div>
       <div className="min-w-0">
         <p className="flex min-w-0 items-baseline gap-1.5">
-          <span className="min-w-0 truncate font-semibold text-ink">
-            {player.riotId?.gameName ?? (player.puuid ? copy.hiddenPlayer : copy.bot)}
-          </span>
-          {player.riotId?.tagLine ? (
-            <span className="shrink-0 text-sm text-ink-faint max-sm:hidden">
-              #{player.riotId.tagLine}
-            </span>
-          ) : null}
+          <PlayerRiotId
+            riotId={player.riotId}
+            platform={player.isMe ? undefined : platform}
+            fallback={player.puuid ? copy.hiddenPlayer : copy.bot}
+          />
           {player.isMe ? (
             <Badge className="shrink-0 self-center bg-ink text-canvas">{copy.you}</Badge>
           ) : null}

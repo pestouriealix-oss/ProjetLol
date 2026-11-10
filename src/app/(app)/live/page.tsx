@@ -165,7 +165,12 @@ export default async function LivePage({ searchParams }: { searchParams: Account
         )}
       </p>
       {game.teams.map((team) => (
-        <LiveTeamSection key={team.teamId} team={team} assets={resolve} />
+        <LiveTeamSection
+          key={team.teamId}
+          team={team}
+          assets={resolve}
+          platform={account.platform}
+        />
       ))}
     </PageShell>
   );

@@ -1,10 +1,12 @@
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { TeamMark } from "@/components/draft/team-mark";
 import { RoleGlyph } from "@/components/map/role-glyph";
+import { PlayerRiotId } from "@/components/player/player-riot-id";
 import { RankBadge, type RankValue } from "@/components/rank/rank-badge";
 import { Badge } from "@/components/ui/badge";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
+import type { Platform } from "@/lib/config";
 import { formatDecimal, formatInteger, formatPercent } from "@/lib/format";
 import type { DetailObjectives, DetailPlayer, DetailTeam } from "@/lib/stats/match-detail";
 
@@ -39,12 +41,15 @@ export function TeamTable({
   durationMinutes,
   assets,
   ranks,
+  platform,
 }: {
   team: DetailTeam;
   maxDamage: number;
   durationMinutes: number;
   assets: AssetResolver;
   ranks?: PlayerRanks;
+  /** Serveur de la partie : les noms des joueurs mènent alors à leur profil. */
+  platform?: Platform;
 }) {
   const titleId = `equipe-${team.teamId}`;
   const title = team.isMine ? copy.ourTeam : copy.theirTeam;
@@ -124,6 +129,7 @@ export function TeamTable({
                 maxDamage={maxDamage}
                 durationMinutes={durationMinutes}
                 assets={assets}
+                platform={platform}
               />
             ))}
           </tbody>
@@ -139,6 +145,7 @@ export function TeamTable({
             rank={ranks?.get(player.puuid)}
             maxDamage={maxDamage}
             assets={assets}
+            platform={platform}
           />
         ))}
       </ul>
@@ -152,12 +159,14 @@ function PlayerRow({
   maxDamage,
   durationMinutes,
   assets,
+  platform,
 }: {
   player: DetailPlayer;
   rank: RankValue | null | undefined;
   maxDamage: number;
   durationMinutes: number;
   assets: AssetResolver;
+  platform?: Platform;
 }) {
   return (
     <tr
@@ -171,7 +180,7 @@ function PlayerRow({
         <Loadout player={player} assets={assets} />
       </td>
       <td className="py-2.5 pr-3">
-        <PlayerName player={player} rank={rank} assets={assets} />
+        <PlayerName player={player} rank={rank} assets={assets} platform={platform} />
       </td>
       <td className="py-2.5 pr-3 whitespace-nowrap">
         <Score player={player} />
@@ -204,11 +213,13 @@ function PlayerCard({
   rank,
   maxDamage,
   assets,
+  platform,
 }: {
   player: DetailPlayer;
   rank: RankValue | null | undefined;
   maxDamage: number;
   assets: AssetResolver;
+  platform?: Platform;
 }) {
   return (
     <li
@@ -218,7 +229,7 @@ function PlayerCard({
       )}
     >
       <Loadout player={player} assets={assets} />
-      <PlayerName player={player} rank={rank} assets={assets} stacked />
+      <PlayerName player={player} rank={rank} assets={assets} platform={platform} stacked />
       <div className="text-right">
         <Score player={player} />
       </div>
@@ -284,11 +295,13 @@ function PlayerName({
   player,
   rank,
   assets,
+  platform,
   stacked = false,
 }: {
   player: DetailPlayer;
   rank: RankValue | null | undefined;
   assets: AssetResolver;
+  platform?: Platform;
   /** Carte de téléphone : le rang sur sa propre ligne, réservée d'avance. */
   stacked?: boolean;
 }) {
@@ -302,14 +315,11 @@ function PlayerName({
   return (
     <div className="min-w-0">
       <p className="flex min-w-0 items-baseline gap-1.5">
-        <span className="min-w-0 truncate font-semibold text-ink">
-          {player.riotId?.gameName ?? copy.unknownPlayer}
-        </span>
-        {player.riotId?.tagLine ? (
-          <span className="shrink-0 text-sm text-ink-faint max-sm:hidden">
-            #{player.riotId.tagLine}
-          </span>
-        ) : null}
+        <PlayerRiotId
+          riotId={player.riotId}
+          platform={player.isMe ? undefined : platform}
+          fallback={copy.unknownPlayer}
+        />
         {player.isMe ? (
           <Badge className="ml-0.5 shrink-0 self-center bg-ink text-canvas">{copy.you}</Badge>
         ) : null}

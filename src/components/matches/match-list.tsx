@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { ChampionIcon } from "@/components/champion/champion-icon";
 import { RoleGlyph } from "@/components/map/role-glyph";
 import { Link } from "@/components/ui/link";
@@ -18,9 +20,12 @@ const copy = t.matches;
 export function MatchList({
   matches,
   champions,
+  linked = true,
 }: {
   matches: PlayedMatch[];
   champions: ChampionAssets | null;
+  /** Faux pour les parties d'un autre joueur : leur détail n'est pas consultable. */
+  linked?: boolean;
 }) {
   const now = new Date();
   return (
@@ -31,13 +36,15 @@ export function MatchList({
         const minutes = Math.max(1, match.durationSeconds / 60);
         return (
           <li key={match.id}>
-            <Link
-              href={`/matches/${match.matchId}`}
-              aria-label={copy.openDetail(name, match.win ? copy.win : copy.loss)}
+            <Row
+              href={linked ? `/matches/${match.matchId}` : null}
+              label={copy.openDetail(name, match.win ? copy.win : copy.loss)}
               className={cn(
                 // Le résultat teinte le bord gauche de la ligne, comme une lueur : on parcourt
                 // l'historique d'un coup d'œil, sans que la couleur porte seule le sens.
-                "flex items-center gap-3 rounded-panel border border-line bg-linear-to-r via-surface via-35% to-surface px-3 py-3 shadow-panel transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:via-raised hover:to-raised sm:gap-4 sm:px-4",
+                "flex items-center gap-3 rounded-panel border border-line bg-linear-to-r via-surface via-35% to-surface px-3 py-3 shadow-panel sm:gap-4 sm:px-4",
+                linked &&
+                  "transition-colors duration-(--duration-fast) ease-(--ease-out) hover:border-line-strong hover:via-raised hover:to-raised",
                 match.win ? "from-win-soft" : "from-loss-soft",
               )}
             >
@@ -92,10 +99,30 @@ export function MatchList({
                 <p className="text-ink">{formatDuration(match.durationSeconds)}</p>
                 <p>{formatRelative(match.startedAt, now)}</p>
               </div>
-            </Link>
+            </Row>
           </li>
         );
       })}
     </ul>
+  );
+}
+
+/** Une ligne cliquable vers le détail de la partie, ou une simple ligne. */
+function Row({
+  href,
+  label,
+  className,
+  children,
+}: {
+  href: string | null;
+  label: string;
+  className: string;
+  children: ReactNode;
+}) {
+  if (!href) return <div className={className}>{children}</div>;
+  return (
+    <Link href={href} aria-label={label} className={className}>
+      {children}
+    </Link>
   );
 }
