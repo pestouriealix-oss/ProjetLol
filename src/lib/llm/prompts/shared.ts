@@ -16,8 +16,21 @@ export const ROLE_NAMES: Record<Role, string> = {
 export type ChampionSheet = {
   name: string;
   passive: { name: string; text: string };
-  spells: { key: string; name: string; cooldown: string; text: string }[];
+  spells: {
+    key: "Q" | "W" | "E" | "R";
+    name: string;
+    cooldown: string;
+    text: string;
+    /** Rangs de la compétence (Data Dragon) ; `null` si inconnu. */
+    maxRank?: number | null;
+  }[];
 };
+
+/**
+ * Les touches des compétences telles que les joueurs français les disent, sur
+ * un clavier AZERTY : le Q de Riot est le A, le W est le Z.
+ */
+export const SPELL_KEYS = { Q: "A", W: "Z", E: "E", R: "R" } as const;
 
 /** Résultats de parties classées (compteurs bruts). */
 export type GameRecord = { games: number; wins: number };
@@ -52,3 +65,8 @@ export const modelList = <T extends z.ZodType>(item: T, min: number, max: number
     .array(item)
     .min(min)
     .transform((items) => items.slice(0, max));
+
+/** « de Katarina », « d'Orianna » : l'élision devant une voyelle ou un h muet. */
+export function ofChampion(name: string): string {
+  return /^[aeiouyhàâéèêîïôûAEIOUYHÀÂÉÈÊÎÏÔÛ]/.test(name) ? `d'${name}` : `de ${name}`;
+}

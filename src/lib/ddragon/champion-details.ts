@@ -26,6 +26,8 @@ const detailsSchema = z.object({
             name: z.string(),
             description: z.string(),
             cooldownBurn: z.string().optional().default(""),
+            /** Rangs de la compétence : 3 pour un ultime classique, plus s'il est pris dès le niveau 1. */
+            maxrank: z.number().int().positive().optional(),
           }),
         )
         .length(4),
@@ -39,7 +41,13 @@ export type ChampionDetails = {
   title: string;
   tags: string[];
   passive: { name: string; text: string };
-  spells: { key: "Q" | "W" | "E" | "R"; name: string; cooldown: string; text: string }[];
+  spells: {
+    key: "Q" | "W" | "E" | "R";
+    name: string;
+    cooldown: string;
+    text: string;
+    maxRank: number | null;
+  }[];
 };
 
 const KEYS = ["Q", "W", "E", "R"] as const;
@@ -82,6 +90,7 @@ export async function getChampionDetails(
         name: spell.name,
         cooldown: spell.cooldownBurn,
         text: ddragonText(spell.description),
+        maxRank: spell.maxrank ?? null,
       })),
     };
   } catch (error) {

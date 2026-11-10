@@ -19,6 +19,11 @@ const schema = z.object({
   ANTHROPIC_BASE_URL: optional,
   /** Modèle qui écrit les fiches et les bilans. Par défaut, Haiku ; « claude-sonnet-5-5 » pour comparer. */
   DRAFT_SHEET_MODEL: optional,
+  /**
+   * Modèle qui écrit le duel contre le vis-à-vis. Par défaut, Sonnet : le texte
+   * est écrit une fois par duel et par patch, puis resservi à tous.
+   */
+  MATCHUP_MODEL: optional,
   /** Plafond de dépense mensuelle du modèle, en dollars : au-delà, les fiches gratuites s'arrêtent. */
   LLM_MONTHLY_BUDGET_USD: optional.pipe(
     z

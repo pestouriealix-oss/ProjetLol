@@ -4,7 +4,15 @@ import type { Role } from "@/lib/config";
 import { formatInteger, formatPercent } from "@/lib/format";
 
 import type { ToolSpec } from "../client";
-import { ROLE_NAMES, type ChampionSheet, type GameRecord, modelList, modelText } from "./shared";
+import {
+  ROLE_NAMES,
+  SPELL_KEYS,
+  type ChampionSheet,
+  type GameRecord,
+  modelList,
+  modelText,
+  ofChampion,
+} from "./shared";
 
 /**
  * Duel contre le vis-à-vis : ne dépend que des deux champions (et du duo en
@@ -12,7 +20,7 @@ import { ROLE_NAMES, type ChampionSheet, type GameRecord, modelList, modelText }
  * resservi à tous ceux qui jouent ce duel sur le même patch. Version à changer
  * à chaque modification du texte ou du schéma : elle fait partie de la clé.
  */
-export const DRAFT_MATCHUP_VERSION = "draft-matchup@4";
+export const DRAFT_MATCHUP_VERSION = "draft-matchup@5";
 
 export const DRAFT_MATCHUP_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -26,8 +34,16 @@ Tu écris le duel contre son vis-à-vis (même rôle en face ; en jungle, le jun
 Ce texte sert à tous les joueurs de ce duel : ne parle que des champions indiqués, jamais des autres joueurs de la partie ni du classement du joueur.
 
 Tu reçois des données vérifiées, à respecter :
-- La fiche technique des deux champions pour le patch en cours (Data Dragon) : passif, compétences, délais de récupération par rang. Ce que tu dis de leurs compétences et de leurs délais doit s'accorder avec elle ; ne cite pas de compétence absente de la fiche.
+- La fiche technique des deux champions pour le patch en cours (Data Dragon) : le passif, puis chaque compétence sous sa touche, avec son délai de récupération par rang et le niveau où l'ultime se débloque. Ce que tu dis des compétences, des délais et des niveaux doit s'accorder avec elle.
 - Quand elles existent, les statistiques de parties classées Émeraude et plus : le taux de victoire du duel et le nombre de parties. Ce taux est affiché à côté de ta fiche : ne l'écris pas. S'il est marqué fiable, accorde ton verdict avec lui (52 % ou plus, favorable ; 48 % ou moins, défavorable ; entre les deux, équilibré) et explique d'où vient l'écart. S'il est absent ou peu fiable, fonde le verdict sur les compétences.
+
+Les compétences, là où un coach perd sa crédibilité :
+- Chaque compétence appartient au champion sous lequel elle est listée. Avant chaque phrase qui parle d'une compétence, vérifie à quel champion elle est.
+- Désigne une compétence par sa touche et son champion, comme les joueurs : « le A d'Ahri », « le R de Garen », ou « ton E », « son E » quand le champion est évident. Touches d'un clavier AZERTY : A, Z, E, R. N'écris jamais le nom d'une compétence ni celui d'un passif.
+- Un ultime se débloque au niveau 6 et monte aux niveaux 11 et 16, sauf si la fiche dit autre chose. Ne lui donne jamais d'autre niveau.
+- Un délai que tu cites vient de la fiche, au bon rang. Dans le doute, n'en cite pas.
+
+La voie : le message dit comment elle se joue (seul, à deux, ou en jungle). En haut et au milieu, le joueur est seul : pas d'allié de voie, pas de support.
 
 Règles :
 - Court et concret. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour tous les duels.
@@ -102,16 +118,43 @@ export type MatchupRequest = {
 const percent = (record: GameRecord) =>
   formatPercent(record.games > 0 ? record.wins / record.games : 0);
 
+/** Quand l'ultime se débloque : niveau 6 pour un ultime classique à trois rangs. */
+function ultimateNote(maxRank: number | null | undefined): string {
+  if (maxRank === undefined || maxRank === null) return "ultime";
+  if (maxRank === 3) return "ultime, débloqué au niveau 6, puis rangs aux niveaux 11 et 16";
+  return `disponible dès le niveau 1, ${maxRank} rangs`;
+}
+
+/**
+ * La fiche d'un champion, compétences sous leur touche AZERTY et sans leur
+ * nom : le modèle les cite comme les joueurs (« le E d'Orianna ») et ne peut
+ * pas prêter à l'un le sort de l'autre en recopiant un nom.
+ */
 function championBlock(sheet: ChampionSheet | null, fallback: string): string[] {
   if (!sheet) return [`${fallback} : fiche technique indisponible.`];
   return [
     `${sheet.name} :`,
-    `- Passif, ${sheet.passive.name} : ${sheet.passive.text}`,
-    ...sheet.spells.map(
-      (spell) =>
-        `- ${spell.key}, ${spell.name}${spell.cooldown ? ` (délai ${spell.cooldown} s)` : ""} : ${spell.text}`,
-    ),
+    `- Passif ${ofChampion(sheet.name)} : ${sheet.passive.text}`,
+    ...sheet.spells.map((spell) => {
+      const key = SPELL_KEYS[spell.key];
+      const note = spell.key === "R" ? `, ${ultimateNote(spell.maxRank)}` : "";
+      const cooldown = spell.cooldown ? ` (délai ${spell.cooldown} s)` : "";
+      return `- ${key} ${ofChampion(sheet.name)}${note}${cooldown} : ${spell.text}`;
+    }),
   ];
+}
+
+/** Comment se joue la voie : seul, à deux, ou sans voie en jungle. */
+function laneLine({ role, mine, theirs, partners }: MatchupRequest): string {
+  if (role === "TOP" || role === "MID") {
+    return `Voie seule : ${mine} contre ${theirs}, en un contre un. Le joueur n'a ni allié de voie ni support.`;
+  }
+  if (role === "JUNGLE") {
+    return `Jungle : pas de voie. Le duel se joue sur les camps, les invades, les ganks et les objectifs.`;
+  }
+  return partners
+    ? `En bas, le duo du joueur est ${mine} avec ${partners.mine} ; en face, ${theirs} avec ${partners.theirs}.`
+    : `En bas, à deux contre deux : les partenaires de voie ne sont pas connus.`;
 }
 
 function statsBlock({ stats, mine, theirs }: MatchupRequest): string[] {
@@ -147,9 +190,7 @@ export function draftMatchupMessage(request: MatchupRequest): string {
   return [
     `Patch ${request.patch}.`,
     `Duel au poste ${ROLE_NAMES[request.role]} : le joueur joue ${request.mine}, son vis-à-vis ${request.theirs}.`,
-    request.partners
-      ? `En bas, le duo du joueur est ${request.mine} avec ${request.partners.mine} ; en face, ${request.theirs} avec ${request.partners.theirs}.`
-      : null,
+    laneLine(request),
     "",
     `Données vérifiées (Data Dragon ${request.ddragonVersion}) :`,
     ...championBlock(request.champions.mine, request.mine),
@@ -162,4 +203,17 @@ export function draftMatchupMessage(request: MatchupRequest): string {
   ]
     .filter((part) => part !== null)
     .join("\n");
+}
+
+/**
+ * Le deuxième jet : le même message, suivi des erreurs relevées par le
+ * contrôle (`src/lib/coach/matchup-check.ts`).
+ */
+export function draftMatchupCorrection(message: string, issues: string[]): string {
+  return [
+    message,
+    "",
+    "Un premier jet de ce duel contenait des erreurs. Réécris tout le duel en les corrigeant, sans en introduire d'autres :",
+    ...issues.map((issue) => `- ${issue}`),
+  ].join("\n");
 }

@@ -144,6 +144,8 @@ export const draft = {
         `Seulement ${games} parties pour ce duel : trop peu pour un chiffre fiable`,
       statNone: "Duel pas encore vu dans nos parties analysées",
       statsLevel: "Émeraude et plus",
+      unverified:
+        "Le coach n'a pas réussi à écrire ce duel sans erreur : il préfère ne rien afficher. Il réessaiera à ta prochaine partie.",
     },
     sources: {
       title: "Sources",

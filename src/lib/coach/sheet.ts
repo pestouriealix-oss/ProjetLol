@@ -16,6 +16,7 @@ import {
   DRAFT_MATCHUP_SYSTEM,
   DRAFT_MATCHUP_TOOL,
   DRAFT_MATCHUP_VERSION,
+  draftMatchupCorrection,
   draftMatchupMessage,
   matchupSchema,
   type Matchup,
@@ -32,12 +33,15 @@ import { t } from "@/i18n/fr";
 
 import { CoachError } from "./errors";
 import { loadMatchupFacts } from "./facts";
+import { matchupIssues } from "./matchup-check";
 import { lanePartnerRole, matchupNoteKey } from "./matchup-key";
 import { trackUsage } from "./usage";
 
 export type { DraftSheet };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** Un premier jet, puis un second avec les erreurs relevées par le contrôle. */
+const MATCHUP_ATTEMPTS = 2;
 
 /** Fiches encore possibles sur les dernières 24 heures, selon l'offre. */
 export async function remainingSheets(userId: string, plan: Plan, now = new Date()) {
@@ -72,7 +76,9 @@ const tidyMatchup = (value: Matchup): Matchup => ({
  *
  * Deux appels partent en même temps : les conditions de victoire (propres à
  * cette partie) et le duel. Le duel ne dépend que des deux champions : s'il a
- * déjà été écrit pour ce patch, il s'affiche aussitôt et ne coûte rien.
+ * déjà été écrit pour ce patch, il s'affiche aussitôt et ne coûte rien. Sinon,
+ * il est écrit hors de la vue, contrôlé (`matchup-check.ts`), réécrit une fois
+ * si le contrôle relève des erreurs, et ne s'affiche qu'une fois juste.
  */
 export async function writeDraftSheet(
   userId: string,
@@ -125,6 +131,7 @@ export async function writeDraftSheet(
   const allyNames = names(draft.allies);
   const enemyNames = names(draft.enemies);
   const model = MODELS.draftSheet;
+  const matchupModel = MODELS.matchup;
   const partnerRole = lanePartnerRole(draft.myRole);
   const partnerIds =
     partnerRole && draft.allies[partnerRole] && draft.enemies[partnerRole]
@@ -132,7 +139,7 @@ export async function writeDraftSheet(
       : null;
   const key = matchupNoteKey({
     promptVersion: DRAFT_MATCHUP_VERSION,
-    model,
+    model: matchupModel,
     patch,
     role: draft.myRole,
     mine: myId,
@@ -179,57 +186,84 @@ export async function writeDraftSheet(
     )
     .then(tidyWinConditions);
 
+  const partnerNames =
+    partnerRole && allyNames[partnerRole] && enemyNames[partnerRole]
+      ? { mine: allyNames[partnerRole], theirs: enemyNames[partnerRole] }
+      : null;
+  const mineName = allyNames[draft.myRole] ?? myId;
+  const theirName = enemyNames[draft.myRole] ?? theirId;
+  const matchupMessage = draftMatchupMessage({
+    patch,
+    ddragonVersion: champions.version,
+    role: draft.myRole,
+    mine: mineName,
+    theirs: theirName,
+    partners: partnerNames,
+    champions: { mine: sheetOf(grounded.mine), theirs: sheetOf(grounded.theirs) },
+    stats: stats
+      ? {
+          patch: stats.patch,
+          matches: stats.matches,
+          duel: stats.matchup,
+          reliable: stats.reliable,
+          mineAtRole: grounded.roleRates.mine,
+          theirsAtRole: grounded.roleRates.theirs,
+        }
+      : null,
+  });
+  const checkContext = {
+    role: draft.myRole,
+    sheets: [sheetOf(grounded.mine), sheetOf(grounded.theirs)],
+    allowed: [
+      mineName,
+      theirName,
+      ...(partnerNames ? [partnerNames.mine, partnerNames.theirs] : []),
+    ],
+    roster: champions.list().map((champion) => champion.name),
+  };
+
+  /** Deux jets au plus ; `null` si le second échoue encore au contrôle. */
+  const writeMatchup = async (): Promise<Matchup | null> => {
+    let content = matchupMessage;
+    for (let attempt = 0; attempt < MATCHUP_ATTEMPTS; attempt += 1) {
+      const matchup = await llm.streamTool(
+        {
+          model: matchupModel,
+          system: DRAFT_MATCHUP_SYSTEM,
+          maxTokens: 1500,
+          tool: DRAFT_MATCHUP_TOOL,
+          onUsage: track,
+          content,
+        },
+        // Rien ne s'affiche avant le contrôle : la page garde ses lignes d'attente.
+        () => {},
+        controller.signal,
+      );
+      const issues = matchupIssues(matchup, checkContext);
+      if (issues.length === 0) return tidyMatchup(matchup);
+      console.warn(`Duel ${mineName} contre ${theirName} refusé par le contrôle`, issues);
+      content = draftMatchupCorrection(matchupMessage, issues);
+    }
+    return null;
+  };
+
   const matchupTask = cached
     ? Promise.resolve(cached)
-    : llm
-        .streamTool(
-          {
-            model,
-            system: DRAFT_MATCHUP_SYSTEM,
-            maxTokens: 1500,
-            tool: DRAFT_MATCHUP_TOOL,
-            onUsage: track,
-            content: draftMatchupMessage({
-              patch,
-              ddragonVersion: champions.version,
-              role: draft.myRole,
-              mine: allyNames[draft.myRole] ?? myId,
-              theirs: enemyNames[draft.myRole] ?? theirId,
-              partners:
-                partnerRole && allyNames[partnerRole] && enemyNames[partnerRole]
-                  ? { mine: allyNames[partnerRole], theirs: enemyNames[partnerRole] }
-                  : null,
-              champions: { mine: sheetOf(grounded.mine), theirs: sheetOf(grounded.theirs) },
-              stats: stats
-                ? {
-                    patch: stats.patch,
-                    matches: stats.matches,
-                    duel: stats.matchup,
-                    reliable: stats.reliable,
-                    mineAtRole: grounded.roleRates.mine,
-                    theirsAtRole: grounded.roleRates.theirs,
-                  }
-                : null,
-            }),
-          },
-          (partial) => {
-            current = { ...current, matchup: partial };
-            emit();
-          },
-          controller.signal,
-        )
-        .then(tidyMatchup)
-        .then(async (matchup) => {
-          // Gardé pour les suivants ; un échec ici ne prive pas le joueur de sa fiche.
+    : writeMatchup().then(async (matchup) => {
+        current = { ...current, matchup: matchup ?? undefined };
+        emit();
+        // Gardé pour les suivants s'il est juste ; un échec ici ne prive pas le joueur de sa fiche.
+        if (matchup) {
           await saveMatchupNote({
             key,
             patch,
-            model,
+            model: matchupModel,
             promptVersion: DRAFT_MATCHUP_VERSION,
             content: matchup,
           }).catch((error: unknown) => console.error("Duel non gardé", error));
-          return matchup;
-        });
+        }
+        return matchup;
+      });
 
   let sheet: DraftSheet;
   try {

@@ -12,11 +12,12 @@ import { matchupSchema } from "./draft-matchup";
  * Version à changer à chaque modification d'un des deux prompts ou du schéma
  * (elle est enregistrée avec chaque fiche).
  */
-export const DRAFT_SHEET_VERSION = "draft-sheet@6";
+export const DRAFT_SHEET_VERSION = "draft-sheet@7";
 
 export const draftSheetSchema = z.object({
   winConditions: winConditionsSchema,
-  matchup: matchupSchema,
+  /** `null` si le duel n'a pas passé le contrôle, même au deuxième jet : il n'est pas affiché. */
+  matchup: matchupSchema.nullable(),
 });
 
 export type DraftSheet = z.infer<typeof draftSheetSchema>;

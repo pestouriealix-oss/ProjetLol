@@ -74,50 +74,62 @@ export function SheetView({
 
         {sheet.facts ? <DuelStat facts={sheet.facts} /> : null}
 
-        <Growing text={matchup?.summary} writing={writing} className="text-ink" lines={2} />
+        {!matchup && !writing ? (
+          // Le duel n'a pas passé le contrôle : mieux vaut rien qu'un conseil faux.
+          <p className="text-sm text-ink-muted">{copy.matchup.unverified}</p>
+        ) : (
+          <>
+            <Growing text={matchup?.summary} writing={writing} className="text-ink" lines={2} />
 
-        <Block label={copy.matchup.keyMoments}>
-          <Growing
-            text={matchup?.keyMoments}
-            writing={writing}
-            className="text-ink-muted"
-            lines={2}
-          />
-        </Block>
+            <Block label={copy.matchup.keyMoments}>
+              <Growing
+                text={matchup?.keyMoments}
+                writing={writing}
+                className="text-ink-muted"
+                lines={2}
+              />
+            </Block>
 
-        <Block label={copy.matchup.options}>
-          {options.length > 0 ? (
-            <ol className="flex flex-col gap-3">
-              {options.map((option, index) => (
-                <li key={index} className="flex gap-2.5">
-                  <Slash className="mt-[0.3em] h-[0.85em] text-accent" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-ink">
-                      <span className="sr-only">{copy.matchup.option(index + 1)}</span>
-                      {option.title ?? ""}
-                    </p>
-                    <Growing
-                      text={option.detail}
-                      writing={writing}
-                      className="text-ink-muted"
-                      lines={1}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ol>
-          ) : writing ? (
-            <Lines count={3} />
-          ) : null}
-        </Block>
+            <Block label={copy.matchup.options}>
+              {options.length > 0 ? (
+                <ol className="flex flex-col gap-3">
+                  {options.map((option, index) => (
+                    <li key={index} className="flex gap-2.5">
+                      <Slash className="mt-[0.3em] h-[0.85em] text-accent" />
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink">
+                          <span className="sr-only">{copy.matchup.option(index + 1)}</span>
+                          {option.title ?? ""}
+                        </p>
+                        <Growing
+                          text={option.detail}
+                          writing={writing}
+                          className="text-ink-muted"
+                          lines={1}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : writing ? (
+                <Lines count={3} />
+              ) : null}
+            </Block>
 
-        <div className="flex gap-2.5 rounded-control border border-warn/30 bg-warn-soft px-3 py-2.5">
-          <ThreatMark className="mt-1" />
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-warn">{copy.matchup.watchOut}</p>
-            <Growing text={matchup?.watchOut} writing={writing} className="text-ink" lines={1} />
-          </div>
-        </div>
+            <div className="flex gap-2.5 rounded-control border border-warn/30 bg-warn-soft px-3 py-2.5">
+              <ThreatMark className="mt-1" />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-warn">{copy.matchup.watchOut}</p>
+                <Growing
+                  text={matchup?.watchOut}
+                  writing={writing}
+                  className="text-ink"
+                  lines={1}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </section>
 
       {sheet.facts ? <Sources facts={sheet.facts} /> : null}
