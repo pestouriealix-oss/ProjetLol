@@ -62,4 +62,32 @@ describe("client PandaScore", () => {
       "PandaScore a répondu 404 pour /lol/tournaments/running.",
     );
   });
+
+  it("garde une réponse une minute, puis la redemande ; l'ancienne ne sert qu'en secours", async () => {
+    let calls = 0;
+    let down = false;
+    let clock = 0;
+    const api = createEsportApi({
+      token: "x",
+      baseUrl: "http://faux",
+      now: () => clock,
+      fetch: async () => {
+        calls += 1;
+        if (down) return new Response("{}", { status: 503 });
+        return new Response(JSON.stringify([]), { status: 200 });
+      },
+    });
+    await api.tournamentMatches(1);
+    await api.tournamentMatches(1);
+    expect(calls).toBe(1);
+
+    clock = 61_000;
+    await api.tournamentMatches(1);
+    expect(calls).toBe(2);
+
+    clock = 130_000;
+    down = true;
+    expect(await api.tournamentMatches(1)).toEqual([]);
+    expect(calls).toBe(3);
+  });
 });

@@ -85,8 +85,27 @@ export const tournamentSchema = z.looseObject({
 });
 export const tournamentsSchema = z.array(tournamentSchema);
 
+/** Une saison d'une ligue (« LEC Winter 2027 »), annoncée parfois avant ses tournois. */
+export const serieSchema = z.looseObject({
+  id,
+  name: z.string().nullable().optional().default(null),
+  full_name: z.string().nullable().optional().default(null),
+  slug: z.string().optional().default(""),
+  begin_at: date,
+  end_at: date,
+  year: z.number().int().nullable().optional().default(null),
+  league: z.looseObject({
+    id,
+    name: z.string(),
+    slug: z.string().optional().default(""),
+    image_url: z.string().nullable().optional().default(null),
+  }),
+});
+export const seriesSchema = z.array(serieSchema);
+
 export type EsportTeam = z.infer<typeof teamSchema>;
 export type EsportMatch = z.infer<typeof matchSchema>;
 export type BracketMatch = z.infer<typeof bracketMatchSchema>;
 export type Standing = z.infer<typeof standingSchema>;
 export type Tournament = z.infer<typeof tournamentSchema>;
+export type Serie = z.infer<typeof serieSchema>;

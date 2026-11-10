@@ -18,7 +18,14 @@ import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
 import { esportApi, EsportApiError, isEsportConfigured } from "@/lib/esport";
 import { layoutBracket } from "@/lib/esport/bracket";
-import { groupBySerie, pickFeatured, pickStage, type Competition } from "@/lib/esport/competitions";
+import {
+  groupBySerie,
+  pickFeatured,
+  pickStage,
+  seasonCalendar,
+  type Competition,
+  type SeasonEntry,
+} from "@/lib/esport/competitions";
 import type { EsportMatch, Tournament } from "@/lib/esport/schemas";
 import { isSwissStage, swissGroups } from "@/lib/esport/swiss";
 import { formatLongDate } from "@/lib/format";
@@ -67,15 +74,18 @@ export default async function EsportPage({ searchParams }: { searchParams: Espor
     );
   }
 
-  if (!view) {
+  if (!view.featured) {
     return (
       <PageShell route="esport" title={copy.title}>
-        <Message title={copy.emptyTitle} body={copy.emptyBody} />
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_17rem]">
+          <Message title={copy.emptyTitle} body={copy.emptyBody} />
+          <SeasonPanel season={view.season} openable={view.openable} />
+        </div>
       </PageShell>
     );
   }
 
-  const { competition, stages, stage, content, others } = view;
+  const { competition, stages, stage, content, others } = view.featured;
   const status = competitionStatus(competition, stages, now);
 
   return (
@@ -164,6 +174,7 @@ export default async function EsportPage({ searchParams }: { searchParams: Espor
         </div>
 
         <aside className="flex flex-col gap-4">
+          <SeasonPanel season={view.season} openable={view.openable} />
           <Panel className="p-5">
             <h2 className="display text-xl text-ink">{copy.others.title}</h2>
             {others.length === 0 ? (
@@ -251,26 +262,35 @@ async function loadView(
   requestedStage: number | undefined,
   now: Date,
 ): Promise<{
-  competition: Competition;
-  stages: Tournament[];
-  stage: Tournament;
-  content: StageContent;
-  others: Competition[];
-} | null> {
-  const [running, upcoming] = await Promise.all([
+  featured: {
+    competition: Competition;
+    stages: Tournament[];
+    stage: Tournament;
+    content: StageContent;
+    others: Competition[];
+  } | null;
+  season: SeasonEntry[];
+  /** Compétitions qui ont déjà leurs tournois : on peut ouvrir leur page. */
+  openable: Set<number>;
+}> {
+  const [running, upcoming, runningSeries, upcomingSeries] = await Promise.all([
     esportApi.listTournaments("running", TIERS),
     esportApi.listTournaments("upcoming", TIERS),
+    esportApi.listSeries("running"),
+    esportApi.listSeries("upcoming"),
   ]);
+  const season = seasonCalendar([...runningSeries, ...upcomingSeries], now);
   const runningCompetitions = groupBySerie(running);
   const upcomingCompetitions = groupBySerie(upcoming).filter(
     (candidate) => !runningCompetitions.some((known) => known.serieId === candidate.serieId),
   );
   const all = [...runningCompetitions, ...upcomingCompetitions];
 
+  const openable = new Set(all.map((candidate) => candidate.serieId));
   const featured =
     all.find((candidate) => candidate.serieId === requestedSerie) ??
     pickFeatured(runningCompetitions, upcomingCompetitions);
-  if (!featured) return null;
+  if (!featured) return { featured: null, season, openable };
 
   // Toutes les étapes de la compétition, y compris celles déjà terminées : ses
   // dates vont alors du début de la première à la fin de la dernière.
@@ -278,7 +298,7 @@ async function loadView(
   const competition = complete ?? featured;
   const stages = competition.stages;
   const stage = pickStage(stages, now, requestedStage);
-  if (!stage) return null;
+  if (!stage) return { featured: null, season, openable };
 
   const content: StageContent = stage.has_bracket
     ? await esportApi.tournamentBracket(stage.id).then((bracket) => ({
@@ -296,7 +316,65 @@ async function loadView(
     .sort((a, b) => (a.beginAt?.getTime() ?? Infinity) - (b.beginAt?.getTime() ?? Infinity))
     .slice(0, 8);
 
-  return { competition, stages, stage, content, others };
+  return { featured: { competition, stages, stage, content, others }, season, openable };
+}
+
+/**
+ * Les rendez-vous de la saison : les trois grandes ligues et les compétitions
+ * internationales, avec leurs dates dès qu'elles sont annoncées.
+ */
+function SeasonPanel({ season, openable }: { season: SeasonEntry[]; openable: Set<number> }) {
+  return (
+    <Panel className="p-5">
+      <h2 className="display text-xl text-ink">{copy.season.title}</h2>
+      <ul className="flex flex-col pt-2">
+        {season.map(({ circuit, next }) => {
+          const body = (
+            <>
+              <TeamLogo
+                src={next?.leagueImage ?? null}
+                className="size-7"
+                fallback={<Trophy className="size-4" />}
+              />
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-ink-muted">
+                  {copy.season.names[circuit]}
+                </span>
+                <span className="block text-xs text-ink-faint">
+                  {!next
+                    ? copy.season.unannounced
+                    : next.live
+                      ? copy.season.live
+                      : next.beginAt && next.endAt
+                        ? copy.dates(formatLongDate(next.beginAt), formatLongDate(next.endAt))
+                        : next.beginAt
+                          ? copy.season.from(formatLongDate(next.beginAt))
+                          : copy.season.unannounced}
+                </span>
+              </span>
+            </>
+          );
+          return (
+            <li key={circuit} className="border-t border-line first:border-t-0">
+              {next && openable.has(next.serieId) ? (
+                <Link
+                  href={`/esport?serie=${next.serieId}`}
+                  title={next.title}
+                  className="flex items-center gap-3 py-2.5 transition-colors duration-(--duration-fast) hover:text-ink"
+                >
+                  {body}
+                </Link>
+              ) : (
+                <div title={next?.title} className="flex items-center gap-3 py-2.5">
+                  {body}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </Panel>
+  );
 }
 
 /** Une étape dont le classement ou l'arbre n'est pas encore publié. */

@@ -1,13 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { layoutBracket } from "./bracket";
-import { groupBySerie, groupByDay, matchSides, pickFeatured, pickStage } from "./competitions";
+import {
+  groupBySerie,
+  groupByDay,
+  matchSides,
+  pickFeatured,
+  pickStage,
+  seasonCalendar,
+} from "./competitions";
 import {
   bracketSchema,
   matchSchema,
   tournamentSchema,
   type BracketMatch,
   type Tournament,
+  seriesSchema,
 } from "./schemas";
 import { isSwissStage, swissGroups } from "./swiss";
 
@@ -216,5 +224,36 @@ describe("phase suisse", () => {
       ["active", "1-2", [6]],
       ["eliminated", "0-3", [9]],
     ]);
+  });
+});
+
+describe("saison à venir", () => {
+  const serie = (id: number, league: string, fullName: string, begin: string, end: string) => ({
+    id,
+    full_name: fullName,
+    begin_at: begin,
+    end_at: end,
+    league: { id: id * 10, name: league, slug: league.toLowerCase(), image_url: null },
+  });
+  const now = new Date("2026-11-10T12:00:00Z");
+
+  it("garde pour chaque rendez-vous la saison en cours ou la prochaine", () => {
+    const series = seriesSchema.parse([
+      serie(1, "LEC", "Versus 2026", "2026-01-10T00:00:00Z", "2026-03-01T00:00:00Z"),
+      serie(2, "LEC", "Winter 2027", "2027-01-17T00:00:00Z", "2027-03-02T00:00:00Z"),
+      serie(3, "LCK Challengers", "Spring 2027", "2027-01-05T00:00:00Z", "2027-04-01T00:00:00Z"),
+      serie(4, "LCK", "Cup 2027", "2027-01-14T00:00:00Z", "2027-02-28T00:00:00Z"),
+      serie(5, "Worlds", "2026", "2026-10-01T00:00:00Z", "2026-11-15T00:00:00Z"),
+    ]);
+    const calendar = Object.fromEntries(
+      seasonCalendar(series, now).map((entry) => [entry.circuit, entry.next]),
+    );
+    expect(calendar.LEC).toMatchObject({ serieId: 2, title: "LEC Winter 2027", live: false });
+    // Les Challengers ne sont pas la LCK.
+    expect(calendar.LCK).toMatchObject({ serieId: 4, title: "LCK Cup 2027" });
+    expect(calendar.WORLDS).toMatchObject({ serieId: 5, live: true });
+    // Rien d'annoncé : la page le dira.
+    expect(calendar.LPL).toBeNull();
+    expect(calendar.MSI).toBeNull();
   });
 });

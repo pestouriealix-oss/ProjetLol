@@ -1,4 +1,4 @@
-import type { EsportMatch, EsportTeam, Tournament } from "./schemas";
+import type { EsportMatch, EsportTeam, Serie, Tournament } from "./schemas";
 
 /**
  * Mise en forme des données de PandaScore pour l'onglet Esport. Fonctions
@@ -145,4 +145,62 @@ export function groupByDay(
     days.set(day, [...(days.get(day) ?? []), match]);
   }
   return [...days.entries()].map(([day, list]) => ({ day, matches: list }));
+}
+
+/**
+ * Les rendez-vous de la saison suivis par l'onglet : les trois grandes ligues
+ * (Europe, Corée, Chine) et les compétitions internationales, dans l'ordre de
+ * l'année. Reconnus au nom de leur ligue chez PandaScore.
+ */
+export const SEASON_CIRCUITS = [
+  { key: "LEC", match: (league: string) => /^lec$/i.test(league) },
+  { key: "LCK", match: (league: string) => /^lck$/i.test(league) },
+  { key: "LPL", match: (league: string) => /^lpl$/i.test(league) },
+  { key: "FIRST_STAND", match: (league: string) => /first stand/i.test(league) },
+  { key: "MSI", match: (league: string) => /^msi$|mid-season/i.test(league) },
+  { key: "EWC", match: (league: string) => /esports world cup/i.test(league) },
+  { key: "WORLDS", match: (league: string) => /^worlds$|world championship/i.test(league) },
+] as const;
+export type SeasonCircuit = (typeof SEASON_CIRCUITS)[number]["key"];
+
+export type SeasonEntry = {
+  circuit: SeasonCircuit;
+  /** Le prochain rendez-vous (ou celui en cours), `null` tant que rien n'est annoncé. */
+  next: {
+    serieId: number;
+    title: string;
+    leagueImage: string | null;
+    beginAt: Date | null;
+    endAt: Date | null;
+    live: boolean;
+  } | null;
+};
+
+/**
+ * Pour chaque rendez-vous suivi, la saison en cours ou la prochaine annoncée,
+ * d'après les saisons de PandaScore (`/lol/series/running` et `upcoming`).
+ */
+export function seasonCalendar(series: Serie[], now: Date): SeasonEntry[] {
+  const at = now.getTime();
+  return SEASON_CIRCUITS.map(({ key, match }) => {
+    const candidates = series
+      .filter((serie) => match(serie.league.name) || match(serie.league.slug))
+      // Une saison déjà terminée ne compte plus.
+      .filter((serie) => !(time(serie.end_at) < at))
+      .sort((a, b) => (time(a.begin_at) || Infinity) - (time(b.begin_at) || Infinity));
+    const serie = candidates[0];
+    if (!serie) return { circuit: key, next: null };
+    const edition = serie.full_name ?? serie.name ?? (serie.year ? String(serie.year) : "");
+    return {
+      circuit: key,
+      next: {
+        serieId: serie.id,
+        title: [serie.league.name, edition].filter(Boolean).join(" "),
+        leagueImage: serie.league.image_url,
+        beginAt: serie.begin_at ? new Date(serie.begin_at) : null,
+        endAt: serie.end_at ? new Date(serie.end_at) : null,
+        live: time(serie.begin_at) <= at,
+      },
+    };
+  });
 }

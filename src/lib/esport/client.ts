@@ -6,9 +6,11 @@ import {
   bracketSchema,
   matchesSchema,
   standingsSchema,
+  seriesSchema,
   tournamentsSchema,
   type BracketMatch,
   type EsportMatch,
+  type Serie,
   type Standing,
   type Tournament,
 } from "./schemas";
@@ -27,9 +29,12 @@ export type EsportClientOptions = {
   /** Durée pendant laquelle une réponse est réutilisée, en secondes. */
   revalidateSeconds?: number;
   timeoutMs?: number;
+  /** Horloge (tests). */
+  now?: () => number;
 };
 
 export type TournamentStatus = "running" | "upcoming" | "past";
+export type SerieStatus = "running" | "upcoming";
 
 export type EsportApi = ReturnType<typeof createEsportApi>;
 
@@ -39,7 +44,16 @@ export function createEsportApi({
   fetch: fetchImpl = fetch,
   revalidateSeconds = 60,
   timeoutMs = 8000,
+  now = () => Date.now(),
 }: EsportClientOptions) {
+  /**
+   * Réponses gardées en mémoire, par adresse. Une réponse plus vieille que
+   * `revalidateSeconds` est redemandée avant d'être montrée : jamais de
+   * résultats d'hier au premier affichage. L'ancienne ne sert qu'en secours,
+   * si PandaScore ne répond pas.
+   */
+  const memory = new Map<string, { at: number; value: unknown }>();
+
   const get = async <Schema extends z.ZodType>(
     path: string,
     schema: Schema,
@@ -51,14 +65,37 @@ export function createEsportApi({
 
     const url = new URL(baseUrl.replace(/\/$/, "") + path);
     for (const [key, value] of Object.entries(query)) url.searchParams.set(key, String(value));
+    const key = url.toString();
+    const kept = memory.get(key);
+    if (kept && now() - kept.at < revalidateSeconds * 1000) return kept.value as z.infer<Schema>;
 
+    try {
+      const value = await request(key, path, schema, whenMissing);
+      memory.set(key, { at: now(), value });
+      return value;
+    } catch (error) {
+      const outage =
+        error instanceof EsportApiError &&
+        (error.kind === "unavailable" || error.kind === "rate_limited");
+      if (outage && kept) return kept.value as z.infer<Schema>;
+      throw error;
+    }
+  };
+
+  const request = async <Schema extends z.ZodType>(
+    url: string,
+    path: string,
+    schema: Schema,
+    whenMissing?: z.infer<Schema>,
+  ): Promise<z.infer<Schema>> => {
     let response: Response;
     try {
-      response = await fetchImpl(url.toString(), {
+      response = await fetchImpl(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-        // Les résultats changent au fil des matchs : une minute de cache suffit
-        // à rester sous la limite de l'offre gratuite.
-        next: { revalidate: revalidateSeconds },
+        // Pas de cache de Next.js : il rendait une réponse périmée au premier
+        // affichage (même après un redémarrage). Le cache en mémoire ci-dessus
+        // garde une minute, assez pour la limite de l'offre gratuite.
+        cache: "no-store",
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (error) {
@@ -108,6 +145,11 @@ export function createEsportApi({
         sort: status === "past" ? "-end_at" : "begin_at",
         per_page: 50,
       });
+    },
+
+    /** Saisons de LoL en cours ou à venir, annoncées parfois avant leurs tournois. */
+    listSeries(status: SerieStatus): Promise<Serie[]> {
+      return get(`/lol/series/${status}`, seriesSchema, { sort: "begin_at", per_page: 100 });
     },
 
     /** Les étapes d'une compétition (Play-In, phase suisse, phase finale…), dans l'ordre. */

@@ -58,6 +58,21 @@ export const esport = {
     watchLabel: (match: string) => `Regarder ${match} (nouvel onglet)`,
     versus: (a: string, b: string) => `${a} contre ${b}`,
   },
+  season: {
+    title: "La saison à venir",
+    names: {
+      LEC: "LEC · Europe",
+      LCK: "LCK · Corée",
+      LPL: "LPL · Chine",
+      FIRST_STAND: "First Stand",
+      MSI: "MSI",
+      EWC: "Esports World Cup",
+      WORLDS: "Worlds",
+    },
+    unannounced: "Dates pas encore annoncées",
+    from: (date: string) => `À partir du ${date}`,
+    live: "En cours",
+  },
   others: {
     title: "Autres compétitions",
     empty: "Aucune autre compétition majeure en ce moment.",
