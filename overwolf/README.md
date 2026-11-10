@@ -1,7 +1,7 @@
 # Gufo pour Overwolf
 
 L'app de bureau de Gufo : la fiche de draft s'ouvre toute seule à l'écran de
-chargement de League of Legends, reste le temps d'aller en voie (jusqu'à 1:30
+chargement de League of Legends, reste le temps d'aller en voie (45 secondes
 de jeu), puis se range. Le raccourci (Ctrl+Shift+G) la rouvre en partie.
 
 Elle ne fait que trois choses : suivre le client (sélection, chargement,

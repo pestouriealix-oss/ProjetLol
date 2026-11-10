@@ -111,10 +111,11 @@ const SERVER_ERRORS: Record<string, SheetErrorReason> = {
 const ACCOUNT_REFRESH_MS = 20_000;
 /**
  * Au début de la partie, la fiche reste le temps d'aller en voie : elle se range
- * vers 1:30, quand les premiers CS arrivent. Un chargement rapide ne laisse
- * sinon pas le temps de la lire.
+ * au bout de 45 secondes de jeu, avant l'arrivée des premiers CS (plus tôt
+ * depuis la saison 2026). Un chargement rapide ne laisse sinon pas le temps
+ * de la lire.
  */
-export const SHEET_IN_GAME_MS = 90_000;
+export const SHEET_IN_GAME_MS = 45_000;
 
 type Options = {
   sleep?: (ms: number) => Promise<void>;
@@ -345,7 +346,7 @@ export class Controller {
     if (this.state.sheetVisible) this.set({ sheetVisible: false });
   }
 
-  /** Range la fiche vers 1:30 de jeu, sauf si le joueur l'a rangée ou rouverte entre-temps. */
+  /** Range la fiche après 45 s de jeu, sauf si le joueur l'a rangée ou rouverte entre-temps. */
   private async hideSheetSoon() {
     this.autoHideRun += 1;
     const run = this.autoHideRun;

@@ -110,7 +110,7 @@ describe("liaison avec le compte", () => {
 });
 
 describe("la fiche à l'écran de chargement", () => {
-  it("cherche la partie, écrit la fiche, et la garde jusqu'à 1:30 de jeu", async () => {
+  it("cherche la partie, écrit la fiche, et la garde 45 secondes de jeu", async () => {
     const sheet = { winConditions: { ours: "Jouer autour du dragon", theirs: "Diviser" } };
     const { controller, platform, signals, flush, clock } = setup({
       token: "jeton",
@@ -163,7 +163,7 @@ describe("la fiche à l'écran de chargement", () => {
       token: "jeton",
       live: [{ status: "found", draft, riotId: "Alix" }],
       sheet: [{ type: "done", id: "fiche-2", sheet: {} }],
-      // Le délai de 1:30 ne s'écoule que sur commande.
+      // Le délai de 45 s ne s'écoule que sur commande.
       sleep: (ms) =>
         ms === SHEET_IN_GAME_MS ? new Promise<void>((resolve) => (release = resolve)) : undefined,
     });
@@ -171,7 +171,7 @@ describe("la fiche à l'écran de chargement", () => {
     signals().gameRunning(true);
     for (let i = 0; i < 5; i += 1) await flush();
     signals().matchStarted();
-    // Le joueur la range puis la rouvre avant 1:30 : elle reste.
+    // Le joueur la range puis la rouvre avant la fin du délai : elle reste.
     signals().hotkey();
     signals().hotkey();
     release();
