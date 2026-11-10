@@ -19,7 +19,7 @@ export const PUBLISHER: {
 } = { name: "Alix-Pierre Pestourie", status: "Particulier", email: "pestouriealix@gmail.com" };
 
 /** Date de la version en ligne des conditions et de la politique de confidentialité. */
-export const LEGAL_UPDATED_AT = "2026-11-02";
+export const LEGAL_UPDATED_AT = "2026-11-10";
 
 export const ROLES = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"] as const;
 export type Role = (typeof ROLES)[number];

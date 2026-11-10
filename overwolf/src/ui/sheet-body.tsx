@@ -85,11 +85,6 @@ export function SheetBody({
                 {t.companion.app.account.fixOnSite}
               </Button>
             ) : null}
-            {sheet.reason === "quota" || sheet.reason === "budget" ? (
-              <Button size="sm" variant="secondary" onClick={() => onOpenSite("/premium")}>
-                {copy.seePremium}
-              </Button>
-            ) : null}
           </div>
           {sheet.code ? <p className="text-xs text-ink-faint">{copy.code(sheet.code)}</p> : null}
         </Message>

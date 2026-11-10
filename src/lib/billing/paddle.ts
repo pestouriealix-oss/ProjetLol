@@ -41,6 +41,13 @@ export function checkoutConfig(options: { founder: boolean }): CheckoutConfig | 
   };
 }
 
+/**
+ * Vrai si les fondateurs paient vraiment leur prix garanti : sans prix
+ * fondateurs chez Paddle, ils passeraient par le prix public, et l'affichage
+ * doit le dire.
+ */
+export const foundersPriceReady = (): boolean => Boolean(env.PADDLE_PRICE_ID_FOUNDERS);
+
 /** La durée d'un prix Paddle déjà payé : l'annuel se reconnaît à son identifiant. */
 export function intervalOfPrice(priceId: string | null): BillingInterval {
   return priceId && priceId === env.PADDLE_PRICE_ID_YEARLY ? "year" : "month";

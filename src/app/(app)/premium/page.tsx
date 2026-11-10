@@ -11,7 +11,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n/fr";
 import { isPaidPlan, limitsFor } from "@/lib/auth/entitlements";
 import { requireUser } from "@/lib/auth/session";
-import { checkoutConfig, intervalOfPrice } from "@/lib/billing/paddle";
+import { checkoutConfig, foundersPriceReady, intervalOfPrice } from "@/lib/billing/paddle";
 import { formatPremiumPrice } from "@/lib/billing/plans";
 import { findCurrentSubscription } from "@/lib/db/billing";
 import { formatLongDate } from "@/lib/format";
@@ -31,6 +31,8 @@ export default async function PremiumPage({
   const { merci, portail } = await searchParams;
   const subscription = await findCurrentSubscription(user.id);
   const config = checkoutConfig({ founder: user.founder });
+  // Le prix fondateurs n'est affiché que s'il est vraiment facturé.
+  const founderRate = user.founder && foundersPriceReady();
   // Premium offert (fondateurs) : on peut s'abonner pendant, rien n'est payé.
   const subscribed = isPaidPlan(user.plan) && user.trialEndsAt === null;
   const free = limitsFor("FREE");
@@ -70,10 +72,13 @@ export default async function PremiumPage({
 
       <Panel className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <div className="flex flex-col gap-5">
-          {user.founder ? (
+          {founderRate ? (
             <p className="flex flex-col items-start gap-2 text-ink-muted">
               <Badge tone="strong">{copy.founder.badge}</Badge>
-              {copy.founder.priceLock(formatPremiumPrice("month"))}
+              {copy.founder.priceLock(
+                formatPremiumPrice("month", { founder: true }),
+                formatPremiumPrice("month"),
+              )}
             </p>
           ) : null}
 
@@ -82,6 +87,7 @@ export default async function PremiumPage({
             email={user.email}
             userId={user.id}
             subscribed={subscribed}
+            founder={founderRate}
             initialInterval={subscribed ? intervalOfPrice(subscription?.priceId ?? null) : "month"}
           />
 

@@ -11,7 +11,7 @@ import type { ChampionDetails } from "@/lib/ddragon/champion-details";
 import { canAnalyse, duplicateChampions, type Draft } from "@/lib/draft/draft";
 import type { SheetFacts } from "@/lib/draft/sheet-view";
 import { frenchSpacing } from "@/lib/format";
-import { llm, MODELS } from "@/lib/llm";
+import { llm, LlmError, MODELS } from "@/lib/llm";
 import {
   DRAFT_MATCHUP_SYSTEM,
   DRAFT_MATCHUP_TOOL,
@@ -226,13 +226,13 @@ export async function writeDraftSheet(
     roster: champions.list().map((champion) => champion.name),
   };
 
-  /** Deux jets au plus ; `null` si le second échoue encore au contrôle. */
-  const writeMatchup = async (): Promise<Matchup | null> => {
+  /** Deux jets au plus avec ce modèle ; `null` si le second échoue encore au contrôle. */
+  const writeMatchupWith = async (model: string): Promise<Matchup | null> => {
     let content = matchupMessage;
     for (let attempt = 0; attempt < MATCHUP_ATTEMPTS; attempt += 1) {
       const matchup = await llm.streamTool(
         {
-          model: matchupModel,
+          model,
           system: DRAFT_MATCHUP_SYSTEM,
           maxTokens: 1500,
           tool: DRAFT_MATCHUP_TOOL,
@@ -251,23 +251,48 @@ export async function writeDraftSheet(
     return null;
   };
 
-  const matchupTask = cached
+  /**
+   * Le duel par le modèle prévu ; s'il ne répond pas (refusé, surchargé, en
+   * panne), par celui des conditions de victoire, contrôlé de la même façon.
+   * Le texte de secours n'est pas gardé : le joueur suivant aura celui du
+   * modèle prévu.
+   */
+  const writeMatchup = async (): Promise<{ matchup: Matchup | null; model: string }> => {
+    try {
+      return { matchup: await writeMatchupWith(matchupModel), model: matchupModel };
+    } catch (error) {
+      if (controller.signal.aborted || !(error instanceof LlmError) || matchupModel === model) {
+        throw error;
+      }
+      console.error(`Duel : ${matchupModel} ne répond pas, repli sur ${model}`, error);
+      return { matchup: await writeMatchupWith(model), model };
+    }
+  };
+
+  const matchupTask: Promise<Matchup | null> = cached
     ? Promise.resolve(cached)
-    : writeMatchup().then(async (matchup) => {
-        current = { ...current, matchup: matchup ?? undefined };
-        emit();
-        // Gardé pour les suivants s'il est juste ; un échec ici ne prive pas le joueur de sa fiche.
-        if (matchup) {
-          await saveMatchupNote({
-            key,
-            patch,
-            model: matchupModel,
-            promptVersion: DRAFT_MATCHUP_VERSION,
-            content: matchup,
-          }).catch((error: unknown) => console.error("Duel non gardé", error));
-        }
-        return matchup;
-      });
+    : writeMatchup()
+        .catch((error: unknown) => {
+          // Sans duel, la fiche garde ses conditions de victoire : seul l'arrêt demandé l'interrompt.
+          if (controller.signal.aborted) throw error;
+          console.error(`Duel ${mineName} contre ${theirName} impossible`, error);
+          return { matchup: null, model: matchupModel };
+        })
+        .then(async ({ matchup, model: writtenBy }) => {
+          current = { ...current, matchup: matchup ?? undefined };
+          emit();
+          // Gardé pour les suivants s'il est juste et vient du modèle prévu ; un échec ici ne prive pas le joueur de sa fiche.
+          if (matchup && writtenBy === matchupModel) {
+            await saveMatchupNote({
+              key,
+              patch,
+              model: matchupModel,
+              promptVersion: DRAFT_MATCHUP_VERSION,
+              content: matchup,
+            }).catch((error: unknown) => console.error("Duel non gardé", error));
+          }
+          return matchup;
+        });
 
   let sheet: DraftSheet;
   try {

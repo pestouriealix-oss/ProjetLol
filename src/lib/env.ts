@@ -55,9 +55,8 @@ const schema = z.object({
   /** Prix de Premium à l'année (« pri_… »). Sans lui, seule l'offre au mois est proposée. */
   PADDLE_PRICE_ID_YEARLY: optional,
   /**
-   * Prix au mois garanti aux fondateurs (comptes venus par invitation). Vide
-   * tant que le prix public n'a pas changé ; le jour où il monte, on y met
-   * l'ancien prix (2,99 €) et `PADDLE_PRICE_ID` reçoit le nouveau.
+   * Prix au mois garanti aux fondateurs (comptes venus par invitation) : 2,99 €,
+   * l'ancien prix public. `PADDLE_PRICE_ID` porte le prix public (3,99 €).
    */
   PADDLE_PRICE_ID_FOUNDERS: optional,
   /** Autre adresse pour l'API Paddle (tests). */

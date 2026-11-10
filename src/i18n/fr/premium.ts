@@ -18,8 +18,8 @@ export const premium = {
     `Soit ${perMonth} par mois. Payé une fois par an, résiliable quand tu veux : Premium reste actif jusqu'à la fin de l'année payée.`,
   founder: {
     badge: "Fondateur",
-    priceLock: (price: string) =>
-      `Tu étais là avant l'ouverture : ${price} par mois, garantis à vie, même si le prix monte.`,
+    priceLock: (price: string, publicPrice: string) =>
+      `Tu étais là avant l'ouverture : ${price} par mois au lieu de ${publicPrice}, garantis tant que ton abonnement court.`,
   },
   trial: {
     title: (date: string) => `Premium t'est offert jusqu'au ${date}`,

@@ -117,7 +117,6 @@ export const companion = {
       lookingHint: "Riot la montre quelques secondes après le début du chargement.",
       onSite: "Ta fiche est aussi sur gufo.gg.",
       retry: "Réessayer",
-      seePremium: "Voir Premium",
       code: (code: string) => `Code : ${code}`,
       signedOut: {
         title: "App pas encore reliée",
@@ -142,11 +141,11 @@ export const companion = {
         },
         quota: {
           title: "Plus de fiches aujourd'hui",
-          body: "Tu as utilisé tes fiches du jour. Premium en donne 40 par jour.",
+          body: "Tu as utilisé tes fiches des dernières 24 heures : chacune revient 24 heures après avoir servi.",
         },
         budget: {
           title: "Fiches gratuites en pause",
-          body: "Les fiches gratuites reprennent le mois prochain. Premium continue.",
+          body: "Les fiches gratuites reprennent le mois prochain.",
         },
         coach_setup: {
           title: "Coach indisponible",

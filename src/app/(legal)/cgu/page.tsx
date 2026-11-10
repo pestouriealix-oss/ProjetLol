@@ -15,6 +15,7 @@ export default function Page() {
     reviews: free.matchReviewsPerDay,
     price: formatPremiumPrice("month"),
     yearlyPrice: formatPremiumPrice("year"),
+    founderPrice: formatPremiumPrice("month", { founder: true }),
   });
   return (
     <>

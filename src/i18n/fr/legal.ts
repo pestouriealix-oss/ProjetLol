@@ -14,6 +14,8 @@ export const legal = {
     reviews: number;
     price: string;
     yearlyPrice: string;
+    /** Prix au mois garanti aux fondateurs. */
+    founderPrice: string;
   }) => [
     {
       title: "1. Objet",
@@ -48,7 +50,7 @@ export const legal = {
         `L'essentiel de ${APP_NAME} est gratuit, avec des limites par 24 heures : ${offer.sheets} fiches de draft et ${offer.reviews} bilans de partie. L'application affiche ce qu'il te reste.`,
         `Premium, à ${offer.price} TTC par mois ou ${offer.yearlyPrice} TTC par an, relève ces limites. Le paiement, la facture, la TVA, le remboursement et le droit de rétractation sont gérés par Paddle (Paddle.com Market Limited), notre revendeur officiel, selon ses conditions de vente, présentées au moment du paiement.`,
         "L'abonnement se renouvelle à la fin de chaque période payée (un mois ou un an). Tu peux le résilier à tout moment depuis la page Premium : il reste actif jusqu'à la fin de la période déjà payée. Un changement de prix est annoncé au moins 30 jours à l'avance, et tu restes libre de résilier.",
-        `Offre fondateurs : un compte créé avec une invitation (test fermé, liste d'attente) garde Premium au mois à ${offer.price} TTC tant que son abonnement court, même si le prix public augmente. Il peut aussi recevoir Premium offert pour une durée annoncée, sans moyen de paiement ; à la fin, le compte repasse à l'offre gratuite, sauf s'il s'abonne.`,
+        `Offre fondateurs : un compte créé avec une invitation (test fermé, liste d'attente) garde Premium au mois à ${offer.founderPrice} TTC tant que son abonnement court, même si le prix public augmente. Il peut aussi recevoir Premium offert pour une durée annoncée, sans moyen de paiement ; à la fin, le compte repasse à l'offre gratuite, sauf s'il s'abonne.`,
         "Le budget du coach est plafonné chaque mois : s'il est atteint, les fiches et bilans gratuits s'arrêtent jusqu'au mois suivant. Premium n'est pas concerné.",
       ],
     },

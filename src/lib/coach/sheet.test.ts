@@ -12,20 +12,27 @@ type ToolCallLike = { tool: { name: string }; content: string; model: string };
 
 const calls: ToolCallLike[] = [];
 let duels: Matchup[] = [];
+/** Modèles qui refusent l'appel, comme une clé sans accès ou une panne. */
+let failing = new Set<string>();
 const partials: unknown[] = [];
 
 const saveMatchupNote = vi.fn(async () => undefined);
 
-vi.mock("@/lib/llm", () => ({
-  MODELS: { draftSheet: "haiku", matchup: "sonnet" },
-  llm: {
-    streamTool: vi.fn(async (call: ToolCallLike) => {
-      calls.push(call);
-      if (call.tool.name === "ecrire_duel") return duels.shift();
-      return { ours: "Jouer la fin de partie.", theirs: "Finir vite." };
-    }),
-  },
-}));
+vi.mock("@/lib/llm", async () => {
+  const { LlmError } = await import("@/lib/llm/errors");
+  return {
+    LlmError,
+    MODELS: { draftSheet: "haiku", matchup: "sonnet" },
+    llm: {
+      streamTool: vi.fn(async (call: ToolCallLike) => {
+        calls.push(call);
+        if (failing.has(call.model)) throw new LlmError("invalid_key", "Clé refusée (403).");
+        if (call.tool.name === "ecrire_duel") return duels.shift();
+        return { ours: "Jouer la fin de partie.", theirs: "Finir vite." };
+      }),
+    },
+  };
+});
 vi.mock("@/lib/ddragon/champions", () => ({
   getChampionAssets: async () => ({
     version: "16.22.1",
@@ -116,6 +123,7 @@ const right = duel("Une fois ton E utilisé, son E te tombe dessus.");
 const write = () => writeDraftSheet("user-1", draft, (partial) => partials.push(partial));
 
 beforeEach(() => {
+  failing = new Set();
   calls.length = 0;
   partials.length = 0;
   saveMatchupNote.mockClear();
@@ -155,5 +163,31 @@ describe("le duel de la fiche", () => {
     expect(sheet.winConditions.ours).toBe("Jouer la fin de partie.");
     expect(saveMatchupNote).not.toHaveBeenCalled();
     expect(JSON.stringify(partials)).not.toContain("Shunpo");
+  });
+
+  it("se rabat sur le modèle des conditions de victoire si celui du duel ne répond pas", async () => {
+    failing = new Set(["sonnet"]);
+    duels = [right];
+    const { sheet } = await write();
+    expect(
+      calls.filter((call) => call.tool.name === "ecrire_duel").map((call) => call.model),
+    ).toEqual(["sonnet", "haiku"]);
+    expect(sheet.matchup?.watchOut).toBe(right.watchOut);
+    // Le texte de secours n'est pas gardé : le joueur suivant aura celui du modèle prévu.
+    expect(saveMatchupNote).not.toHaveBeenCalled();
+  });
+
+  it("laisse la fiche sans duel plutôt que de tout perdre si aucun modèle ne l'écrit", async () => {
+    duels = [];
+    const { llm } = await import("@/lib/llm");
+    vi.mocked(llm.streamTool).mockImplementation(async (call) => {
+      calls.push(call as unknown as ToolCallLike);
+      if (call.tool.name === "ecrire_duel")
+        throw new (await import("@/lib/llm/errors")).LlmError("unavailable", "Panne.");
+      return { ours: "Jouer la fin de partie.", theirs: "Finir vite." } as never;
+    });
+    const { sheet } = await write();
+    expect(sheet.matchup).toBeNull();
+    expect(sheet.winConditions.ours).toBe("Jouer la fin de partie.");
   });
 });

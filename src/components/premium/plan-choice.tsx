@@ -24,6 +24,8 @@ type PlanChoiceProps = {
   userId: string;
   /** Abonné : seul le prix de son abonnement s'affiche, sans choix ni paiement. */
   subscribed: boolean;
+  /** Fondateur au prix garanti : le mois affiché est le sien (2,99 €). */
+  founder?: boolean;
   initialInterval: BillingInterval;
 };
 
@@ -36,6 +38,7 @@ export function PlanChoice({
   email,
   userId,
   subscribed,
+  founder = false,
   initialInterval,
 }: PlanChoiceProps) {
   const [interval, setInterval] = useState<BillingInterval>(initialInterval);
@@ -77,7 +80,7 @@ export function PlanChoice({
                     {copy.interval[each]}
                     {each === "year" ? (
                       <span className="text-win tabular">
-                        {copy.interval.saving(yearlySavingPercent())}
+                        {copy.interval.saving(yearlySavingPercent({ founder }))}
                       </span>
                     ) : null}
                   </label>
@@ -90,7 +93,9 @@ export function PlanChoice({
 
       <div className="flex flex-col gap-2">
         <p className="flex items-baseline gap-2">
-          <span className="display text-6xl text-ink tabular">{formatPremiumPrice(interval)}</span>
+          <span className="display text-6xl text-ink tabular">
+            {formatPremiumPrice(interval, { founder })}
+          </span>
           <span className="text-ink-muted">
             {interval === "year" ? copy.perYear : copy.perMonth}
           </span>
