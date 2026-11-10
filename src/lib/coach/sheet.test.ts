@@ -68,6 +68,7 @@ vi.mock("./facts", () => ({
           maxRank: 3,
         },
       ],
+      fingerprint: "orianna-16",
     },
     theirs: {
       id: "Katarina",
@@ -85,6 +86,7 @@ vi.mock("./facts", () => ({
         },
         { key: "R", name: "Lotus mortel", cooldown: "90/60/45", text: "Dagues.", maxRank: 3 },
       ],
+      fingerprint: "katarina-16",
     },
     roleRates: { mine: null, theirs: null },
   }),
@@ -126,6 +128,10 @@ describe("le duel de la fiche", () => {
     expect(sheet.matchup?.watchOut).toBe(right.watchOut);
     expect(calls.find((call) => call.tool.name === "ecrire_duel")?.model).toBe("sonnet");
     expect(saveMatchupNote).toHaveBeenCalledWith(expect.objectContaining({ model: "sonnet" }));
+    // Gardé sous l'empreinte des deux champions : il resservira au patch suivant s'ils n'ont pas bougé.
+    expect(saveMatchupNote).toHaveBeenCalledWith(
+      expect.objectContaining({ key: expect.stringContaining("saison 16:orianna-16+katarina-16") }),
+    );
   });
 
   it("est réécrit avec la liste des erreurs, et seul le texte juste est montré", async () => {

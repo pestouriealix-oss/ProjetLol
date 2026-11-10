@@ -1,4 +1,6 @@
 import "server-only";
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import { env } from "@/lib/env";
@@ -11,29 +13,54 @@ import { env } from "@/lib/env";
 
 const BASE_URL = env.DDRAGON_BASE_URL ?? "https://ddragon.leagueoflegends.com";
 
-const detailsSchema = z.object({
-  data: z.record(
-    z.string(),
-    z.looseObject({
-      id: z.string(),
-      name: z.string(),
-      title: z.string().optional().default(""),
-      tags: z.array(z.string()).optional().default([]),
-      passive: z.looseObject({ name: z.string(), description: z.string() }),
-      spells: z
-        .array(
-          z.looseObject({
-            name: z.string(),
-            description: z.string(),
-            cooldownBurn: z.string().optional().default(""),
-            /** Rangs de la compétence : 3 pour un ultime classique, plus s'il est pris dès le niveau 1. */
-            maxrank: z.number().int().positive().optional(),
-          }),
-        )
-        .length(4),
-    }),
-  ),
+const championSchema = z.looseObject({
+  id: z.string(),
+  name: z.string(),
+  title: z.string().optional().default(""),
+  tags: z.array(z.string()).optional().default([]),
+  /** Statistiques de base (points de vie, armure…) : un équilibrage les touche souvent. */
+  stats: z.record(z.string(), z.number()).optional().default({}),
+  passive: z.looseObject({ name: z.string(), description: z.string() }),
+  spells: z
+    .array(
+      z.looseObject({
+        name: z.string(),
+        description: z.string(),
+        cooldownBurn: z.string().optional().default(""),
+        costBurn: z.string().optional().default(""),
+        rangeBurn: z.string().optional().default(""),
+        effectBurn: z.array(z.string().nullable()).optional().default([]),
+        /** Rangs de la compétence : 3 pour un ultime classique, plus s'il est pris dès le niveau 1. */
+        maxrank: z.number().int().positive().optional(),
+      }),
+    )
+    .length(4),
 });
+
+const detailsSchema = z.object({ data: z.record(z.string(), championSchema) });
+
+/**
+ * L'empreinte d'un champion pour le coach : tout ce qu'un équilibrage peut
+ * changer dans Data Dragon (statistiques de base, descriptions, délais, coûts,
+ * portées, valeurs). Même empreinte d'un patch à l'autre = champion inchangé,
+ * et un duel déjà écrit reste juste.
+ */
+export function championFingerprint(champion: z.input<typeof championSchema>): string {
+  const parsed = championSchema.parse(champion);
+  const stable = {
+    stats: Object.entries(parsed.stats).sort(([a], [b]) => a.localeCompare(b)),
+    passive: parsed.passive.description,
+    spells: parsed.spells.map((spell) => [
+      spell.description,
+      spell.cooldownBurn,
+      spell.costBurn,
+      spell.rangeBurn,
+      spell.effectBurn,
+      spell.maxrank ?? null,
+    ]),
+  };
+  return createHash("sha256").update(JSON.stringify(stable)).digest("hex").slice(0, 16);
+}
 
 export type ChampionDetails = {
   id: string;
@@ -48,6 +75,8 @@ export type ChampionDetails = {
     text: string;
     maxRank: number | null;
   }[];
+  /** Voir `championFingerprint`. */
+  fingerprint: string;
 };
 
 const KEYS = ["Q", "W", "E", "R"] as const;
@@ -92,6 +121,7 @@ export async function getChampionDetails(
         text: ddragonText(spell.description),
         maxRank: spell.maxrank ?? null,
       })),
+      fingerprint: championFingerprint(champion),
     };
   } catch (error) {
     console.error(`Fiche Data Dragon indisponible pour ${championId}`, error);

@@ -141,6 +141,10 @@ export async function writeDraftSheet(
     promptVersion: DRAFT_MATCHUP_VERSION,
     model: matchupModel,
     patch,
+    fingerprints:
+      grounded.mine && grounded.theirs
+        ? { mine: grounded.mine.fingerprint, theirs: grounded.theirs.fingerprint }
+        : null,
     role: draft.myRole,
     mine: myId,
     theirs: theirId,
