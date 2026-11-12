@@ -65,7 +65,7 @@ describe("draftMatchupMessage", () => {
 
   it("ne parle que du duel, avec le duo en bas", () => {
     const solo = draftMatchupMessage(base);
-    expect(solo).not.toContain("En bas");
+    expect(solo).not.toContain("En botlane");
     const bot = draftMatchupMessage({
       ...base,
       role: "ADC",
@@ -76,10 +76,10 @@ describe("draftMatchupMessage", () => {
     expect(bot).toContain("le duo du joueur est Caitlyn avec Lux ; en face, Kog'Maw avec Lulu");
   });
 
-  it("dit comment se joue la voie", () => {
-    expect(draftMatchupMessage(base)).toContain("Jungle : pas de voie.");
+  it("dit comment se joue la lane", () => {
+    expect(draftMatchupMessage(base)).toContain("Jungle : pas de lane.");
     expect(draftMatchupMessage({ ...base, role: "MID", mine: "Ahri", theirs: "Zed" })).toContain(
-      "Voie seule : Ahri contre Zed, en un contre un. Le joueur n'a ni allié de voie ni support.",
+      "Lane solo : Ahri contre Zed, en un contre un. Le joueur n\'a ni allié de lane ni support.",
     );
   });
 

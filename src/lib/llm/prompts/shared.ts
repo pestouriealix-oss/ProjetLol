@@ -70,3 +70,10 @@ export const modelList = <T extends z.ZodType>(item: T, min: number, max: number
 export function ofChampion(name: string): string {
   return /^[aeiouyhàâéèêîïôûAEIOUYHÀÂÉÈÊÎÏÔÛ]/.test(name) ? `d'${name}` : `de ${name}`;
 }
+
+/**
+ * Le vocabulaire des joueurs, rappelé dans chaque prompt : les mots du client
+ * français (« vague », « voie », « sbires ») sonnent faux dans la bouche d'un coach.
+ */
+export const PLAYER_VOCABULARY =
+  "- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), wave (jamais « vague »), lane (jamais « voie »), farm, KP, kill, gank, roam, back, push, freeze, trade, poke, all-in, lead, teamfight (jamais « combat groupé »), engage, split-push, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.";

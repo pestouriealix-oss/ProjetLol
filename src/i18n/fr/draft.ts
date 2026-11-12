@@ -62,7 +62,7 @@ export const draft = {
   you: "Toi",
   slot: "En attente",
   board: {
-    caption: "Les champions de la partie, voie par voie",
+    caption: "Les champions de la partie, lane par lane",
     role: "Rôle",
     hint: "Une erreur ? Clique sur un champion pour le corriger, ou sur un poste pour dire lequel est le tien.",
     waitingHint: "Le tableau se remplit avec ta partie en cours, ou avec une capture.",
@@ -119,7 +119,7 @@ export const draft = {
     body: "Elle s'écrira ici dès que tu la lances, en quelques secondes.",
     items: [
       "Comment ton équipe gagne, et comment la leur gagne",
-      "Ton matchup en voie, et plusieurs façons de le jouer",
+      "Ton matchup en lane, et plusieurs façons de le jouer",
       "Les moments où le rapport de force bascule",
       "Ce qui te fait perdre le duel",
     ],

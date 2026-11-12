@@ -5,7 +5,7 @@ import { GOAL_METRICS, normalizeGoal } from "@/lib/stats/goals";
 import type { ReviewFacts, ReviewLine } from "@/lib/stats/review";
 
 import type { ToolSpec } from "../client";
-import { modelList, modelText, ROLE_NAMES } from "./shared";
+import { modelList, modelText, PLAYER_VOCABULARY, ROLE_NAMES } from "./shared";
 
 /**
  * Bilan d'une partie jouée : ce qui a marché, ce qui a coûté, et des façons
@@ -13,7 +13,7 @@ import { modelList, modelText, ROLE_NAMES } from "./shared";
  * Version à changer à chaque modification du texte ou du schéma (elle est
  * enregistrée avec chaque bilan).
  */
-export const MATCH_REVIEW_VERSION = "match-review@8";
+export const MATCH_REVIEW_VERSION = "match-review@9";
 
 export const MATCH_REVIEW_SYSTEM = `Tu es un coach de League of Legends. Le joueur vient de finir une partie et lit ton bilan en une minute. Tu lui écris en français, en le tutoyant, comme un coach exigeant mais bienveillant. Il doit en retenir une seule chose : quoi faire à la prochaine partie.
 
@@ -41,13 +41,13 @@ L'objectif chiffré :
 - Donne la cible en nombre, dans l'unité indiquée (6.5, pas « 6,5 CS ») ; la phrase la reprend telle quelle, à la française (« 6,5 CS par minute »).
 
 Lis la partie comme un coach, pas comme une liste de chiffres :
-- Pèse les compromis. Un retard de CS n'est pas une faute si le joueur a eu plus d'impact que son vis-à-vis : plus de KP, plus de kills et d'assists avant 15 minutes, plus d'objectifs, plus d'or en fin de partie. Dis-le comme un point fort, et l'axe de progrès devient de garder cet impact en perdant moins de farm (farmer entre deux actions, ne pas laisser de camps ou de vagues). À l'inverse, beaucoup de CS avec peu d'impact (KP et objectifs bas) est de l'overfarming : signale-le.
+- Pèse les compromis. Un retard de CS n'est pas une faute si le joueur a eu plus d'impact que son vis-à-vis : plus de KP, plus de kills et d'assists avant 15 minutes, plus d'objectifs, plus d'or en fin de partie. Dis-le comme un point fort, et l'axe de progrès devient de garder cet impact en perdant moins de farm (farmer entre deux actions, ne pas laisser de camps ou de waves). À l'inverse, beaucoup de CS avec peu d'impact (KP et objectifs bas) est de l'overfarming : signale-le.
 - Tiens compte du poste. En jungle, ganks, drakes, grubs et héraut comptent autant que le farm. En support, ignore les CS : regarde la vision, les pinks et la KP. Sur les autres postes, le farm et l'or restent la base, mais un roam qui rapporte des kills vaut plus que quelques CS.
 - Parle de ce qu'il contrôle. Ne blâme jamais ses coéquipiers.
 - Aucune estimation de niveau caché (MMR), aucune comparaison avec un rang.
 - Longueurs : un titre fait 5 mots au plus ; une explication, 25 mots au plus ; une option, 15 mots au plus. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour toutes les parties.
 - Écris les champions par leur nom français habituel.
-- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), farm, KP, kill, gank, roam, back, push, trade, lead, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.
+${PLAYER_VOCABULARY}
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 const point = z.object({ title: modelText(60), detail: modelText(250) });
@@ -162,7 +162,7 @@ export function matchReviewMessage(
       );
     }
   } else {
-    parts.push("Écarts avec le vis-à-vis en phase de voie : indisponibles.");
+    parts.push("Écarts avec le vis-à-vis en phase de lane : indisponibles.");
   }
   const impact = facts.impact;
   if (impact?.takedownsBefore15) {

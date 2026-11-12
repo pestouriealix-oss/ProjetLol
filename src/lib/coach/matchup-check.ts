@@ -7,7 +7,8 @@ import { SPELL_KEYS, ofChampion, type ChampionSheet } from "@/lib/llm/prompts/sh
  * joueurs suivants. Il ne juge pas le conseil, seulement ce qui se vérifie
  * contre les données : une compétence prêtée au mauvais champion, un allié de
  * voie au milieu, un ultime au niveau 9, un délai inventé, un champion hors du
- * duel. Chaque erreur est dite au modèle, qui réécrit.
+ * duel, un mot du client que les joueurs ne disent pas (« vague », « voie »).
+ * Chaque erreur est dite au modèle, qui réécrit.
  */
 
 export type MatchupContext = {
@@ -81,16 +82,31 @@ function spellNameIssues(text: string, sheets: (ChampionSheet | null)[]): string
 
 function laneIssues(text: string, role: Role): string[] {
   if (role === "TOP" || role === "MID") {
-    return /alli[ée]e?s? de voie|\bton (?:support|duo|adc|tireur)\b/i.test(text)
-      ? ["En haut et au milieu, le joueur est seul en voie : il n'a ni allié de voie ni support."]
+    return /alli[ée]e?s? de (?:voie|lane)|\bton (?:support|duo|adc|tireur)\b/i.test(text)
+      ? ["En top et au mid, le joueur est seul sur sa lane : il n'a ni allié de lane ni support."]
       : [];
   }
   if (role === "JUNGLE") {
-    return /alli[ée]e?s? de voie/i.test(text)
-      ? ["En jungle, le joueur n'a pas de voie ni d'allié de voie."]
+    return /alli[ée]e?s? de (?:voie|lane)/i.test(text)
+      ? ["En jungle, le joueur n'a pas de lane ni d'allié de lane."]
       : [];
   }
   return [];
+}
+
+/** Les mots du client français, que les joueurs ne disent pas. */
+const CLIENT_WORDS: [pattern: RegExp, word: string, said: string][] = [
+  [/(?<![\p{L}])vagues?(?![\p{L}])/iu, "vague", "wave"],
+  [/(?<![\p{L}])voies?(?![\p{L}])/iu, "voie", "lane"],
+  [/(?<![\p{L}])sbires?(?![\p{L}])/iu, "sbires", "CS"],
+  [/(?<![\p{L}])balises? de contrôle(?![\p{L}])/iu, "balise de contrôle", "pink"],
+  [/(?<![\p{L}])combats? groupés?(?![\p{L}])/iu, "combat groupé", "teamfight"],
+];
+
+function vocabularyIssues(text: string): string[] {
+  return CLIENT_WORDS.filter(([pattern]) => pattern.test(text)).map(
+    ([, word, said]) => `« ${word} » : les joueurs disent « ${said} ». Écris avec leurs mots.`,
+  );
 }
 
 function intruderIssues(text: string, allowed: string[], roster: string[]): string[] {
@@ -170,6 +186,7 @@ export function matchupIssues(matchup: Matchup, context: MatchupContext): string
   const issues = [
     ...spellNameIssues(text, context.sheets),
     ...laneIssues(text, context.role),
+    ...vocabularyIssues(text),
     ...intruderIssues(text, context.allowed, context.roster),
     ...ultimateIssues(text, context.sheets),
     ...secondsIssues(text, context.sheets),

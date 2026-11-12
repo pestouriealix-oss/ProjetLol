@@ -3,14 +3,14 @@ import { z } from "zod";
 import type { Role } from "@/lib/config";
 
 import type { ToolSpec } from "../client";
-import { modelText, ROLE_NAMES } from "./shared";
+import { modelText, PLAYER_VOCABULARY, ROLE_NAMES } from "./shared";
 
 /**
  * Conditions de victoire des deux équipes : la partie de la fiche qui dépend
  * des dix champions, écrite pour chaque partie. Version à changer à chaque
  * modification du texte ou du schéma.
  */
-export const WIN_CONDITIONS_VERSION = "win-conditions@5";
+export const WIN_CONDITIONS_VERSION = "win-conditions@6";
 
 export const WIN_CONDITIONS_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
@@ -22,7 +22,7 @@ Règles :
 - Appuie-toi sur ce qui est stable d'un patch à l'autre (rôle des champions, pics de puissance). Si tu n'es pas sûr d'un détail, ne l'écris pas.
 - Écris les champions par leur nom français habituel. Ne cite que les dix champions de la partie.
 - Une compétence se désigne par sa touche AZERTY et son champion, comme les joueurs : « le R de Garen », « le A d'Ahri ». Jamais par son nom, et seulement si tu es sûr de ce qu'elle fait.
-- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), farm, KP, kill, gank, roam, back, push, trade, lead, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.
+${PLAYER_VOCABULARY}
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 export const winConditionsSchema = z.object({ ours: modelText(500), theirs: modelText(500) });

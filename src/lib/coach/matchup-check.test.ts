@@ -140,7 +140,8 @@ describe("contrôle du texte de duel", () => {
     expect(all).toContain("« Lame rebondissante » est le nom du A de Katarina");
     expect(all).toContain("« Lotus mortel » est le nom du R de Katarina");
     expect(all).toContain("« Commande : Onde de choc » est le nom du R d'Orianna");
-    expect(all).toContain("ni allié de voie ni support");
+    expect(all).toContain("ni allié de lane ni support");
+    expect(all).toContain("« voie » : les joueurs disent « lane »");
     expect(all).toContain("A au lieu de Q, Z au lieu de W");
   });
 
@@ -187,19 +188,40 @@ describe("contrôle du texte de duel", () => {
     ).toEqual([]);
   });
 
-  it("accepte le duo en bas, pas d'allié de voie en jungle", () => {
+  it("accepte le duo en botlane, pas d'allié de lane en jungle", () => {
     expect(
-      matchupIssues(matchup({ summary: "Ton support Lux tient la voie." }), {
+      matchupIssues(matchup({ summary: "Ton support Lux tient la lane." }), {
         ...context,
         role: "ADC",
         allowed: ["Orianna", "Katarina", "Lux", "Vi"],
       }),
     ).toEqual([]);
     expect(
-      matchupIssues(matchup({ summary: "Aide ton allié de voie." }), {
+      matchupIssues(matchup({ summary: "Aide ton allié de lane." }), {
         ...context,
         role: "JUNGLE",
       }),
     ).toHaveLength(1);
+  });
+
+  it("refuse les mots du client et garde ceux des joueurs", () => {
+    const issues = matchupIssues(
+      matchup({
+        summary: "Pousse la vague sous sa tour et gagne ta voie avant les combats groupés.",
+        watchOut: "Ne perds pas de sbires pour une balise de contrôle.",
+      }),
+      context,
+    ).join("\n");
+    expect(issues).toContain("« vague » : les joueurs disent « wave »");
+    expect(issues).toContain("« voie » : les joueurs disent « lane »");
+    expect(issues).toContain("« combat groupé » : les joueurs disent « teamfight »");
+    expect(issues).toContain("« sbires » : les joueurs disent « CS »");
+    expect(issues).toContain("« balise de contrôle » : les joueurs disent « pink »");
+    expect(
+      matchupIssues(
+        matchup({ summary: "Push la wave sous sa tour, gagne ta lane et arrive en teamfight." }),
+        context,
+      ),
+    ).toEqual([]);
   });
 });

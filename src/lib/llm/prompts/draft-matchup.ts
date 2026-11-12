@@ -5,6 +5,7 @@ import { formatInteger, formatPercent } from "@/lib/format";
 
 import type { ToolSpec } from "../client";
 import {
+  PLAYER_VOCABULARY,
   ROLE_NAMES,
   SPELL_KEYS,
   type ChampionSheet,
@@ -20,13 +21,13 @@ import {
  * resservi à tous ceux qui jouent ce duel sur le même patch. Version à changer
  * à chaque modification du texte ou du schéma : elle fait partie de la clé.
  */
-export const DRAFT_MATCHUP_VERSION = "draft-matchup@5";
+export const DRAFT_MATCHUP_VERSION = "draft-matchup@6";
 
 export const DRAFT_MATCHUP_SYSTEM = `Tu es un coach de League of Legends. Un joueur vient de finir sa sélection des champions et lit ta fiche pendant l'écran de chargement : il a une minute. Tu lui écris en français, en le tutoyant.
 
 Tu écris le duel contre son vis-à-vis (même rôle en face ; en jungle, le jungler adverse ; en bas, le duo indiqué) :
 - un verdict : favorable, équilibré ou défavorable pour lui ;
-- un résumé en une phrase : qui domine la voie et à quel moment ça bascule ;
+- un résumé en une phrase : qui domine la lane et à quel moment ça bascule ;
 - les moments clés : niveaux et objets qui changent le rapport de force, des deux côtés ;
 - deux ou trois façons de jouer ce duel, au choix du joueur. Chacune a un titre court et une phrase d'explication. Ce sont des options, pas des ordres : chacune doit être une vraie manière de gagner, adaptée à un style de jeu ;
 - une chose à surveiller : la compétence ou la situation qui fait perdre le duel.
@@ -43,7 +44,7 @@ Les compétences, là où un coach perd sa crédibilité :
 - Un ultime se débloque au niveau 6 et monte aux niveaux 11 et 16, sauf si la fiche dit autre chose. Ne lui donne jamais d'autre niveau.
 - Un délai que tu cites vient de la fiche, au bon rang. Dans le doute, n'en cite pas.
 
-La voie : le message dit comment elle se joue (seul, à deux, ou en jungle). En haut et au milieu, le joueur est seul : pas d'allié de voie, pas de support.
+La lane : le message dit comment elle se joue (seul, à deux, ou en jungle). En top et au mid, le joueur est seul : pas d'allié de lane, pas de support.
 
 Règles :
 - Court et concret. Pas d'introduction, pas de formule de politesse, pas de généralités valables pour tous les duels.
@@ -51,7 +52,7 @@ Règles :
 - Aucun pourcentage ni statistique dans ton texte : les seuls chiffres permis sont les délais et les niveaux de la fiche technique. Pas d'estimation de niveau caché (MMR).
 - Pour le reste (style de jeu, pics de puissance), appuie-toi sur ce qui est stable d'un patch à l'autre. Si tu n'es pas sûr d'un détail, ne l'écris pas.
 - Écris les champions par leur nom français habituel.
-- Parle comme les joueurs francophones, avec leur vocabulaire : CS (jamais « sbires »), farm, KP, kill, gank, roam, back, push, trade, lead, ward, pink (jamais « balise de contrôle »), drake, nash, héraut, grubs.
+${PLAYER_VOCABULARY}
 - Typographie française : espace insécable avant « : », « ? », « ! » et « ; ».`;
 
 export const matchupSchema = z.object({
@@ -144,17 +145,17 @@ function championBlock(sheet: ChampionSheet | null, fallback: string): string[] 
   ];
 }
 
-/** Comment se joue la voie : seul, à deux, ou sans voie en jungle. */
+/** Comment se joue la lane : seul, à deux, ou sans lane en jungle. */
 function laneLine({ role, mine, theirs, partners }: MatchupRequest): string {
   if (role === "TOP" || role === "MID") {
-    return `Voie seule : ${mine} contre ${theirs}, en un contre un. Le joueur n'a ni allié de voie ni support.`;
+    return `Lane solo : ${mine} contre ${theirs}, en un contre un. Le joueur n'a ni allié de lane ni support.`;
   }
   if (role === "JUNGLE") {
-    return `Jungle : pas de voie. Le duel se joue sur les camps, les invades, les ganks et les objectifs.`;
+    return `Jungle : pas de lane. Le duel se joue sur les camps, les invades, les ganks et les objectifs.`;
   }
   return partners
-    ? `En bas, le duo du joueur est ${mine} avec ${partners.mine} ; en face, ${theirs} avec ${partners.theirs}.`
-    : `En bas, à deux contre deux : les partenaires de voie ne sont pas connus.`;
+    ? `En botlane, le duo du joueur est ${mine} avec ${partners.mine} ; en face, ${theirs} avec ${partners.theirs}.`
+    : `En botlane, à deux contre deux : les partenaires de lane ne sont pas connus.`;
 }
 
 function statsBlock({ stats, mine, theirs }: MatchupRequest): string[] {
