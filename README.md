@@ -405,9 +405,9 @@ fond reste discret : la couleur vient des visuels du jeu et des résultats.
   à un bouton ou un lien de texte sur écran tactile, sans changer sa taille à
   l'écran. Les boutons l'ont d'office ; les sélecteurs en ligne passent de 36 à
   40 px sous `sm`.
-- **Téléphone.** La barre du bas porte ce qui sert autour d'une partie : Accueil,
-  Parties, Game (la touche corail, au centre), Progrès, Stats. Esport et Actus
-  sont dans le menu du compte (`src/components/layout/nav-items.ts`).
+- **Téléphone.** La barre du bas : Accueil, Parties, Game (la touche corail, au
+  centre), Progrès, Esport. Stats et Actus sont dans le menu du compte
+  (`src/components/layout/nav-items.ts`).
 - **Cadres.** La fiche de draft s'adapte à son cadre, pas à l'écran (requêtes de
   conteneur) : une colonne dans le panneau étroit de « Nouvelle game », deux dans
   la fiche enregistrée, où elle prend la place principale.

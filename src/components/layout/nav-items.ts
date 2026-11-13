@@ -51,13 +51,14 @@ const PROGRESSION: NavItem = {
 export const HEADER_ITEMS: NavItem[] = [DASHBOARD, MATCHES, PROGRESSION, STATS, ESPORT, NEWS];
 
 /**
- * Onglets de la barre du bas (téléphone) : le coach d'abord, « Nouvelle game »
- * au centre, sous le pouce. Ce qui se lit entre deux parties est dans le menu du compte.
+ * Onglets de la barre du bas (téléphone) : « Nouvelle game » au centre, sous le
+ * pouce, l'objectif du coach et l'esport à sa droite. Les statistiques
+ * détaillées s'ouvrent aussi depuis le tableau de bord (« Toutes les stats »).
  */
-export const TAB_ITEMS: NavItem[] = [DASHBOARD, MATCHES, NEW_GAME, PROGRESSION, STATS];
+export const TAB_ITEMS: NavItem[] = [DASHBOARD, MATCHES, NEW_GAME, PROGRESSION, ESPORT];
 
 /** Liens du menu du compte, au téléphone seulement : ce que la barre du bas ne montre pas. */
-export const MENU_ITEMS: NavItem[] = [ESPORT, NEWS];
+export const MENU_ITEMS: NavItem[] = [STATS, NEWS];
 
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
