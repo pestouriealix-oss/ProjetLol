@@ -149,7 +149,7 @@ export default async function DashboardPage({
               </h2>
               <Link
                 href={`/matches?compte=${account.id}`}
-                className="text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
+                className="tap text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
               >
                 {copy.recent.all}
               </Link>

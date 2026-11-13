@@ -176,9 +176,7 @@ export default async function MatchDetailPage({
           puuids={[...ours.players, ...theirs.players].map((player) => player.puuid)}
         />
       </Suspense>
-      <div className="max-w-2xl">
-        <Duel me={me} opponent={opponent} assets={assets} />
-      </div>
+      <Duel me={me} opponent={opponent} assets={assets} />
       <Suspense fallback={<TimelineSkeleton />}>
         <TimelineSection
           userId={user.id}
@@ -238,7 +236,7 @@ function BackLink({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
+      className="tap inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
     >
       <ArrowLeft aria-hidden className="size-4" />
       {copy.back}

@@ -164,18 +164,19 @@ export function LpChart({
           />
         </svg>
 
-        {/* Noms des paliers, en HTML pour rester nets quelle que soit la largeur. */}
+        {/* Noms des paliers, en HTML pour rester nets quelle que soit la largeur. Posés sur
+            un fond : la courbe, qui part du même bord, ne les raye pas. */}
         {labeledFloors.map((floor) => (
           <span
             key={floor.label}
             aria-hidden
             className={cn(
-              "absolute left-3 -translate-y-full pb-0.5 text-[0.6875rem] text-ink-faint",
+              "absolute left-2 -translate-y-full pb-0.5 text-[0.6875rem] text-ink-faint",
               floor.kind === "tier" && "font-semibold",
             )}
             style={{ top: topPercent(y(floor.points)) }}
           >
-            {floor.label}
+            <span className="rounded-[3px] bg-surface/90 px-1">{floor.label}</span>
           </span>
         ))}
 

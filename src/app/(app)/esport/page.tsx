@@ -130,7 +130,7 @@ export default async function EsportPage({ searchParams }: { searchParams: Espor
                         aria-current={current ? "page" : undefined}
                         scroll={false}
                         className={cn(
-                          "flex h-9 items-center gap-2 rounded-[5px] px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                          "flex h-10 items-center gap-2 rounded-[5px] px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out) sm:h-9",
                           current
                             ? "bg-raised text-ink shadow-key"
                             : "text-ink-muted hover:text-ink",
@@ -213,7 +213,7 @@ export default async function EsportPage({ searchParams }: { searchParams: Espor
               href="https://pandascore.co"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline-offset-2 hover:underline"
+              className="tap underline-offset-2 hover:underline"
             >
               {copy.credit}
             </a>

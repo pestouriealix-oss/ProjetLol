@@ -339,14 +339,26 @@ export function DraftWorkspace({
             )}
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-ink">
-                {dragging ? copy.capture.dropHere : copy.capture.title}
+                {dragging ? (
+                  copy.capture.dropHere
+                ) : (
+                  <>
+                    <span className="pointer-coarse:hidden">{copy.capture.title}</span>
+                    <span className="hidden pointer-coarse:inline">{copy.capture.titleTouch}</span>
+                  </>
+                )}
               </h2>
               <p className="pt-0.5 text-ink-muted" role="status" aria-live="polite">
-                {read.status === "reading"
-                  ? copy.capture.reading
-                  : read.status === "done"
-                    ? copy.capture.read(read.filled)
-                    : copy.capture.body}
+                {read.status === "reading" ? (
+                  copy.capture.reading
+                ) : read.status === "done" ? (
+                  copy.capture.read(read.filled)
+                ) : (
+                  <>
+                    <span className="pointer-coarse:hidden">{copy.capture.body}</span>
+                    <span className="hidden pointer-coarse:inline">{copy.capture.bodyTouch}</span>
+                  </>
+                )}
               </p>
               {read.status === "done" && read.unrecognized > 0 ? (
                 <p className="pt-1 text-sm text-warn">
@@ -358,6 +370,7 @@ export function DraftWorkspace({
           <input
             ref={fileRef}
             type="file"
+            aria-label={copy.capture.choose}
             accept="image/png,image/jpeg,image/webp"
             className="sr-only"
             tabIndex={-1}
@@ -447,7 +460,7 @@ export function DraftWorkspace({
                   ) : (
                     <Link
                       href="/premium"
-                      className="text-sm font-semibold text-ink underline underline-offset-4"
+                      className="tap text-sm font-semibold text-ink underline underline-offset-4"
                     >
                       {t.premium.upsell}
                     </Link>
@@ -459,7 +472,7 @@ export function DraftWorkspace({
                   {copy.analyse.saved}{" "}
                   <Link
                     href={`/draft/${sheet.id}`}
-                    className="font-semibold text-ink underline underline-offset-4"
+                    className="tap font-semibold text-ink underline underline-offset-4"
                   >
                     {copy.analyse.openSheet}
                   </Link>

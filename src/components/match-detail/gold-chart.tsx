@@ -1,11 +1,19 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 
 import { TeamMark } from "@/components/draft/team-mark";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 import { formatDuration, formatInteger } from "@/lib/format";
+import { spread } from "@/lib/stats/spread";
 import { minuteTicks } from "@/lib/stats/ticks";
 
 const copy = t.matchDetail.timeline;
@@ -26,6 +34,11 @@ export type ObjectiveLegend = { short: string; name: string };
 const WIDTH = 1000;
 const HEIGHT = 240;
 const PAD_X = 12;
+
+/** Place d'un repère de la frise, en pixels : la lettre et un peu d'air autour. */
+const MARK_GAP = 13;
+/** Largeur supposée avant la mesure : celle d'un téléphone, où les repères se touchent le plus. */
+const ASSUMED_WIDTH = 340;
 
 /**
  * Écart d'or entre les deux équipes : au-dessus de zéro, ton équipe mène ;
@@ -48,6 +61,7 @@ export function GoldChart({
   durationSeconds: number;
 }) {
   const [active, setActive] = useState<number | null>(null);
+  const [measured, setMeasured] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const hintId = useId();
   const clipAbove = useId();
@@ -91,8 +105,38 @@ export function GoldChart({
     );
   };
 
+  // La largeur réelle du graphique : deux objectifs pris à quelques secondes
+  // d'intervalle se chevauchent ou non selon elle. Mesurée avant l'affichage.
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setMeasured(entry.contentRect.width);
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
   const shown = active !== null ? points[active] : undefined;
   const left = (value: number) => `${(value / WIDTH) * 100}%`;
+
+  // Chaque équipe a sa ligne sur la frise : on écarte les repères ligne par ligne.
+  const railWidth = measured ?? ASSUMED_WIDTH;
+  const marks = [true, false].flatMap((ours) => {
+    const row = objectives
+      .filter((objective) => objective.ours === ours)
+      .sort((a, b) => a.seconds - b.seconds);
+    const placed = spread(
+      row.map((objective) => (x(objective.seconds / 60) / WIDTH) * railWidth),
+      MARK_GAP,
+      MARK_GAP / 2,
+      railWidth - MARK_GAP / 2,
+    );
+    return row.map((objective, index) => ({
+      ...objective,
+      left: `${((placed[index] ?? 0) / railWidth) * 100}%`,
+    }));
+  });
   const describe = (diff: number) => {
     const amount = formatInteger(Math.abs(Math.round(diff)));
     return diff > 0
@@ -216,25 +260,22 @@ export function GoldChart({
       {/* Frise des objectifs, alignée sur le temps du graphique. */}
       {objectives.length > 0 ? (
         <div className="relative h-14" aria-label={copy.gold.table} role="list">
-          {objectives.map((objective, index) => {
-            const minute = objective.seconds / 60;
-            return (
-              <span
-                key={`${objective.seconds}-${index}`}
-                role="listitem"
-                title={objective.label}
-                aria-label={objective.label}
-                className={cn(
-                  "absolute flex -translate-x-1/2 flex-col items-center gap-0.5 text-[0.625rem] font-bold",
-                  objective.ours ? "top-0 text-ink" : "top-7 text-ink-muted",
-                )}
-                style={{ left: left(x(minute)) }}
-              >
-                <TeamMark side={objective.ours ? "ours" : "theirs"} className="size-2" />
-                <span aria-hidden>{objective.short}</span>
-              </span>
-            );
-          })}
+          {marks.map((mark, index) => (
+            <span
+              key={`${mark.seconds}-${index}`}
+              role="listitem"
+              title={mark.label}
+              aria-label={mark.label}
+              className={cn(
+                "absolute flex -translate-x-1/2 flex-col items-center gap-0.5 text-[0.625rem] font-bold",
+                mark.ours ? "top-0 text-ink" : "top-7 text-ink-muted",
+              )}
+              style={{ left: mark.left }}
+            >
+              <TeamMark side={mark.ours ? "ours" : "theirs"} className="size-2" />
+              <span aria-hidden>{mark.short}</span>
+            </span>
+          ))}
         </div>
       ) : null}
       <p className="relative h-4 text-xs text-ink-faint tabular" aria-hidden>

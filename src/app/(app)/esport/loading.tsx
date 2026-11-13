@@ -22,7 +22,7 @@ export default function EsportLoading() {
               <Skeleton className="h-5 w-64 max-w-[60vw]" />
             </div>
           </div>
-          <Skeleton className="h-11 w-80 max-w-full" />
+          <Skeleton className="h-12 w-80 max-w-full sm:h-11" />
           <div className="flex gap-6 overflow-hidden">
             {[4, 2, 1].map((count, index) => (
               <div key={index} className="flex shrink-0 flex-col justify-around gap-4">

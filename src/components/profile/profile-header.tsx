@@ -87,7 +87,8 @@ export function ProfileHeader({
           </div>
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        {/* Au téléphone, le groupe passe sous le nom : il s'aligne alors à gauche, comme le reste. */}
+        <div className="flex flex-wrap items-center gap-2 max-sm:-ml-3 sm:ml-auto">
           <AccountSwitcher basePath="/dashboard" accounts={accounts} currentId={account.id} />
           <Button asChild variant="ghost" size="sm">
             <Link href={`/live?compte=${account.id}`}>

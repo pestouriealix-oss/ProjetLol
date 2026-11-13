@@ -89,7 +89,7 @@ export default async function NewsPage({ searchParams }: { searchParams: NewsSea
                   {link.label}
                   <ArrowUpRight
                     aria-hidden
-                    className="size-4 shrink-0 text-ink-faint transition-colors duration-(--duration-fast) group-hover:text-accent"
+                    className="size-4 shrink-0 text-ink-faint transition-colors duration-(--duration-fast) group-hover:text-ink"
                   />
                 </a>
               </li>

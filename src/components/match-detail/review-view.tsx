@@ -35,7 +35,7 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
         <div className="flex gap-3 rounded-control border border-accent/40 bg-accent-soft px-4 py-3">
           <Slash className="mt-[0.3em] h-[0.9em] text-accent" />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold tracking-[0.04em] text-accent uppercase">
+            <p className="text-xs font-semibold tracking-[0.04em] text-accent-ink uppercase">
               {copy.focus}
             </p>
             <Growing
@@ -46,14 +46,14 @@ export function ReviewView({ review, writing = false }: { review: Review; writin
             />
             {review.goal ? (
               <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
-                <span className="rounded-pill bg-accent/15 px-2 py-0.5 font-semibold text-accent tabular">
+                <span className="rounded-pill bg-accent/15 px-2 py-0.5 font-semibold text-accent-ink tabular">
                   {formatTarget(review.goal)}
                 </span>
                 <span>{copy.goalNote}</span>
                 {writing ? null : (
                   <Link
                     href="/progression"
-                    className="font-semibold text-ink underline-offset-4 hover:underline"
+                    className="tap font-semibold text-ink underline-offset-4 hover:underline"
                   >
                     {copy.goalLink}
                   </Link>

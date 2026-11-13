@@ -58,7 +58,7 @@ function TabsSkeleton({ labels }: { labels: string[] }) {
       {labels.map((label) => (
         <li
           key={label}
-          className="flex h-9 items-center px-3.5 text-sm font-semibold whitespace-nowrap text-ink-faint"
+          className="flex h-10 items-center px-3.5 text-sm font-semibold whitespace-nowrap text-ink-faint sm:h-9"
         >
           {label}
         </li>

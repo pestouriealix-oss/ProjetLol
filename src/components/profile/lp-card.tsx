@@ -42,7 +42,7 @@ export function LpCard({
       )}
       <Link
         href={`${statsHref}&file=${useFlex ? "flex" : "solo"}`}
-        className="w-fit text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
+        className="tap w-fit text-sm font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
       >
         {copy.details}
       </Link>

@@ -18,9 +18,13 @@ const VERDICT_TONE: Record<Verdict, string> = {
 };
 
 /**
- * La fiche du coach : conditions de victoire, puis le matchup en voie et ses
+ * La fiche du coach : conditions de victoire, puis le matchup en lane et ses
  * options. Pendant l'écriture, chaque texte grandit à sa place et ce qui n'est
  * pas encore écrit garde une ligne d'attente, pour que rien ne saute.
+ *
+ * La fiche s'adapte à son cadre, pas à l'écran : dans une colonne étroite
+ * (nouvelle game) tout s'empile ; dans un cadre large (fiche enregistrée) les
+ * deux équipes se font face et les façons de jouer prennent leur colonne.
  */
 export function SheetView({
   sheet,
@@ -37,12 +41,12 @@ export function SheetView({
   const options = matchup?.options ?? [];
 
   return (
-    <article className="flex flex-col gap-6" aria-busy={writing}>
+    <article className="@container flex flex-col gap-6" aria-busy={writing}>
       <section aria-labelledby="sheet-win" className="flex flex-col gap-3">
         <h3 id="sheet-win" className="display text-xl text-ink">
           {copy.win.title}
         </h3>
-        <dl className="flex flex-col gap-3">
+        <dl className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-3 @xl:grid-cols-2">
           <WinLine side="ours" label={copy.win.ours} text={win?.ours} writing={writing} />
           <WinLine side="theirs" label={copy.win.theirs} text={win?.theirs} writing={writing} />
         </dl>
@@ -79,53 +83,61 @@ export function SheetView({
           <p className="text-sm text-ink-muted">{copy.matchup.unverified}</p>
         ) : (
           <>
-            <Growing text={matchup?.summary} writing={writing} className="text-ink" lines={2} />
+            <Growing
+              text={matchup?.summary}
+              writing={writing}
+              className="max-w-[62ch] text-ink"
+              lines={2}
+            />
 
-            <Block label={copy.matchup.keyMoments}>
-              <Growing
-                text={matchup?.keyMoments}
-                writing={writing}
-                className="text-ink-muted"
-                lines={2}
-              />
-            </Block>
-
-            <Block label={copy.matchup.options}>
-              {options.length > 0 ? (
-                <ol className="flex flex-col gap-3">
-                  {options.map((option, index) => (
-                    <li key={index} className="flex gap-2.5">
-                      <Slash className="mt-[0.3em] h-[0.85em] text-accent" />
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink">
-                          <span className="sr-only">{copy.matchup.option(index + 1)}</span>
-                          {option.title ?? ""}
-                        </p>
-                        <Growing
-                          text={option.detail}
-                          writing={writing}
-                          className="text-ink-muted"
-                          lines={1}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              ) : writing ? (
-                <Lines count={3} />
-              ) : null}
-            </Block>
-
-            <div className="flex gap-2.5 rounded-control border border-warn/30 bg-warn-soft px-3 py-2.5">
-              <ThreatMark className="mt-1" />
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-warn">{copy.matchup.watchOut}</p>
+            {/* Cadre large : les moments clés et le piège à gauche, les façons de jouer à droite. */}
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-4 @xl:grid-cols-2 @xl:grid-rows-[auto_1fr]">
+              <Block label={copy.matchup.keyMoments}>
                 <Growing
-                  text={matchup?.watchOut}
+                  text={matchup?.keyMoments}
                   writing={writing}
-                  className="text-ink"
-                  lines={1}
+                  className="text-ink-muted"
+                  lines={2}
                 />
+              </Block>
+
+              <Block label={copy.matchup.options} className="@xl:col-start-2 @xl:row-span-2">
+                {options.length > 0 ? (
+                  <ol className="flex flex-col gap-3">
+                    {options.map((option, index) => (
+                      <li key={index} className="flex gap-2.5">
+                        <Slash className="mt-[0.3em] h-[0.85em] text-accent" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-ink">
+                            <span className="sr-only">{copy.matchup.option(index + 1)}</span>
+                            {option.title ?? ""}
+                          </p>
+                          <Growing
+                            text={option.detail}
+                            writing={writing}
+                            className="text-ink-muted"
+                            lines={1}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                ) : writing ? (
+                  <Lines count={3} />
+                ) : null}
+              </Block>
+
+              <div className="flex gap-2.5 self-start rounded-control border border-warn/30 bg-warn-soft px-3 py-2.5">
+                <ThreatMark className="mt-1" />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-warn">{copy.matchup.watchOut}</p>
+                  <Growing
+                    text={matchup?.watchOut}
+                    writing={writing}
+                    className="text-ink"
+                    lines={1}
+                  />
+                </div>
               </div>
             </div>
           </>
@@ -190,14 +202,14 @@ function WinLine({
   writing: boolean;
 }) {
   return (
-    <div className="flex gap-2.5">
-      <TeamMark side={side} className="mt-1.5" />
-      <div className="min-w-0 flex-1">
-        <dt className="text-sm font-semibold text-ink">{label}</dt>
-        <dd>
-          <Growing text={text} writing={writing} className="text-ink-muted" lines={2} />
-        </dd>
-      </div>
+    <div className="min-w-0">
+      <dt className="flex items-center gap-2.5 text-sm font-semibold text-ink">
+        <TeamMark side={side} />
+        {label}
+      </dt>
+      <dd className="pl-5">
+        <Growing text={text} writing={writing} className="text-ink-muted" lines={2} />
+      </dd>
     </div>
   );
 }

@@ -61,7 +61,7 @@ export function PatchList({ patches }: { patches: Patch[] | null }) {
                   <span className="display text-xl text-ink tabular">{patch.id}</span>
                   <ArrowUpRight
                     aria-hidden
-                    className="size-4 shrink-0 text-ink-faint transition-[translate,color] duration-(--duration-base) ease-(--ease-spring) group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
+                    className="size-4 shrink-0 text-ink-faint transition-[translate,color] duration-(--duration-base) ease-(--ease-spring) group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink"
                   />
                 </a>
               </li>

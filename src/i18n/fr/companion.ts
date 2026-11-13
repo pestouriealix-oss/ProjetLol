@@ -53,6 +53,24 @@ export const companion = {
       },
       noAccount: "Pas encore de compte ?",
       createAccount: "Créer un compte sur gufo.gg",
+      /** Ce qui va se passer, dans l'ordre : la fenêtre ne laisse pas deviner la suite. */
+      steps: {
+        title: "En trois temps",
+        items: [
+          {
+            title: "Demande un code",
+            body: "L'app l'affiche et ouvre gufo.gg dans ton navigateur.",
+          },
+          {
+            title: "Valide-le sur gufo.gg",
+            body: "Connecte-toi si besoin, vérifie que c'est le même code, puis valide.",
+          },
+          {
+            title: "Lance une partie",
+            body: "Ta fiche s'ouvre toute seule à l'écran de chargement.",
+          },
+        ],
+      },
     },
     account: {
       loading: "Lecture de ton compte…",

@@ -52,7 +52,7 @@ export default async function SavedDraftPage({ params }: { params: Promise<{ id:
         <header className="flex flex-col gap-4">
           <Link
             href="/draft/new"
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
+            className="tap inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
           >
             <ArrowLeft aria-hidden className="size-4" />
             {copy.saved.back}
@@ -74,17 +74,19 @@ export default async function SavedDraftPage({ params }: { params: Promise<{ id:
         </header>
       }
     >
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
-        <div className="flex min-w-0 flex-col gap-2 max-lg:order-2">
-          <DraftBoard draft={draft.data} champion={champion} />
-          <p className="text-sm text-ink-faint">{copy.board.readOnlyHint}</p>
-        </div>
-        <Panel className="p-5">
+      {/* Une fiche qu'on rouvre, on la relit : elle prend la place, la draft la rappelle à côté. */}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+        <Panel className="p-5 sm:p-6">
+          <h2 className="sr-only">{copy.sheet.title}</h2>
           <SheetView
             sheet={readSheetView(analysis.content)}
             opponent={opponent ? champion(opponent) : null}
           />
         </Panel>
+        <div className="flex min-w-0 flex-col gap-2 lg:sticky lg:top-24">
+          <DraftBoard draft={draft.data} champion={champion} compact />
+          <p className="text-sm text-ink-faint">{copy.board.readOnlyHint}</p>
+        </div>
       </div>
     </PageShell>
   );

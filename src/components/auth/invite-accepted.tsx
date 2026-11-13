@@ -16,7 +16,7 @@ export function InviteAccepted({ code }: { code: string }) {
       </div>
       <Link
         href="/register"
-        className="shrink-0 text-ink-muted underline-offset-4 hover:text-ink hover:underline"
+        className="tap shrink-0 text-ink-muted underline-offset-4 hover:text-ink hover:underline"
       >
         {copy.otherCode}
       </Link>

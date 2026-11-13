@@ -22,7 +22,6 @@ export const matches = {
   count: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
   noAccountBody: "Lie d'abord ton compte Riot pour que tes parties puissent être suivies.",
   noAccountAction: "Lier un compte Riot",
-  openDetail: (champion: string, result: string) => `Détail de la partie : ${champion}, ${result}`,
 } as const;
 
 export const matchDetail = {
@@ -81,7 +80,7 @@ export const matchDetail = {
     strengths: "Points forts",
     improvements: "À travailler",
     focus: "Objectif pour la prochaine partie",
-    goalNote: "Vérifié tout seul sur tes prochaines parties à ce poste",
+    goalNote: "Vérifié tout seul sur tes prochaines parties à ce rôle",
     goalLink: "Suivre ma progression",
     options: "Deux façons d'y arriver",
     option: (index: number) => `Option ${index} : `,
@@ -105,10 +104,10 @@ export const matchDetail = {
     },
     sources: (games: number) =>
       games > 0
-        ? `D'après les données officielles de la partie (Riot) et tes ${games} autres parties à ce poste. Bilan écrit par le coach (Claude).`
+        ? `D'après les données officielles de la partie (Riot) et tes ${games} autres parties à ce rôle. Bilan écrit par le coach (Claude).`
         : "D'après les données officielles de la partie (Riot). Bilan écrit par le coach (Claude).",
     notReviewable:
-      "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+      "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un rôle.",
     notOwned:
       "Le coach écrit les bilans de tes propres comptes. Confirme que celui-ci est à toi : 30 secondes dans le client du jeu.",
     confirmAccount: "Confirmer mon compte",
@@ -120,7 +119,7 @@ export const matchDetail = {
         "Les bilans gratuits sont en pause jusqu'au mois prochain : le coach a atteint son budget mensuel.",
       match_not_found: "Cette partie est introuvable.",
       not_reviewable:
-        "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+        "Le bilan existe pour les parties de la Faille de l'invocateur, où chaque joueur a un rôle.",
       missing_key: "La clé de l'API Anthropic n'est pas configurée sur le serveur.",
       invalid_key: "La clé de l'API Anthropic est refusée (révoquée ou sans crédit).",
       rate_limited: "Le coach est très demandé. Réessaie dans une minute.",
@@ -135,12 +134,12 @@ export const matchDetail = {
   },
   duel: {
     title: "Face à ton vis-à-vis",
-    body: (champion: string) => `Toi contre ${champion}, au même poste.`,
+    body: (champion: string) => `Toi contre ${champion}, au même rôle.`,
     damage: "Dégâts aux champions",
     gold: "Or gagné",
     cs: "CS",
     vision: "Score de vision",
-    none: "Riot n'a pas attribué les postes de cette partie : pas de vis-à-vis à comparer.",
+    none: "Riot n'a pas attribué les rôles de cette partie : pas de vis-à-vis à comparer.",
   },
   timeline: {
     title: "Chronologie",
@@ -198,7 +197,7 @@ export const matchDetail = {
       title: "Ordre des compétences",
       empty: "Aucune compétence enregistrée.",
       level: (level: number) => `Niveau ${level}`,
-      keys: ["Q", "W", "E", "R"],
+      keys: ["A", "Z", "E", "R"],
     },
     errors: {
       missing_key: "Chronologie indisponible : la clé de l'API Riot est absente.",

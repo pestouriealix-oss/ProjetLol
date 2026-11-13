@@ -76,7 +76,7 @@ export const dashboard = {
     } as Record<string, string>,
   },
   champions: {
-    title: "Champions les plus joués",
+    title: "Champions joués",
     empty: "Tes champions apparaîtront ici, avec ton taux de victoire sur chacun.",
     games: (count: number) => (count === 1 ? "1 partie" : `${count} parties`),
     kda: (ratio: string) => `${ratio} KDA`,

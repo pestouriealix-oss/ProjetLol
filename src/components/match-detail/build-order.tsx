@@ -58,14 +58,14 @@ export function BuildOrder({
 }
 
 /**
- * Ordre des compétences : une ligne par touche (Q, W, E, R), une colonne par
+ * Ordre des compétences : une ligne par touche (A, Z, E, R), une colonne par
  * niveau ; la case du niveau où la touche a été montée porte ce niveau.
  */
 export function SkillOrder({ skills }: { skills: number[] }) {
   if (skills.length === 0) return <p className="text-sm text-ink-muted">{copy.skills.empty}</p>;
   const levels = skills.slice(0, 18);
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="group" aria-label={copy.skills.title}>
       <table className="border-separate border-spacing-0.5 text-center text-xs">
         <tbody>
           {copy.skills.keys.map((key, row) => (

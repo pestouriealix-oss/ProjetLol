@@ -204,6 +204,27 @@ function LinkPanel({ state, controller }: { state: AppState; controller: Control
           </p>
         </div>
       )}
+
+      {link.status === "waiting" ? null : (
+        <div className="mt-3 border-t border-line pt-5">
+          <h2 className="display text-sm tracking-[0.08em] text-ink-faint">
+            {copy.link.steps.title}
+          </h2>
+          <ol className="mt-4 flex flex-col gap-4">
+            {copy.link.steps.items.map((step, index) => (
+              <li key={step.title} className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3">
+                <span aria-hidden className="display text-2xl leading-none text-ink-faint tabular">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-ink">{step.title}</h3>
+                  <p className="text-ink-muted">{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </section>
   );
 }

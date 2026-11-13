@@ -9,6 +9,8 @@ import { Ping } from "@/components/ui/ping";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 
+import { MENU_ITEMS } from "./nav-items";
+
 const itemClasses =
   "flex cursor-default items-center gap-2.5 rounded-[5px] px-2.5 py-2 text-sm text-ink outline-none data-highlighted:bg-raised [&_svg]:size-4 [&_svg]:text-ink-muted";
 
@@ -28,7 +30,7 @@ export function AccountMenu({ email, name, signOutAction }: AccountMenuProps) {
         aria-label={t.nav.accountMenu}
         aria-busy={pending || undefined}
         className={cn(
-          "flex size-9 items-center justify-center rounded-pill border border-line-strong bg-raised display text-lg text-ink",
+          "tap flex size-9 items-center justify-center rounded-pill border border-line-strong bg-raised display text-lg text-ink",
           "[transition:scale_var(--duration-slow)_var(--ease-spring),border-color_var(--duration-fast)_var(--ease-out)]",
           "hover:border-ink-faint active:scale-[0.94] active:[transition-duration:var(--duration-press)] data-[state=open]:border-accent",
         )}
@@ -46,6 +48,18 @@ export function AccountMenu({ email, name, signOutAction }: AccountMenuProps) {
             <p className="truncate text-sm text-ink-muted">{email}</p>
           </div>
           <DropdownMenu.Separator className="my-1 h-px bg-line" />
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <DropdownMenu.Item key={item.href} asChild className={cn(itemClasses, "md:hidden")}>
+                <Link href={item.href}>
+                  <Icon aria-hidden />
+                  {item.label}
+                </Link>
+              </DropdownMenu.Item>
+            );
+          })}
+          <DropdownMenu.Separator className="my-1 h-px bg-line md:hidden" />
           <DropdownMenu.Item asChild className={itemClasses}>
             <Link href="/settings">
               <Settings aria-hidden />

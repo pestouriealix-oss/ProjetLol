@@ -28,7 +28,7 @@ export function TabLinks({
                 scroll={false}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-9 items-center rounded-[5px] px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                  "flex h-10 items-center rounded-[5px] px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out) sm:h-9",
                   active ? "bg-raised text-ink shadow-key" : "text-ink-muted hover:text-ink",
                 )}
               >

@@ -7,11 +7,14 @@ import { Link } from "@/components/ui/link";
 import { t } from "@/i18n/fr";
 import { cn } from "@/lib/cn";
 
-import { isActive, TAB_ITEMS } from "./nav-items";
+import { isActive, NEW_GAME, TAB_ITEMS } from "./nav-items";
 
 /**
  * Navigation du téléphone, en bas de l'écran : atteignable au pouce quand le
  * téléphone est posé à côté du clavier. Le repère glisse d'un onglet à l'autre.
+ *
+ * « Nouvelle game », au centre, porte la touche corail du bouton de l'en-tête
+ * (ordinateur) : c'est la même action, et la seule que le coach fait faire ici.
  */
 export function TabBar() {
   const pathname = usePathname();
@@ -24,6 +27,7 @@ export function TabBar() {
         {TAB_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
+          const primary = item.href === NEW_GAME.href;
           return (
             <li key={item.href} className="relative">
               {active ? (
@@ -44,14 +48,23 @@ export function TabBar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group flex h-15 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold transition-colors duration-(--duration-fast) ease-(--ease-out)",
-                  active ? "text-accent" : "text-ink-muted",
+                  "group flex h-15 flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-semibold transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                  active ? "text-accent" : primary ? "text-ink" : "text-ink-muted",
                 )}
               >
-                <Icon
-                  aria-hidden
-                  className="size-5 transition-[scale,translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-active:scale-90 group-aria-[current=page]:-translate-y-0.5"
-                />
+                {primary ? (
+                  <span
+                    aria-hidden
+                    className="grid h-7 w-11 place-items-center rounded-control bg-accent text-on-accent shadow-key transition-[scale] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-active:scale-90"
+                  >
+                    <Icon className="size-[1.125rem]" />
+                  </span>
+                ) : (
+                  // Même hauteur que la touche du centre : les cinq libellés restent sur une ligne.
+                  <span aria-hidden className="grid h-7 place-items-center">
+                    <Icon className="size-5 transition-[scale,translate] duration-(--duration-slow) ease-(--ease-spring-bouncy) group-active:scale-90 group-aria-[current=page]:-translate-y-0.5" />
+                  </span>
+                )}
                 {item.shortLabel ? (
                   <>
                     <span aria-hidden>{item.shortLabel}</span>

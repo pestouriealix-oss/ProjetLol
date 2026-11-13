@@ -93,7 +93,7 @@ function DraftSketch() {
                   className={cn("size-3.5", mine ? "text-accent" : "text-ink-faint")}
                 />
                 {mine ? (
-                  <span className="text-xs font-semibold text-accent">{copy.you}</span>
+                  <span className="text-xs font-semibold text-accent-ink">{copy.you}</span>
                 ) : (
                   <span className="h-1.5 w-10 rounded-pill bg-line-strong/70" />
                 )}
@@ -125,7 +125,7 @@ function SheetSketch() {
             className={cn(
               "inline-flex h-7 items-center rounded-pill border px-3 text-xs font-semibold",
               index === 0
-                ? "border-accent bg-accent-soft text-accent"
+                ? "border-accent bg-accent-soft text-accent-ink"
                 : "border-line-strong text-ink-muted",
             )}
           >
@@ -160,7 +160,7 @@ function ReviewSketch() {
         ))}
       </div>
       <div className="flex items-center gap-2.5 rounded-control border border-accent/50 bg-accent-soft px-2.5 py-2">
-        <span className="text-xs font-semibold text-accent">{copy.focus}</span>
+        <span className="text-xs font-semibold text-accent-ink">{copy.focus}</span>
         <span className="h-1.5 flex-1 rounded-pill bg-accent/35" />
       </div>
     </div>

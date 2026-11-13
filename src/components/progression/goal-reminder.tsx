@@ -76,12 +76,12 @@ export function GoalReminder({
           </h2>
           <p className="font-semibold text-pretty text-ink">{goal.text ?? formatTarget(goal)}</p>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
-            <span className="rounded-pill bg-accent/15 px-2 py-0.5 font-semibold text-accent tabular">
+            <span className="rounded-pill bg-accent/15 px-2 py-0.5 font-semibold text-accent-ink tabular">
               {formatTarget(goal)}
             </span>
             <Link
               href={progressionHref}
-              className="font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
+              className="tap font-semibold text-ink-muted underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline"
             >
               {copy.dashboard.see}
             </Link>

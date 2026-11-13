@@ -22,7 +22,7 @@ export const stats = {
   },
   roles: {
     title: "Par rôle",
-    unknown: "Poste non attribué",
+    unknown: "Rôle non attribué",
   },
   champions: {
     title: "Par champion",
@@ -39,9 +39,9 @@ export const stats = {
   },
   matchups: {
     title: "Face à quels champions",
-    body: "Ton bilan contre le champion adverse à ton poste, à partir de deux parties.",
-    worst: "Tes vis-à-vis les plus durs",
-    best: "Ceux qui te réussissent",
+    body: "Ton bilan contre le champion d'en face à ton rôle, à partir de deux parties.",
+    worst: "Tes pires matchups",
+    best: "Tes meilleurs matchups",
     empty: "Pas encore assez de parties contre les mêmes champions.",
     record: (wins: number, games: number) => `${wins} V sur ${games}`,
   },

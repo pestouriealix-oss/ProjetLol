@@ -38,7 +38,6 @@ export function MatchList({
           <li key={match.id}>
             <Row
               href={linked ? `/matches/${match.matchId}` : null}
-              label={copy.openDetail(name, match.win ? copy.win : copy.loss)}
               className={cn(
                 // Le résultat teinte le bord gauche de la ligne, comme une lueur : on parcourt
                 // l'historique d'un coup d'œil, sans que la couleur porte seule le sens.
@@ -110,18 +109,16 @@ export function MatchList({
 /** Une ligne cliquable vers le détail de la partie, ou une simple ligne. */
 function Row({
   href,
-  label,
   className,
   children,
 }: {
   href: string | null;
-  label: string;
   className: string;
   children: ReactNode;
 }) {
   if (!href) return <div className={className}>{children}</div>;
   return (
-    <Link href={href} aria-label={label} className={className}>
+    <Link href={href} className={className}>
       {children}
     </Link>
   );

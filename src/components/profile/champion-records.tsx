@@ -31,7 +31,7 @@ export function ChampionRecords({
         {statsHref && records.length > 0 ? (
           <Link
             href={statsHref}
-            className="shrink-0 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
+            className="tap shrink-0 text-sm font-semibold text-ink-muted transition-colors duration-(--duration-fast) hover:text-ink"
           >
             {t.stats.seeAll}
           </Link>

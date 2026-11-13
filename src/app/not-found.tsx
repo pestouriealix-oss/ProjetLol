@@ -10,7 +10,7 @@ export default function NotFound() {
       className="mx-auto grid min-h-dvh max-w-4xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-[minmax(0,1fr)_16rem]"
     >
       <div className="flex flex-col items-start gap-4">
-        <p className="display text-2xl text-accent">404</p>
+        <p className="display text-2xl text-ink-faint">404</p>
         <h1 className="display text-5xl text-ink">{t.common.notFoundTitle}</h1>
         <p className="text-lg text-ink-muted">{t.common.notFoundBody}</p>
         <Button asChild variant="secondary" className="mt-3">

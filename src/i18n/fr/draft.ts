@@ -4,6 +4,10 @@ export const draft = {
   soon: "Bientôt",
   capture: {
     title: "Colle une capture de ta draft",
+    /** Au doigt, ni Ctrl + V ni glisser-déposer : on choisit l'image. */
+    titleTouch: "Envoie une capture de ta draft",
+    bodyTouch:
+      "Choisis une capture de la fin de sélection des champions ou de l'écran de chargement.",
     body: "Ctrl + V (ou Cmd + V), dépose l'image ici, ou choisis-la. Fin de sélection des champions ou écran de chargement.",
     choose: "Choisir une image",
     reading: "Lecture de la capture…",
@@ -39,7 +43,7 @@ export const draft = {
       "Dès que ta partie charge, la draft se remplit toute seule : Riot la donne à l'écran de chargement, pas pendant la sélection.",
     checking: "Recherche de ta partie…",
     found: (riotId: string) =>
-      `Draft de ta partie chargée (${riotId}). Vérifie les postes, puis lance ta fiche.`,
+      `Draft de ta partie chargée (${riotId}). Vérifie les rôles, puis lance ta fiche.`,
     stopped:
       "La recherche automatique s'est arrêtée au bout d'un quart d'heure. Relance-la quand ta partie charge.",
     check: "Vérifier maintenant",
@@ -64,11 +68,11 @@ export const draft = {
   board: {
     caption: "Les champions de la partie, lane par lane",
     role: "Rôle",
-    hint: "Une erreur ? Clique sur un champion pour le corriger, ou sur un poste pour dire lequel est le tien.",
+    hint: "Une erreur ? Clique sur un champion pour le corriger, ou sur un rôle pour dire lequel est le tien.",
     waitingHint: "Le tableau se remplit avec ta partie en cours, ou avec une capture.",
     readOnlyHint: "La draft telle qu'elle a été analysée.",
     choose: (role: string, side: string) =>
-      `Choisir le champion ${side === "ours" ? "allié" : "adverse"} au poste ${role}`,
+      `Choisir le champion ${side === "ours" ? "allié" : "adverse"} au rôle ${role}`,
     change: (champion: string) => `${champion}, changer`,
     setMine: (role: string) => `Je joue ${role}`,
     mine: (role: string) => `${role}, ton rôle`,
@@ -121,7 +125,7 @@ export const draft = {
       "Comment ton équipe gagne, et comment la leur gagne",
       "Ton matchup en lane, et plusieurs façons de le jouer",
       "Les moments où le rapport de force bascule",
-      "Ce qui te fait perdre le duel",
+      "Ce qui te fait perdre le matchup",
     ],
     win: {
       title: "Conditions de victoire",
@@ -141,11 +145,11 @@ export const draft = {
       watchOut: "À surveiller",
       stat: (rate: string, games: string) => `${rate} de victoires sur ${games} parties`,
       statThin: (games: string) =>
-        `Seulement ${games} parties pour ce duel : trop peu pour un chiffre fiable`,
-      statNone: "Duel pas encore vu dans nos parties analysées",
+        `Seulement ${games} parties pour ce matchup : trop peu pour un chiffre fiable`,
+      statNone: "Matchup pas encore vu dans nos parties analysées",
       statsLevel: "Émeraude et plus",
       unverified:
-        "Le coach n'a pas pu écrire ce duel de façon fiable cette fois : il préfère ne rien afficher. Il réessaiera à ta prochaine partie.",
+        "Le coach n'a pas pu écrire ce matchup de façon fiable cette fois : il préfère ne rien afficher. Il réessaiera à ta prochaine partie.",
     },
     sources: {
       title: "Sources",

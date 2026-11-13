@@ -30,6 +30,7 @@ export function DraftBoard({
   onPick,
   onSetMine,
   duplicates = [],
+  compact = false,
 }: {
   draft: Draft;
   champion: (id: string) => ChampionInfo;
@@ -37,13 +38,15 @@ export function DraftBoard({
   onSetMine?: (role: Role) => void;
   /** Champions présents deux fois : leurs cases sont signalées. */
   duplicates?: readonly string[];
+  /** Colonne étroite (rappel à côté d'une fiche) : la colonne des rôles cède de la place aux noms. */
+  compact?: boolean;
 }) {
   return (
     <table className="w-full table-fixed border-separate border-spacing-0 overflow-hidden rounded-panel border border-line bg-surface">
       <caption className="sr-only">{copy.board.caption}</caption>
       <colgroup>
         <col />
-        <col className="w-20 sm:w-28" />
+        <col className={compact ? "w-20" : "w-20 sm:w-28"} />
         <col />
       </colgroup>
       <thead>

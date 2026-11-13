@@ -100,7 +100,7 @@ export const auth = {
       {
         when: "Avant la première minute",
         title: "Lis ta fiche",
-        body: "Ton duel, comment ton équipe gagne, quand forcer. Plusieurs options : c'est toi qui choisis.",
+        body: "Ton matchup, comment ton équipe gagne, quand engage. Plusieurs options : c'est toi qui choisis.",
       },
       {
         when: "Après la partie",
@@ -109,7 +109,7 @@ export const auth = {
       },
     ],
     you: "Toi",
-    options: ["Envahir", "Protéger", "Pousser"],
+    options: ["Poke", "Freeze", "All-in"],
     focus: "Objectif",
   },
   pricing: (sheets: number, reviews: number, price: string) =>

@@ -170,7 +170,7 @@ export default async function ProgressionPage({
                             scroll={false}
                             aria-current={selected ? "page" : undefined}
                             className={cn(
-                              "flex h-9 items-center gap-1.5 rounded-[5px] px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out)",
+                              "flex h-10 items-center gap-1.5 rounded-[5px] px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out) sm:h-9",
                               selected
                                 ? "bg-raised text-ink shadow-key"
                                 : "text-ink-muted hover:text-ink",

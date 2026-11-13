@@ -39,9 +39,17 @@ export function Lines({ count }: { count: number }) {
 }
 
 /** Un bloc titré de la fiche ou du bilan. */
-export function Block({ label, children }: { label: string; children: ReactNode }) {
+export function Block({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <p className="text-xs font-semibold tracking-[0.04em] text-ink-faint uppercase">{label}</p>
       {children}
     </div>

@@ -36,7 +36,12 @@ const MATCHES: NavItem = { href: "/matches", label: t.nav.matches, icon: History
 const NEWS: NavItem = { href: "/news", label: t.nav.news, icon: Newspaper };
 const ESPORT: NavItem = { href: "/esport", label: t.nav.esport, icon: Trophy };
 const STATS: NavItem = { href: "/stats", label: t.nav.stats, icon: ChartLine };
-const PROGRESSION: NavItem = { href: "/progression", label: t.nav.progression, icon: Target };
+const PROGRESSION: NavItem = {
+  href: "/progression",
+  label: t.nav.progression,
+  shortLabel: t.nav.progressionShort,
+  icon: Target,
+};
 
 /**
  * Liens de la barre du haut (ordinateur) : ce qu'on consulte. « Nouvelle game »
@@ -45,8 +50,14 @@ const PROGRESSION: NavItem = { href: "/progression", label: t.nav.progression, i
  */
 export const HEADER_ITEMS: NavItem[] = [DASHBOARD, MATCHES, PROGRESSION, STATS, ESPORT, NEWS];
 
-/** Onglets de la barre du bas (téléphone). Les paramètres sont dans le menu du compte. */
-export const TAB_ITEMS: NavItem[] = [DASHBOARD, NEW_GAME, MATCHES, ESPORT, NEWS];
+/**
+ * Onglets de la barre du bas (téléphone) : le coach d'abord, « Nouvelle game »
+ * au centre, sous le pouce. Ce qui se lit entre deux parties est dans le menu du compte.
+ */
+export const TAB_ITEMS: NavItem[] = [DASHBOARD, MATCHES, NEW_GAME, PROGRESSION, STATS];
+
+/** Liens du menu du compte, au téléphone seulement : ce que la barre du bas ne montre pas. */
+export const MENU_ITEMS: NavItem[] = [ESPORT, NEWS];
 
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);

@@ -71,6 +71,8 @@
   /* Corail : la voix du coach. Une seule couleur d'action dans l'interface. */
   --color-accent: #ff5a36;
   --color-accent-hover: #ff7a52;
+  /* Le petit texte corail posé sur un fond lui-même teinté de corail (4,5:1 au moins). */
+  --color-accent-ink: #ff8a66;
   --color-accent-soft: oklch(0.685 0.205 34 / 0.14);
   --color-on-accent: oklch(0.2 0.045 40);
 
@@ -366,6 +368,25 @@
 /* Chiffres à chasse fixe, pour qu'ils s'alignent et ne sautillent pas. */
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Au doigt, une cible d'au moins 44 px : la zone cliquable déborde autour du
+ * lien ou du bouton, sans changer sa taille ni la mise en page.
+ */
+@utility tap {
+  position: relative;
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 2.75rem);
+      height: max(100%, 2.75rem);
+      translate: -50% -50%;
+    }
+  }
 }
 
 /* ── Chargement ────────────────────────────────────────────────────────── */

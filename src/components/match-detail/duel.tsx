@@ -21,6 +21,8 @@ const METRICS = [
  * Le joueur face à son adversaire direct, sur quatre mesures. Chaque ligne est
  * une barre partagée : la part de chacun dans leur total à deux. Le plus haut
  * des deux est écrit en clair, l'autre en retrait : l'écart se lit sans couleur.
+ * À l'ordinateur, les mesures se rangent sur deux colonnes pour tenir la largeur
+ * des tableaux au-dessus.
  */
 export function Duel({
   me,
@@ -60,7 +62,7 @@ export function Duel({
         </span>
       </div>
 
-      <dl className="mt-4 flex flex-col gap-3.5">
+      <dl className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-3.5 lg:grid-cols-2">
         {METRICS.map((metric) => {
           const a = metric.value(me);
           const b = metric.value(opponent);

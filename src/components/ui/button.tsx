@@ -8,7 +8,7 @@ import { Ping } from "./ping";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-control display whitespace-nowrap select-none",
+    "tap inline-flex items-center justify-center gap-2 rounded-control display whitespace-nowrap select-none",
     // La couleur change vite ; l'échelle revient comme un ressort après la pression.
     "[transition:scale_var(--duration-slow)_var(--ease-spring),background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),opacity_var(--duration-fast)_var(--ease-out)]",
     "active:scale-[0.96] active:[transition-duration:var(--duration-press)]",

@@ -49,7 +49,7 @@ export const progression = {
     title: "Tes tendances",
     body: (count: number, role: string) =>
       `Tes ${count} dernières parties en ${role}, de la plus ancienne à la plus récente.`,
-    role: "Poste",
+    role: "Rôle",
     average: "Moyenne",
     recent: (value: string) => `5 dernières : ${value}`,
     earlier: (value: string) => `avant : ${value}`,
@@ -57,7 +57,7 @@ export const progression = {
     worse: "en recul",
     targetLine: (value: string) => `Cible : ${value}`,
     noRole:
-      "Tes courbes apparaîtront avec tes parties de la Faille de l'invocateur, où chaque joueur a un poste.",
+      "Tes courbes apparaîtront avec tes parties de la Faille de l'invocateur, où chaque joueur a un rôle.",
     tooFew: (role: string) => `Joue au moins 3 parties en ${role} pour voir tes courbes.`,
     label: (metric: string, count: number, average: string) =>
       `${metric} sur tes ${count} dernières parties, moyenne ${average}`,

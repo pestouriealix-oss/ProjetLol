@@ -94,7 +94,7 @@ export default async function SettingsPage({
                   </Badge>
                   <Link
                     href="/premium"
-                    className="text-sm font-semibold text-ink-muted underline underline-offset-4 hover:text-ink"
+                    className="tap text-sm font-semibold text-ink-muted underline underline-offset-4 hover:text-ink"
                   >
                     {isPaidPlan(user.plan) ? copy.managePlan : copy.upgrade}
                   </Link>

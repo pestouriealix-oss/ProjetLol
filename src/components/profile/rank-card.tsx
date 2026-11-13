@@ -63,7 +63,11 @@ export function RankCard({ ranks, synced }: { ranks: RankLine[]; synced: boolean
               <p className={cn("display text-3xl", tierTextClass(main.rank.tier))}>
                 {rankText(main.rank)}
               </p>
-              <p className="text-sm text-ink-muted tabular">{details(main.rank)}</p>
+              {/* Deux lignes voulues : sur une seule, la carte coupait avant le pourcentage. */}
+              <p className="text-sm text-ink-muted tabular">
+                <span className="font-semibold text-ink">{copy.lp(main.rank.lp)}</span>
+                <span className="block">{record(main.rank)}</span>
+              </p>
             </>
           ) : (
             <p className="text-ink-faint">{missing}</p>
@@ -93,10 +97,15 @@ export function RankCard({ ranks, synced }: { ranks: RankLine[]; synced: boolean
   );
 }
 
-/** « 42 LP · 61 V 55 D · 53 % » : le pourcentage seulement sur assez de parties. */
-function details(rank: RankLine): string {
+/** « 61 V 55 D · 53 % » : le pourcentage seulement sur assez de parties. */
+function record(rank: RankLine): string {
   const games = rank.wins + rank.losses;
-  return `${copy.lp(rank.lp)} · ${copy.record(rank.wins, rank.losses)}${
+  return `${copy.record(rank.wins, rank.losses)}${
     showsWinrate(games) ? ` · ${formatPercent(rank.wins / games)}` : ""
   }`;
+}
+
+/** « 42 LP · 61 V 55 D · 53 % », sur la ligne de la file secondaire. */
+function details(rank: RankLine): string {
+  return `${copy.lp(rank.lp)} · ${record(rank)}`;
 }

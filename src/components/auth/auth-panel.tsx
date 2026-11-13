@@ -18,4 +18,4 @@ export function AuthPanel({ title, children }: { title: string; children: ReactN
 }
 
 export const authLinkClasses =
-  "font-semibold text-ink underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-(--duration-fast) hover:text-accent";
+  "font-semibold text-ink underline decoration-accent decoration-2 tap underline-offset-4 transition-colors duration-(--duration-fast) hover:text-accent";

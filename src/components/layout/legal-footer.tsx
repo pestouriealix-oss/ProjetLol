@@ -4,7 +4,7 @@ import { RIOT_DISCLAIMER } from "@/lib/config";
 import { cn } from "@/lib/cn";
 
 const linkClasses =
-  "underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline";
+  "tap underline-offset-4 transition-colors duration-(--duration-fast) hover:text-ink hover:underline";
 
 /** Pied de page : liens légaux et mention exigée par Riot Games. */
 export function LegalFooter({ className }: { className?: string }) {

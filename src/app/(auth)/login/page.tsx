@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <p className="-mt-2">
         <Link
           href="/forgot-password"
-          className="text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline"
+          className="tap text-sm text-ink-muted underline-offset-4 hover:text-ink hover:underline"
         >
           {t.auth.forgotLink}
         </Link>

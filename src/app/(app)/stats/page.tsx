@@ -10,9 +10,9 @@ import { ChampionStatsTable, Matchups, RoleStats } from "@/components/stats/perf
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
+import { TabLinks } from "@/components/ui/tab-links";
 import { t } from "@/i18n/fr";
 import { requireUser } from "@/lib/auth/session";
-import { cn } from "@/lib/cn";
 import { getChampionAssets } from "@/lib/ddragon/champions";
 import { listChampionStats, listMatchups, listRoleStats, type QueueFilter } from "@/lib/db/matches";
 import { listRankHistory } from "@/lib/db/ranks";
@@ -91,28 +91,15 @@ export default async function StatsPage({ searchParams }: { searchParams: StatsS
       <p className="-mt-4 max-w-[60ch] text-lg text-ink-muted">{copy.intro}</p>
 
       {/* La file choisie vit dans l'adresse : la page se partage, Retour fonctionne. */}
-      <nav aria-label={copy.queue} className="w-fit">
-        <ul className="flex gap-1 rounded-control bg-field p-1">
-          {(Object.keys(QUEUE_PARAM) as (keyof typeof QUEUE_PARAM)[]).map((key) => {
-            const current = key === fileKey;
-            return (
-              <li key={key}>
-                <Link
-                  href={href(key)}
-                  scroll={false}
-                  aria-current={current ? "page" : undefined}
-                  className={cn(
-                    "flex h-9 items-center rounded-[5px] px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-(--duration-fast) ease-(--ease-out)",
-                    current ? "bg-raised text-ink shadow-key" : "text-ink-muted hover:text-ink",
-                  )}
-                >
-                  {copy.queues[QUEUE_PARAM[key]]}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      <TabLinks
+        label={copy.queue}
+        current={fileKey}
+        items={(Object.keys(QUEUE_PARAM) as (keyof typeof QUEUE_PARAM)[]).map((key) => ({
+          key,
+          label: copy.queues[QUEUE_PARAM[key]],
+          href: href(key),
+        }))}
+      />
 
       <section aria-labelledby="lp-title" className="flex flex-col gap-3">
         <div>
@@ -129,7 +116,7 @@ export default async function StatsPage({ searchParams }: { searchParams: StatsS
           <>
             <LpChart points={points} floors={floors} />
             <details className="text-sm">
-              <summary className="w-fit cursor-pointer font-semibold text-ink-muted hover:text-ink">
+              <summary className="tap w-fit cursor-pointer font-semibold text-ink-muted hover:text-ink">
                 {copy.lp.table}
               </summary>
               <table className="mt-2 w-full max-w-md border-collapse text-left">

@@ -12,7 +12,7 @@ export default function StatsLoading() {
       <span className="sr-only" role="status">
         {t.common.loading}
       </span>
-      <Skeleton className="h-11 w-80 max-w-full" />
+      <Skeleton className="h-12 w-80 max-w-full sm:h-11" />
       <section aria-hidden className="flex flex-col gap-3">
         <p className="display text-2xl text-ink">{copy.lp.title}</p>
         <Skeleton className="h-56 rounded-panel sm:h-64" />

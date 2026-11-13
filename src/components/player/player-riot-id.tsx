@@ -39,7 +39,7 @@ export function PlayerRiotId({
     <Link
       href={playerPath(platform, riotId)}
       aria-label={t.player.openProfile(formatRiotId(riotId))}
-      className="group flex min-w-0 items-baseline gap-1.5 rounded-control"
+      className="group tap flex min-w-0 items-baseline gap-1.5 rounded-control"
     >
       {name}
     </Link>

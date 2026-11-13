@@ -396,7 +396,21 @@ fond reste discret : la couleur vient des visuels du jeu et des résultats.
   très fin sur le terrain, des panneaux posés (`shadow-panel`).
 - **Logo.** Le G-œil : un G dont le creux est l'œil d'un hibou, pupille en
   corail (`src/components/brand/mark.tsx`), seul, sans le nom écrit.
-- **Vocabulaire.** Celui des joueurs : CS, KP, pink, drake, nash, grubs, inhib.
+- **Vocabulaire.** Celui des joueurs : CS, KP, wave, lane, matchup, rôle, pink,
+  drake, nash, grubs, inhib.
+- **Lisibilité.** Un petit texte corail posé sur un fond lui-même teinté de
+  corail prend `text-accent-ink`, plus clair (4,5:1 au moins) ; `text-accent`
+  reste pour le corail sur une surface neutre.
+- **Au doigt.** L'utilitaire `tap` (`globals.css`) donne 44 px de zone de touche
+  à un bouton ou un lien de texte sur écran tactile, sans changer sa taille à
+  l'écran. Les boutons l'ont d'office ; les sélecteurs en ligne passent de 36 à
+  40 px sous `sm`.
+- **Téléphone.** La barre du bas porte ce qui sert autour d'une partie : Accueil,
+  Parties, Game (la touche corail, au centre), Progrès, Stats. Esport et Actus
+  sont dans le menu du compte (`src/components/layout/nav-items.ts`).
+- **Cadres.** La fiche de draft s'adapte à son cadre, pas à l'écran (requêtes de
+  conteneur) : une colonne dans le panneau étroit de « Nouvelle game », deux dans
+  la fiche enregistrée, où elle prend la place principale.
 
 ### Mouvement
 

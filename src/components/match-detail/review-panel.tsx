@@ -213,7 +213,10 @@ function Start({
 
 function UpsellLink() {
   return (
-    <Link href="/premium" className="text-sm font-semibold text-ink underline underline-offset-4">
+    <Link
+      href="/premium"
+      className="tap text-sm font-semibold text-ink underline underline-offset-4"
+    >
       {t.premium.upsell}
     </Link>
   );

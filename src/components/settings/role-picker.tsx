@@ -68,7 +68,7 @@ export function RolePicker({
               <label
                 htmlFor={inputId}
                 className={cn(
-                  "inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-pill border pr-3.5 pl-2.5 text-sm font-semibold select-none",
+                  "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-pill border pr-3.5 pl-2.5 text-sm font-semibold select-none sm:h-9",
                   "[transition:scale_var(--duration-slow)_var(--ease-spring),color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),background-color_var(--duration-fast)_var(--ease-out),opacity_var(--duration-base)_var(--ease-out)]",
                   "active:scale-[0.94] active:[transition-duration:var(--duration-press)]",
                   // L'état coché est posé ici plutôt qu'avec `peer-checked` : au
