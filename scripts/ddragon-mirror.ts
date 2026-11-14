@@ -21,6 +21,8 @@ import { dirname, join } from "node:path";
 
 import { z } from "zod";
 
+/* eslint-disable no-console -- un script en ligne de commande parle dans le terminal. */
+
 // DDRAGON_SOURCE : seulement pour tester le script contre un faux CDN.
 const CDN = process.env.DDRAGON_SOURCE ?? "https://ddragon.leagueoflegends.com";
 const OUT = ".ddragon";
