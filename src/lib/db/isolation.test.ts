@@ -260,6 +260,11 @@ describe.skipIf(!hasDatabase)("isolation des données entre utilisateurs", () =>
       controlWards: null,
     });
     expect(await progression.listPlayedGames(bob, aliceAccount.id, { limit: 50 })).toEqual([]);
+    const yearAgo = new Date(Date.now() - 366 * 24 * 60 * 60 * 1000);
+    expect(
+      await progression.listPlayDates(alice, aliceAccount.id, { since: yearAgo }),
+    ).not.toHaveLength(0);
+    expect(await progression.listPlayDates(bob, aliceAccount.id, { since: yearAgo })).toEqual([]);
   });
 
   it("un abonnement ne concerne que son utilisateur et règle son offre", async () => {

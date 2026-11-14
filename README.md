@@ -417,13 +417,14 @@ fond reste discret : la couleur vient des visuels du jeu et des résultats.
 Une animation doit dire quelque chose : d'où vient un élément, ce qui a changé,
 ce que l'application attend. Le reste ne bouge pas.
 
-| Besoin                                     | Outil                                                |
-| ------------------------------------------ | ---------------------------------------------------- |
-| Réponse à un geste (appui, survol, focus)  | Transitions CSS, jetons `--duration-*` et `--ease-*` |
-| Ce qui arrive ou se pose                   | Courbes « ressort » `--ease-spring*`                 |
-| Entrée en scène orchestrée (la fiche)      | Utilitaires `intro-*` et `--intro-delay`, en CSS pur |
-| Changement de page, liste qui se réordonne | Transitions de vue (`<ViewTransition>` de React)     |
-| Signe de refus, valeur qui glisse          | `src/lib/motion.ts`                                  |
+| Besoin                                     | Outil                                                 |
+| ------------------------------------------ | ----------------------------------------------------- |
+| Réponse à un geste (appui, survol, focus)  | Transitions CSS, jetons `--duration-*` et `--ease-*`  |
+| Ce qui arrive ou se pose                   | Courbes « ressort » `--ease-spring*`                  |
+| Entrée en scène orchestrée (la fiche)      | Utilitaires `intro-*` et `--intro-delay`, en CSS pur  |
+| Changement de page, liste qui se réordonne | Transitions de vue (`<ViewTransition>` de React)      |
+| Signe de refus, valeur qui glisse          | `src/lib/motion.ts`                                   |
+| Chiffre qui tombe (gain de LP)             | `<FlapValue>` et l'utilitaire `flap-roll`, en CSS pur |
 
 Les transitions de vue suivent quelques règles, détaillées dans `CLAUDE.md` :
 

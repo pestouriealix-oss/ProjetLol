@@ -457,6 +457,20 @@
   animation: intro-rise var(--duration-move) var(--ease-out) backwards;
 }
 
+/* Un chiffre de panneau à volets : la bande 0-9 défile volet par volet jusqu'au
+   chiffre visé (posé en style par <FlapValue>), comme un tableau d'aéroport.
+   Chaque volet dure 45 ms : un 9 tourne plus longtemps qu'un 2. */
+@utility flap-roll {
+  animation: flap-roll calc(var(--flap-steps, 1) * 45ms) steps(var(--flap-steps, 1), end)
+    var(--intro-delay, 0ms) backwards;
+}
+
+@keyframes flap-roll {
+  from {
+    translate: 0 0;
+  }
+}
+
 @keyframes intro-fade {
   from {
     opacity: 0;

@@ -27,6 +27,20 @@ function localNetworkAddresses(): string[] {
     );
 }
 
+/**
+ * Copie locale de Data Dragon (`npm run ddragon:mirror`), servie sur cet
+ * ordinateur et désignée par DDRAGON_BASE_URL : ses images sont acceptées en
+ * développement seulement. En production, les visuels viennent du CDN de Riot.
+ */
+function localDataDragon(): URL | null {
+  const base = process.env.DDRAGON_BASE_URL;
+  if (!base || process.env.NODE_ENV === "production") return null;
+  const url = new URL(base);
+  return ["localhost", "127.0.0.1"].includes(url.hostname) ? url : null;
+}
+
+const mirror = localDataDragon();
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: localNetworkAddresses(),
   async headers() {
@@ -34,7 +48,20 @@ const nextConfig: NextConfig = {
   },
   images: {
     // Portraits des champions : uniquement depuis Data Dragon (règle Riot).
-    remotePatterns: [{ protocol: "https", hostname: "ddragon.leagueoflegends.com" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "ddragon.leagueoflegends.com" },
+      ...(mirror
+        ? [
+            {
+              protocol: mirror.protocol === "https:" ? ("https" as const) : ("http" as const),
+              hostname: mirror.hostname,
+              port: mirror.port,
+            },
+          ]
+        : []),
+    ],
+    // Next.js refuse par défaut d'optimiser une image d'une adresse locale.
+    dangerouslyAllowLocalIP: mirror !== null,
   },
   // Toutes les pages dépendent de l'utilisateur connecté : elles sont rendues à
   // chaque requête. `cacheComponents` (coquille statique + contenu en flux)

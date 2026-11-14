@@ -89,7 +89,7 @@ export const draft = {
   analyse: {
     action: "Écrire ma fiche",
     writing: "Écriture…",
-    needs: "Il faut au moins ton champion et ton vis-à-vis.",
+    needs: "Il faut au moins ton champion et celui d'en face.",
     waiting: "La fiche se lance dès que la draft est remplie.",
     remaining: (count: number, limit: number) =>
       `${count} fiche${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""} sur ${limit} (24 h)`,

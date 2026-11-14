@@ -27,6 +27,13 @@ export default function ProgressionLoading() {
           ))}
         </div>
       </section>
+      <section aria-hidden className="flex flex-col gap-4">
+        <div>
+          <p className="display text-2xl text-ink">{copy.regularity.title}</p>
+          <p className="mt-2 text-ink-muted">{copy.regularity.body}</p>
+        </div>
+        <Skeleton className="h-80 rounded-panel sm:h-96" />
+      </section>
     </PageShell>
   );
 }

@@ -1,9 +1,12 @@
 import { LpChart } from "@/components/stats/lp-chart";
 import { lpChartFloors, lpChartPoints } from "@/components/stats/lp-points";
+import { FlapValue } from "@/components/ui/flap-value";
 import { Link } from "@/components/ui/link";
 import { Panel } from "@/components/ui/panel";
 import { t } from "@/i18n/fr";
+import { cn } from "@/lib/cn";
 import type { RankSnapshot } from "@/lib/db/schema";
+import { formatSignedInteger } from "@/lib/format";
 
 const copy = t.dashboard.lp;
 
@@ -26,6 +29,9 @@ export function LpCard({
   const flexPoints = lpChartPoints(flex);
   const useFlex = soloPoints.length < 2 && flexPoints.length >= 2;
   const points = useFlex ? flexPoints : soloPoints;
+  const start = points[0];
+  const end = points.at(-1);
+  const change = start && end ? end.points - start.points : 0;
 
   return (
     <Panel className="flex flex-col gap-3 p-5">
@@ -35,10 +41,27 @@ export function LpCard({
           {useFlex ? t.matches.queues.FLEX : t.matches.queues.SOLO}
         </span>
       </div>
-      {points.length < 2 ? (
+      {points.length < 2 || !start ? (
         <p className="text-sm text-ink-muted">{copy.empty}</p>
       ) : (
-        <LpChart compact points={points} floors={lpChartFloors()} />
+        <>
+          {/* Le gain de la période sur un panneau à volets : il tombe une fois, à l'arrivée. */}
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <FlapValue
+              value={`${formatSignedInteger(change)}`}
+              label={t.stats.lp.changeLabel(formatSignedInteger(change), start.date)}
+              delayMs={200}
+              className={cn(
+                "display text-3xl",
+                change > 0 ? "text-win" : change < 0 ? "text-loss" : "text-ink-muted",
+              )}
+            />
+            <span aria-hidden className="text-sm text-ink-muted">
+              {copy.since(start.date)}
+            </span>
+          </p>
+          <LpChart compact showChange={false} points={points} floors={lpChartFloors()} />
+        </>
       )}
       <Link
         href={`${statsHref}&file=${useFlex ? "flex" : "solo"}`}

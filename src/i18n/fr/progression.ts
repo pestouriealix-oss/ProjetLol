@@ -65,6 +65,41 @@ export const progression = {
       `${date}, ${champion} (${win ? "victoire" : "défaite"}) : ${value}`,
     keyboard: "Flèches gauche et droite pour parcourir les parties.",
   },
+  /** Le calendrier de régularité : quand le joueur joue, et ce que ça change. */
+  regularity: {
+    title: "Ta régularité",
+    body: "Tes parties sur la Faille, jour par jour, sur un an.",
+    empty:
+      "Aucune partie sur la Faille depuis un an : ton calendrier se remplira au fil de tes games.",
+    calendar: "Calendrier de tes parties",
+    weekdays: ["lun.", "", "mer.", "", "ven.", "", ""],
+    day: (date: string, games: number, wins: number) =>
+      games === 0
+        ? `${date} : aucune partie`
+        : `${date} : ${games} partie${games > 1 ? "s" : ""}, ${wins} victoire${wins > 1 ? "s" : ""}`,
+    less: "Moins",
+    more: "Plus",
+    activeDays: "Jours joués",
+    games: "Parties",
+    longestStreak: "Plus longue série",
+    currentStreak: "Série en cours",
+    days: (count: number) => (count > 1 ? "jours" : "jour"),
+    session: {
+      title: "Selon le rang dans la journée",
+      early: "Les 3 premières parties du jour",
+      late: "À partir de la 4e",
+      record: (games: number) => `de victoires sur ${games} parties`,
+      /** L'écart en points de pourcentage, arrondi : un constat, pas un conseil. */
+      verdict: (points: number) =>
+        Math.abs(points) < 3
+          ? "Ton winrate tient quand tu enchaînes les games."
+          : points < 0
+            ? `Ton winrate baisse de ${Math.abs(points)} points après la 3e partie de la journée.`
+            : `Ton winrate monte de ${points} points après la 3e partie de la journée.`,
+      waiting:
+        "La comparaison apparaîtra avec une dizaine de parties de chaque côté : les 3 premières du jour, et les suivantes.",
+    },
+  },
   history: {
     title: "Objectifs précédents",
     record: (met: number, total: number) =>

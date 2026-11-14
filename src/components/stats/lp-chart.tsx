@@ -39,11 +39,14 @@ export function LpChart({
   points,
   floors,
   compact = false,
+  showChange = true,
 }: {
   points: ChartPoint[];
   floors: ChartFloor[];
   /** Version courte, pour une colonne étroite (tableau de bord). */
   compact?: boolean;
+  /** Le gain sous la courbe ; la carte du tableau de bord l'affiche déjà en grand. */
+  showChange?: boolean;
 }) {
   const [active, setActive] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -233,18 +236,20 @@ export function LpChart({
       {start && end ? (
         <div className="flex items-baseline justify-between gap-3 text-xs text-ink-faint tabular">
           <span>{start.date}</span>
-          <span
-            title={copy.changeLabel(formatSignedInteger(change), start.date)}
-            className={cn(
-              "text-sm font-semibold",
-              change > 0 ? "text-win" : change < 0 ? "text-loss" : "text-ink-muted",
-            )}
-          >
-            <span aria-hidden>{copy.change(formatSignedInteger(change))}</span>
-            <span className="sr-only">
-              {copy.changeLabel(formatSignedInteger(change), start.date)}
+          {showChange ? (
+            <span
+              title={copy.changeLabel(formatSignedInteger(change), start.date)}
+              className={cn(
+                "text-sm font-semibold",
+                change > 0 ? "text-win" : change < 0 ? "text-loss" : "text-ink-muted",
+              )}
+            >
+              <span aria-hidden>{copy.change(formatSignedInteger(change))}</span>
+              <span className="sr-only">
+                {copy.changeLabel(formatSignedInteger(change), start.date)}
+              </span>
             </span>
-          </span>
+          ) : null}
           <span>{end.date}</span>
         </div>
       ) : null}

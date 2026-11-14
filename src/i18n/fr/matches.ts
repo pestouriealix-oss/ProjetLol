@@ -86,12 +86,12 @@ export const matchDetail = {
     option: (index: number) => `Option ${index} : `,
     facts: {
       title: "Les chiffres de la partie",
-      lane: (minute: number) => `Face à ton vis-à-vis à ${minute} min`,
+      lane: (minute: number) => `Contre ton adversaire direct à ${minute} min`,
       gold: (value: string) => `${value} or`,
       cs: (value: string) => `${value} CS`,
-      goldEnd: "Or face à ton vis-à-vis en fin de partie",
+      goldEnd: "Or contre ton adversaire direct en fin de partie",
       takedowns: "Kills + assists avant 15 min",
-      versus: (value: number) => `vis-à-vis : ${value}`,
+      versus: (value: number) => `en face : ${value}`,
       objectives: "Objectifs auxquels tu as participé",
       objectivesValue: (dragons: number, barons: number, towers: number) =>
         `${dragons} drake${dragons > 1 ? "s" : ""} · ${barons} nash · ${towers} tour${towers > 1 ? "s" : ""}`,
@@ -133,13 +133,13 @@ export const matchDetail = {
     },
   },
   duel: {
-    title: "Face à ton vis-à-vis",
+    title: "Contre ton adversaire direct",
     body: (champion: string) => `Toi contre ${champion}, au même rôle.`,
     damage: "Dégâts aux champions",
     gold: "Or gagné",
     cs: "CS",
     vision: "Score de vision",
-    none: "Riot n'a pas attribué les rôles de cette partie : pas de vis-à-vis à comparer.",
+    none: "Riot n'a pas attribué les rôles de cette partie : pas d'adversaire direct à comparer.",
   },
   timeline: {
     title: "Chronologie",

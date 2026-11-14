@@ -6,6 +6,7 @@ import { RoleGlyph } from "@/components/map/role-glyph";
 import { MatchListEmpty } from "@/components/matches/match-list-empty";
 import { AccountSwitcher } from "@/components/profile/account-switcher";
 import { CurrentGoal, GoalHistory } from "@/components/progression/goal-sections";
+import { PlayCalendar } from "@/components/progression/play-calendar";
 import { TrendCard } from "@/components/progression/trend-card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
@@ -15,7 +16,8 @@ import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/cn";
 import { ROLES, type Role } from "@/lib/config";
 import { getChampionAssets } from "@/lib/ddragon/champions";
-import { listPlayedGames } from "@/lib/db/progression";
+import { listPlayDates, listPlayedGames } from "@/lib/db/progression";
+import { DISPLAY_TIME_ZONE } from "@/lib/format";
 import {
   buildTrend,
   defaultTrendRole,
@@ -23,6 +25,7 @@ import {
   TREND_METRICS,
   type Trend,
 } from "@/lib/stats/goals";
+import { buildCalendar, splitBySession } from "@/lib/stats/regularity";
 
 import { loadGoalProgress } from "../goal-progress";
 import { getSelectedAccount } from "../selected-account";
@@ -35,6 +38,9 @@ const copy = t.progression;
 const GOALS = 6;
 /** Parties lues pour les tendances, tous postes confondus. */
 const READ_GAMES = 100;
+/** Semaines du calendrier de régularité : un an, plus la semaine en cours. */
+const CALENDAR_WEEKS = 53;
+
 /** Parties tracées sur chaque courbe, au poste choisi. */
 const TREND_GAMES = 20;
 
@@ -77,11 +83,17 @@ export default async function ProgressionPage({
     );
   }
 
-  const [progress, games, champions] = await Promise.all([
+  const now = new Date();
+  const [progress, games, champions, dated] = await Promise.all([
     loadGoalProgress(user.id, account.id, { goals: GOALS }),
     listPlayedGames(user.id, account.id, { limit: READ_GAMES }),
     getChampionAssets(),
+    listPlayDates(user.id, account.id, {
+      since: new Date(now.getTime() - (CALENDAR_WEEKS * 7 + 1) * 24 * 60 * 60 * 1000),
+    }),
   ]);
+  const calendar = buildCalendar(dated, now, DISPLAY_TIME_ZONE, CALENDAR_WEEKS);
+  const split = splitBySession(dated, DISPLAY_TIME_ZONE);
   const [current, ...previous] = progress;
 
   // Postes joués récemment, dans l'ordre de la carte ; celui de l'adresse s'il en fait partie.
@@ -203,6 +215,8 @@ export default async function ProgressionPage({
               </Panel>
             )}
           </section>
+
+          <PlayCalendar calendar={calendar} split={split} />
 
           {previous.length > 0 ? <GoalHistory items={previous} /> : null}
         </>

@@ -6,6 +6,7 @@ export const dashboard = {
     empty:
       "Elle se dessine au fil des mises à jour, dès que ton rang bouge. Riot ne donne pas l'historique d'avant.",
     details: "Voir le détail",
+    since: (date: string) => `LP depuis le ${date}`,
   },
   title: "Tableau de bord",
   accounts: "Compte affiché",

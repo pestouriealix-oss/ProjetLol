@@ -1,7 +1,9 @@
 import "server-only";
-import { and, desc, eq, gt, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 
-import { goalSchema, type PlayedGame, type SetGoal } from "@/lib/stats/goals";
+import { goalSchema, MIN_COUNTED_SECONDS, type PlayedGame, type SetGoal } from "@/lib/stats/goals";
+import { RIFT_QUEUE_IDS } from "@/lib/stats/participation";
+import type { DatedGame } from "@/lib/stats/regularity";
 
 import { db } from "./client";
 import { matchReviews, matches, participations, riotAccounts } from "./schema";
@@ -106,4 +108,34 @@ export async function listPlayedGames(
     .orderBy(desc(matches.startedAt))
     .limit(options.limit);
   return rows;
+}
+
+/** Au plus une année de parties pour le calendrier : bien au-delà d'un rythme de jeu ordinaire. */
+const MAX_DATED_GAMES = 5000;
+
+/**
+ * Dates et résultats des parties d'un compte sur la Faille depuis `since`, de
+ * la plus ancienne à la plus récente, pour le calendrier de régularité. Les
+ * remakes ne comptent pas.
+ */
+export async function listPlayDates(
+  userId: string,
+  accountId: string,
+  options: { since: Date },
+): Promise<DatedGame[]> {
+  return db
+    .select({ startedAt: matches.startedAt, win: participations.win })
+    .from(participations)
+    .innerJoin(matches, eq(participations.matchId, matches.id))
+    .innerJoin(riotAccounts, eq(participations.riotAccountId, riotAccounts.id))
+    .where(
+      and(
+        ownedAccount(userId, accountId),
+        gte(matches.startedAt, options.since),
+        gte(matches.durationSeconds, MIN_COUNTED_SECONDS),
+        inArray(matches.queueId, RIFT_QUEUE_IDS),
+      ),
+    )
+    .orderBy(asc(matches.startedAt))
+    .limit(MAX_DATED_GAMES);
 }

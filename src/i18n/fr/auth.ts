@@ -105,7 +105,7 @@ export const auth = {
       {
         when: "Après la partie",
         title: "Reçois ton bilan",
-        body: "Tes chiffres face à ton vis-à-vis, ce qui a marché, et un seul objectif à vérifier dès la game suivante.",
+        body: "Tes chiffres contre ton adversaire direct, ce qui a marché, et un seul objectif à vérifier dès la game suivante.",
       },
     ],
     you: "Toi",
