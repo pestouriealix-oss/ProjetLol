@@ -50,3 +50,7 @@ next-env.d.ts
 /overwolf/node_modules
 /overwolf/dist
 /overwolf/*.opk
+
+# copie locale de Data Dragon (npm run ddragon:mirror)
+/.ddragon/
+/ddragon-mirror.tgz
